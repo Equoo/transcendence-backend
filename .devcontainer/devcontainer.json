@@ -1,0 +1,36 @@
+{
+    "name": "TS",
+    "remoteUser": "root",
+    "updateRemoteUserUID": true,
+    "image": "mcr.microsoft.com/devcontainers/dotnet",
+    "features": {},
+    "containerEnv": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "PORT": "4242",
+        "ASPNETCORE_URLS": "http://*:4242"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.formatOnSave": true,
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "zsh": {
+                        "path": "/bin/zsh"
+                    }
+                },
+                "remote.autoForwardPorts": false,
+                "dotnetAcquisitionExtension.enableTelemetry": false,
+            },
+            "extensions": [
+                "ms-dotnettools.vscode-dotnet-runtime",
+                "ms-dotnettools.csdevkit",
+            ]
+        }
+    },
+    "runArgs": [
+        "--net=bridge",
+        "-p=4242:4242"
+    ],
+    "postCreateCommand": "chsh -s $(which zsh)"
+}
