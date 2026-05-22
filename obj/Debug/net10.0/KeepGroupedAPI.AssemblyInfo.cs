@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KeepGroupedAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d150e4541ef78238ced0c41e8723a05917432ff6")]
 [assembly: System.Reflection.AssemblyProductAttribute("KeepGroupedAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KeepGroupedAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

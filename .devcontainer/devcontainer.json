@@ -2,12 +2,14 @@
     "name": "TS",
     "remoteUser": "root",
     "updateRemoteUserUID": true,
-    "image": "mcr.microsoft.com/devcontainers/dotnet",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
     "features": {},
     "containerEnv": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "PORT": "4242",
-        "ASPNETCORE_URLS": "http://*:4242"
+        "PORT": "8080",
+        "ASPNETCORE_URLS": "http://*:8080"
     },
     "customizations": {
         "vscode": {
@@ -23,14 +25,14 @@
                 "dotnetAcquisitionExtension.enableTelemetry": false,
             },
             "extensions": [
-                "ms-dotnettools.vscode-dotnet-runtime",
                 "ms-dotnettools.csdevkit",
+                "ms-dotnettools.vscode-dotnet-runtime",
             ]
         }
     },
     "runArgs": [
         "--net=bridge",
-        "-p=4242:4242"
+        "-p=8080:8080"
     ],
     "postCreateCommand": "chsh -s $(which zsh)"
 }
