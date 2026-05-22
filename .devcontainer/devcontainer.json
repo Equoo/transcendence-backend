@@ -6,11 +6,6 @@
         "dockerfile": "./Dockerfile"
     },
     "features": {},
-    "containerEnv": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "PORT": "8080",
-        "ASPNETCORE_URLS": "http://*:8080"
-    },
     "customizations": {
         "vscode": {
             "settings": {

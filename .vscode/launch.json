@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "basedev",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/KeepGroupedAPI.csproj",
+            "launchConfigurationId": "TargetFramework=;basedev"
+        }
+    ]
+}
