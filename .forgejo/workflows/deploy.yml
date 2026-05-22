@@ -55,10 +55,10 @@ jobs:
                   script: |
                       docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ env.REGISTRY }}
                       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-                      docker stop frontend-container || true
-                      docker rm frontend-container || true
+                      docker stop backend-container || true
+                      docker rm backend-container || true
                       docker run -d \
-                        --name frontend-container \
+                        --name backend-container \
                         --restart always \
                         -p 4243:8080 \
                         ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
