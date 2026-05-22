@@ -4,7 +4,7 @@
     "basedev": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "http://0.0.0.0:8080",
       "httpPort": 8080,
       "environmentVariables": {
