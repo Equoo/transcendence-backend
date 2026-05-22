@@ -1,0 +1,64 @@
+name: VPS Deploy
+
+on:
+    push:
+        branches:
+            - main
+            - "ci/**"
+
+env:
+    REGISTRY: forgejo.asventi.net
+    IMAGE_NAME: transcendance/backend
+
+jobs:
+    build-and-push:
+        runs-on: docker
+        container:
+            image: ghcr.io/catthehacker/ubuntu:act-latest
+        steps:
+            - name: Code Checkout
+              uses: actions/checkout@v4
+
+            - name: Login to forgejo registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ secrets.REGISTRY_USERNAME }}
+                  password: ${{ secrets.REGISTRY_PASSWORD }}
+
+            - name: Get docker metadata tags
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=raw,value=latest
+
+            - name: Build and push to registry
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+    deploy:
+        needs: build-and-push
+        runs-on: docker
+        steps:
+            - name: Install system dependencies
+              run: apk add --no-cache git curl bash
+            - name: SSH to VPS and deploy
+              uses: https://github.com/appleboy/ssh-action@v1.2.5
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ env.REGISTRY }}
+                      docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+                      docker stop frontend-container || true
+                      docker rm frontend-container || true
+                      docker run -d \
+                        --name frontend-container \
+                        --restart always \
+                        -p 4243:8080 \
+                        ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
