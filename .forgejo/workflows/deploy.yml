@@ -53,7 +53,6 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
-                      docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ env.REGISTRY }}
                       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
                       docker stop backend-container || true
                       docker rm backend-container || true
