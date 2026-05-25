@@ -26,8 +26,9 @@
         }
     },
     "runArgs": [
-        "--net=bridge",
-        "-p=8080:8080"
+        "--network=bridge",
+        "-p=8080:8080",
+        "--name=keepgrouped-backend-dev"
     ],
     "postCreateCommand": "chsh -s $(which zsh)"
 }

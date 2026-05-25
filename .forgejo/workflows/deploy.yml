@@ -53,11 +53,7 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
-                      docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-                      docker stop backend-container || true
-                      docker rm backend-container || true
-                      docker run -d \
-                        --name backend-container \
-                        --restart always \
-                        -p 4243:8080 \
-                        ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+                      cd KeepGrouped
+                      docker compose pull
+                      docker compose down
+                      docker compose up -d
