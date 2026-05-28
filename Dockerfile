@@ -12,4 +12,4 @@ WORKDIR /app
 
 COPY --from=builder /build/bin/Release/net10.0/publish /app
 
-CMD ["./KeepGroupedAPI"]
+CMD ["./KeepGrouped"]
