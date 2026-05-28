@@ -5,7 +5,7 @@
             "name": "basedev",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/KeepGroupedAPI.csproj",
+            "projectPath": "${workspaceFolder}/KeepGrouped.csproj",
             "launchConfigurationId": "TargetFramework=;basedev"
         }
     ]

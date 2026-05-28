@@ -1,0 +1,2 @@
+namespace KeepGrouped.API.Users;
+
