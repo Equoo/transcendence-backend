@@ -1,0 +1,39 @@
+#!/bin/env /bin/bash
+
+# pre-push git hook to check that the branch name respects conventional branching
+
+# Get the current branch name
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Allowed main branches
+if [[ "$current_branch" == "main" ]] || [[ "$current_branch" == "dev" ]]; then
+    exit 0
+fi
+
+# Conventional branching pattern
+# accepted types: feature, bugfix, hotfix, fix, chore, docs, style, refactor, perf, test, ci, build, revert, release
+conventional_branch_pattern='^(feature|bugfix|hotfix|fix|chore|docs|style|refactor|perf|test|ci|build|revert|release)/.+'
+
+# Format check
+if [[ "$current_branch" =~ $conventional_branch_pattern ]]; then
+    exit 0
+else
+    echo "Error: your branch name does not respect conventional branching"
+    echo ""
+    echo "Accepted formats:"
+    echo "  1. Main branches: main, dev"
+    echo ""
+    echo "  2. Conventional branches:"
+    echo "     <type>/<description>"
+    echo ""
+    echo "     accepted types: feature, bugfix, hotfix, fix, chore, docs, style,"
+    echo "                     refactor, perf, test, ci, build, revert, release"
+    echo ""
+    echo "     Examples:"
+    echo "       feature/reverse-proxy"
+    echo "       fix/segfault-in-parsing"
+    echo ""
+    echo "Your current branch:"
+    echo "  $current_branch"
+    exit 1
+fi

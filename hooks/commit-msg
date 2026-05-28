@@ -1,0 +1,40 @@
+#!/bin/env /bin/bash
+
+# commit-msg git hook to check that the commit message respect the conventional commit or the github merge rebase commit
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# convetional commit pattern
+# accepted type: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+conventional_pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?: .+'
+
+# github Merge/Rebase pattern
+merge_pattern='^Merge '
+rebase_pattern='^Rebase '
+
+# Format check
+if [[ "$commit_msg" =~ $conventional_pattern ]]; then
+    exit 0
+elif [[ "$commit_msg" =~ $merge_pattern ]]; then
+    exit 0
+elif [[ "$commit_msg" =~ $rebase_pattern ]]; then
+    exit 0
+else
+    echo "Error: your commit message does not respect conventional commit"
+    echo ""
+    echo "Accepted format:"
+    echo "  1. Conventional Commits:"
+    echo "     <type>(<scope>): <description>"
+    echo ""
+    echo "     accepted type: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+    echo "     Exemple: feat(parsing): reverse proxy parsing"
+    echo ""
+    echo "  2. Github commits:"
+    echo "     Merge ..."
+    echo "     Rebase ..."
+    echo ""
+    echo "Your message:"
+    echo "  $commit_msg"
+    exit 1
+fi

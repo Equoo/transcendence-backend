@@ -2,9 +2,9 @@
     "name": "TS",
     "remoteUser": "root",
     "updateRemoteUserUID": true,
-    "build": {
-        "dockerfile": "./Dockerfile",
-    },
+    "dockerComposeFile": "compose.yaml",
+    "service": "keepgrouped-back-dev",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "features": {},
     "customizations": {
         "vscode": {
@@ -25,11 +25,6 @@
             ]
         }
     },
-    "runArgs": [
-        "--network=keepgrouped-net",
-        "-p=8080:8080",
-        "--name=keepgrouped-back-dev"
-    ],
     "postCreateCommand": "hooks/install-hook.sh",
     "initializeCommand": "docker network create -d bridge keepgrouped-net || true"
 }

@@ -1,0 +1,32 @@
+services:
+  keepgrouped-back-dev:
+    hostname: keepgrouped-back-dev
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ../..:/workspaces:cached
+    networks:
+      - keepgrouped-net
+
+  db:
+    image: postgres:latest
+    hostname: keepgrouped-db-dev
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: dev
+    networks:
+      - keepgrouped-net
+
+networks:
+  keepgrouped-net:
+    external: true
+
+volumes:
+  postgres-data:
+
