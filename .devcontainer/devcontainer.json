@@ -3,7 +3,7 @@
     "remoteUser": "root",
     "updateRemoteUserUID": true,
     "build": {
-        "dockerfile": "./Dockerfile"
+        "dockerfile": "./Dockerfile",
     },
     "features": {},
     "customizations": {
@@ -26,9 +26,10 @@
         }
     },
     "runArgs": [
-        "--network=bridge",
+        "--network=keepgrouped-net",
         "-p=8080:8080",
-        "--name=keepgrouped-backend-dev"
+        "--name=keepgrouped-back-dev"
     ],
-    "postCreateCommand": "chsh -s $(which zsh)"
+    "postCreateCommand": "hooks/install-hook.sh",
+    "initializeCommand": "docker network create -d bridge keepgrouped-net || true"
 }
