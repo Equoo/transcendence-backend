@@ -9,27 +9,22 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddAuthorization();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
         var app = builder.Build();
+
+        app.UseSwagger();
+        app.UseSwaggerUI();
         app.MapGet("/", () => "Hello World from API!");
-        app.MapGet("/test/{name}", async (string name, KeepGroupedDb db) =>
-        {
-            User newuser = new()
-            {
-                Id = Random.Shared.Next(),
-                Name = name
-            };
-            db.Users.Add(newuser);
-            await db.SaveChangesAsync();
 
-            return Results.Created();
-        });
-
-        app.MapGet("/test", async (KeepGroupedDb db) =>
+        app.MapPost("/register", (ApplicationUser user) =>
         {
-            return await db.Users.ToListAsync();
+            return "bite";
         });
 
         app.Run();

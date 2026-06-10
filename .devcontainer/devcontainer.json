@@ -22,9 +22,10 @@
             "extensions": [
                 "ms-dotnettools.csdevkit",
                 "ms-dotnettools.vscode-dotnet-runtime",
+                "cweijan.vscode-database-client2"
             ]
         }
     },
-    "postCreateCommand": "hooks/install-hook.sh; dotnet tool install --global dotnet-ef",
+    "postCreateCommand": "chmod 744 hooks/install-hook.sh && hooks/install-hook.sh; dotnet tool install --global dotnet-ef",
     "initializeCommand": "docker network create -d bridge keepgrouped-net || true"
 }
