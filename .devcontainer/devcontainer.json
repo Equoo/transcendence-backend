@@ -25,6 +25,6 @@
             ]
         }
     },
-    "postCreateCommand": "hooks/install-hook.sh",
+    "postCreateCommand": "hooks/install-hook.sh; dotnet tool install --global dotnet-ef",
     "initializeCommand": "docker network create -d bridge keepgrouped-net || true"
 }
