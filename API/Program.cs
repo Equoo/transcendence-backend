@@ -10,22 +10,28 @@ class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddAuthorization();
+        builder.Services.AddAuthentication();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<KeepGroupedDb>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
 
-        app.UseSwagger();
-        app.UseSwaggerUI();
-        app.MapGet("/", () => "Hello World from API!");
-
-        app.MapPost("/register", (ApplicationUser user) =>
+        if (app.Environment.IsDevelopment())
         {
-            return "bite";
-        });
+            using (var scope = app.Services.CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<KeepGroupedDb>().Database.Migrate();
+            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+        app.MapIdentityApi<ApplicationUser>();
+        app.MapGet("/", () => "Hello World from API!");
 
         app.Run();
 
