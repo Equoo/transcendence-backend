@@ -1,4 +1,6 @@
+using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +16,7 @@ class Program
         // builder.Services.AddAuthentication();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+        builder.Services.AddHttpLogging();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -38,6 +40,7 @@ class Program
             return user;
         }).DisableAntiforgery();
 
+        EventEndpoints.Map(app);
         app.Run();
 
     }
