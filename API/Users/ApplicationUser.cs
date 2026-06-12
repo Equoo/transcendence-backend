@@ -13,6 +13,8 @@ class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 }
 
 [EntityTypeConfiguration(typeof(ApplicationUserConfiguration))]
-class ApplicationUser : IdentityUser
+public class ApplicationUser : IdentityUser
 {
+    public ApplicationUser() : base() { }
+    public ApplicationUser(string username) : base(username) { }
 }

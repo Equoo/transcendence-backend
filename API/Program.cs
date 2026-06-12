@@ -1,4 +1,5 @@
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API;
@@ -9,12 +10,10 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddAuthorization();
-        builder.Services.AddAuthentication();
+        // builder.Services.AddAuthorization();
+        // builder.Services.AddAuthentication();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<KeepGroupedDb>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -30,8 +29,14 @@ class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        app.MapIdentityApi<ApplicationUser>();
         app.MapGet("/", () => "Hello World from API!");
+        app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
+        {
+            var user = new ApplicationUser(username);
+            db.Add(user);
+            await db.SaveChangesAsync();
+            return user;
+        }).DisableAntiforgery();
 
         app.Run();
 
