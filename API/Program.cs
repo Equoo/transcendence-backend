@@ -1,4 +1,5 @@
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API;
@@ -9,28 +10,33 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // builder.Services.AddAuthorization();
+        // builder.Services.AddAuthentication();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
         var app = builder.Build();
-        app.MapGet("/", () => "Hello World from API!");
-        app.MapGet("/test/{name}", async (string name, KeepGroupedDb db) =>
+
+        if (app.Environment.IsDevelopment())
         {
-            User newuser = new()
+            using (var scope = app.Services.CreateScope())
             {
-                Id = Random.Shared.Next(),
-                Name = name
-            };
-            db.Users.Add(newuser);
-            await db.SaveChangesAsync();
-
-            return Results.Created();
-        });
-
-        app.MapGet("/test", async (KeepGroupedDb db) =>
+                scope.ServiceProvider.GetRequiredService<KeepGroupedDb>().Database.Migrate();
+            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+        app.MapGet("/", () => "Hello World from API!");
+        app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
         {
-            return await db.Users.ToListAsync();
-        });
+            var user = new ApplicationUser(username);
+            db.Add(user);
+            await db.SaveChangesAsync();
+            return user;
+        }).DisableAntiforgery();
 
         app.Run();
 

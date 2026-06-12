@@ -1,9 +1,11 @@
 namespace KeepGrouped.API;
 
-using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using KeepGrouped.API.Users;
 
-class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
+
+class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDbContext<ApplicationUser>(options)
 {
-    public DbSet<User> Users => Set<User>();
 }
