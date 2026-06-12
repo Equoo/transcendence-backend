@@ -1,10 +1,7 @@
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace KeepGrouped.API;
 
@@ -29,8 +26,6 @@ class Program
             var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
             context.Database.Migrate();
             context.Database.EnsureCreated();
-            RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
-            databaseCreator.CreateTables();
         }
         if (app.Environment.IsDevelopment())
         {
