@@ -14,5 +14,5 @@ class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDbContext
         builder.Entity<Event>().HasMany(e => e.Users).WithMany(e => e.Events).UsingEntity<Registration>();
 
     }
-    public DbSet<Event> Evenements { get; set; }
+    public DbSet<Event> Events { get; set; }
 }
