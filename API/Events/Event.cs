@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,17 +22,30 @@ public class Event
         Id = Guid.NewGuid().ToString();
     }
 
+    [SetsRequiredMembers]
+    public Event(EventPost req) : this()
+    {
+        Name = req.Name;
+        Size = req.Size;
+        Date = req.Date;
+        Description = req.Description;
+        Location = req.Location;
+        Tags = req.Tags;
+    }
+
     public string Id { get; set; }
     required public string Name { get; set; }
     required public DateTime Date { get; set; }
     required public int Size { get; set; }
+    required public string Location { get; set; }
     public string? Description { get; set; }
+    public ICollection<string> Tags { get; set; } = [];
 
     public ICollection<ApplicationUser> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
 
-public record EventPost(string Name, DateTime Date, int Size, string? Description);
+public record EventPost(string Name, DateTime Date, int Size, string Location, string? Description, ICollection<string> Tags);
 
 public static class EventEndpoints
 {
@@ -39,13 +53,7 @@ public static class EventEndpoints
     {
         app.MapPost("/events", async (KeepGroupedDb db, EventPost ev_req) =>
         {
-            var ev = new Event()
-            {
-                Name = ev_req.Name,
-                Size = ev_req.Size,
-                Date = ev_req.Date,
-                Description = ev_req.Description
-            };
+            var ev = new Event(ev_req);
             db.Add(ev);
             await db.SaveChangesAsync();
             return Results.Created($"/events/{ev.Id}", ev);
