@@ -22,10 +22,6 @@ class Program
 
         var app = builder.Build();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            scope.ServiceProvider.GetRequiredService<KeepGroupedDb>().Database.Migrate();
-        }
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
