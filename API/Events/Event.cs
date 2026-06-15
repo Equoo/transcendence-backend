@@ -39,13 +39,13 @@ public class Event
     required public int Size { get; set; }
     required public string Location { get; set; }
     public string? Description { get; set; }
-    public ICollection<string> Tags { get; set; } = [];
+    public ICollection<string>? Tags { get; set; }
 
     public ICollection<ApplicationUser> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
 
-public record EventPost(string Name, DateTime Date, int Size, string Location, string? Description, ICollection<string> Tags);
+public record EventPost(string Name, DateTime Date, int Size, string Location, string? Description, ICollection<string>? Tags);
 
 public static class EventEndpoints
 {
@@ -54,6 +54,7 @@ public static class EventEndpoints
         app.MapPost("/events", async (KeepGroupedDb db, EventPost ev_req) =>
         {
             var ev = new Event(ev_req);
+            ev.Date = ev.Date.ToUniversalTime();
             db.Add(ev);
             await db.SaveChangesAsync();
             return Results.Created($"/events/{ev.Id}", ev);
