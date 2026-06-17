@@ -17,14 +17,10 @@ class EvenementConfiguration : IEntityTypeConfiguration<Event>
 [EntityTypeConfiguration(typeof(EvenementConfiguration))]
 public class Event
 {
-    public Event()
+    [SetsRequiredMembers]
+    public Event(EventPost req)
     {
         Id = Guid.NewGuid().ToString();
-    }
-
-    [SetsRequiredMembers]
-    public Event(EventPost req) : this()
-    {
         Name = req.Name;
         Size = req.Size;
         Date = req.Date;
@@ -33,7 +29,7 @@ public class Event
         Tags = req.Tags;
     }
 
-    public string Id { get; set; }
+    required public string Id { get; set; }
     required public string Name { get; set; }
     required public DateTime Date { get; set; }
     required public int Size { get; set; }

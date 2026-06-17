@@ -15,7 +15,6 @@ class Program
         // builder.Services.AddAuthentication();
         builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-        builder.Services.AddHttpLogging();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
