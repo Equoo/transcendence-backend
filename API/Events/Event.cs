@@ -1,98 +1,140 @@
 using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.Expressions.Internal;
+
 
 namespace KeepGrouped.API.Events;
 
-class EvenementConfiguration : IEntityTypeConfiguration<Event>
-{
-    public void Configure(EntityTypeBuilder<Event> builder)
-    {
-    }
-}
-
-[EntityTypeConfiguration(typeof(EvenementConfiguration))]
 public class Event
 {
-    [SetsRequiredMembers]
-    public Event()
-    {
-        Id = Guid.NewGuid().ToString();
-        Name = "Default Event";
-        Size = 20;
-        Date = DateTime.UtcNow;
-        Location = "Here";
-    }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
-    required public string Id { get; set; }
-    required public string Name { get; set; }
-    required public DateTime Date { get; set; }
-
-    [Range(1, int.MaxValue)]
-    required public int Size { get; set; }
-    required public string Location { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string Name { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+    public int Size { get; set; }
+    public string Location { get; set; } = string.Empty;
     public string? Description { get; set; }
     public ICollection<string>? Tags { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public ICollection<ApplicationUser> Users { get; } = [];
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public ICollection<Registration> Registrations { get; } = [];
+}
+
+public record CreateEventRequest
+{
+    [Required]
+    public string Name { get; init; } = string.Empty;
+
+    [Required]
+    public DateTime Date { get; init; }
+
+    [Range(1, int.MaxValue)]
+    public int Size { get; init; }
+
+    [Required]
+    public string Location { get; init; } = string.Empty;
+
+    public string? Description { get; init; }
+    public ICollection<string>? Tags { get; init; }
+}
+
+public record UpdateEventRequest
+{
+    [Required]
+    public string Name { get; init; } = string.Empty;
+
+    [Required]
+    public DateTime Date { get; init; }
+
+    [Required]
+    [Range(1, int.MaxValue)]
+    public int Size { get; init; }
+
+    [Required]
+    public string Location { get; init; } = string.Empty;
+
+    public string? Description { get; init; }
+    public ICollection<string>? Tags { get; init; }
+}
+
+public record EventResponse(
+    string Id,
+    string Name,
+    DateTime Date,
+    int Size,
+    string Location,
+    string? Description,
+    ICollection<string>? Tags)
+{
+    public static EventResponse FromEntity(Event ev) => new(
+        ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description, ev.Tags);
 }
 
 public static class EventEndpoints
 {
     public static void Map(WebApplication app)
     {
-        app.MapPost("/events", async (KeepGroupedDb db, Event ev) =>
+        var events = app.MapGroup("/events");
+
+        events.MapPost("/", async (KeepGroupedDb db, CreateEventRequest req) =>
         {
-            ev.Date = ev.Date.ToUniversalTime();
-            db.Add(ev);
+            var ev = new Event
+            {
+                Name = req.Name,
+                Date = req.Date.ToUniversalTime(),
+                Size = req.Size,
+                Location = req.Location,
+                Description = req.Description,
+                Tags = req.Tags,
+            };
+
+            db.Events.Add(ev);
             await db.SaveChangesAsync();
-            return Results.Created($"/events/{ev.Id}", ev);
-        }).DisableAntiforgery();
 
-        app.MapGet("/events", async (KeepGroupedDb db) =>
-        {
-            return await db.Events.ToListAsync();
+            var response = EventResponse.FromEntity(ev);
+            return Results.Created($"/events/{ev.Id}", response);
         });
 
-        app.MapGet("/events/{id}", async (KeepGroupedDb db, string id) =>
+        events.MapGet("/", async (KeepGroupedDb db) =>
+            await db.Events
+                .Select(ev => EventResponse.FromEntity(ev))
+                .ToListAsync());
+
+        events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.FindAsync(id);
-            return ev is null ? Results.NotFound() : Results.Ok(ev);
+            return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
-        app.MapPut("/events/{id}", async (KeepGroupedDb db, string id, Event ev_req) =>
+        events.MapPut("/{id}", async (KeepGroupedDb db, string id, UpdateEventRequest req) =>
         {
             Event? ev = await db.Events.FindAsync(id);
-
             if (ev is null)
             {
                 return Results.NotFound();
             }
-            db.Entry(ev).CurrentValues.SetValues(ev_req);
+
+            ev.Name = req.Name;
+            ev.Date = req.Date.ToUniversalTime();
+            ev.Size = req.Size;
+            ev.Location = req.Location;
+            ev.Description = req.Description;
+            ev.Tags = req.Tags;
+
             await db.SaveChangesAsync();
             return Results.NoContent();
-        }).DisableAntiforgery();
+        });
 
-        app.MapDelete("/events/{id}", async (KeepGroupedDb db, string id) =>
+        events.MapDelete("/{id}", async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.FindAsync(id);
-
             if (ev is null)
             {
                 return Results.NotFound();
             }
+
             db.Events.Remove(ev);
             await db.SaveChangesAsync();
             return Results.NoContent();
-        }).DisableAntiforgery();
+        });
     }
 }

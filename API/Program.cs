@@ -17,6 +17,7 @@ class Program
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddValidation();
 
         var app = builder.Build();
         using (var serviceScope = app.Services.CreateScope())
