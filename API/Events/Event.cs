@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,39 +29,29 @@ public class Event
         Location = "Here";
     }
 
-    [SetsRequiredMembers]
-    public Event(EventPost req)
-    {
-        Id = Guid.NewGuid().ToString();
-        Name = req.Name;
-        Size = req.Size;
-        Date = req.Date;
-        Description = req.Description;
-        Location = req.Location;
-        Tags = req.Tags;
-    }
-
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     required public string Id { get; set; }
     required public string Name { get; set; }
     required public DateTime Date { get; set; }
+
+    [Range(1, int.MaxValue)]
     required public int Size { get; set; }
     required public string Location { get; set; }
     public string? Description { get; set; }
     public ICollection<string>? Tags { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public ICollection<ApplicationUser> Users { get; } = [];
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public ICollection<Registration> Registrations { get; } = [];
 }
-
-public record EventPost(string Name, DateTime Date, int Size, string Location, string? Description, ICollection<string>? Tags);
 
 public static class EventEndpoints
 {
     public static void Map(WebApplication app)
     {
-        app.MapPost("/events", async (KeepGroupedDb db, EventPost ev_req) =>
+        app.MapPost("/events", async (KeepGroupedDb db, Event ev) =>
         {
-            var ev = new Event(ev_req);
             ev.Date = ev.Date.ToUniversalTime();
             db.Add(ev);
             await db.SaveChangesAsync();
@@ -77,7 +69,7 @@ public static class EventEndpoints
             return ev is null ? Results.NotFound() : Results.Ok(ev);
         });
 
-        app.MapPut("/events/{id}", async (KeepGroupedDb db, string id, EventPost ev_req) =>
+        app.MapPut("/events/{id}", async (KeepGroupedDb db, string id, Event ev_req) =>
         {
             Event? ev = await db.Events.FindAsync(id);
 
