@@ -18,6 +18,16 @@ class EvenementConfiguration : IEntityTypeConfiguration<Event>
 public class Event
 {
     [SetsRequiredMembers]
+    public Event()
+    {
+        Id = Guid.NewGuid().ToString();
+        Name = "Default Event";
+        Size = 20;
+        Date = DateTime.UtcNow;
+        Location = "Here";
+    }
+
+    [SetsRequiredMembers]
     public Event(EventPost req)
     {
         Id = Guid.NewGuid().ToString();
