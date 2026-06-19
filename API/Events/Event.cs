@@ -12,8 +12,8 @@ public class Event
     public DateTime Date { get; set; }
     public int Size { get; set; }
     public string Location { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public ICollection<string>? Tags { get; set; }
+    public ICollection<string> Tags { get; set; } = [];
+    public string Description { get; set; } = string.Empty;
 
     public ICollection<ApplicationUser> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
@@ -33,8 +33,9 @@ public record CreateEventRequest
     [Required]
     public string Location { get; init; } = string.Empty;
 
-    public string? Description { get; init; }
-    public ICollection<string>? Tags { get; init; }
+    public ICollection<string> Tags { get; init; } = [];
+
+    public string Description { get; init; } = string.Empty;
 }
 
 public record UpdateEventRequest
@@ -52,8 +53,8 @@ public record UpdateEventRequest
     [Required]
     public string Location { get; init; } = string.Empty;
 
-    public string? Description { get; init; }
-    public ICollection<string>? Tags { get; init; }
+    public string Description { get; init; } = string.Empty;
+    public ICollection<string> Tags { get; init; } = [];
 }
 
 public record EventResponse(
@@ -62,11 +63,13 @@ public record EventResponse(
     DateTime Date,
     int Size,
     string Location,
-    string? Description,
-    ICollection<string>? Tags)
+    string Description,
+    ICollection<string> Tags,
+    ICollection<UserResponse> Users)
 {
     public static EventResponse FromEntity(Event ev) => new(
-        ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description, ev.Tags);
+        ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description, ev.Tags,
+        [.. ev.Users.Select(UserResponse.FromEntity)]);
 }
 
 public static class EventEndpoints
@@ -95,13 +98,14 @@ public static class EventEndpoints
         });
 
         events.MapGet("/", async (KeepGroupedDb db) =>
-            await db.Events
-                .Select(ev => EventResponse.FromEntity(ev))
-                .ToListAsync());
+        {
+            var evs = await db.Events.Include(ev => ev.Users).ToListAsync();
+            return evs.Select(EventResponse.FromEntity);
+        });
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
-            Event? ev = await db.Events.FindAsync(id);
+            var ev = await db.Events.Include(e => e.Users).FirstAsync(e => e.Id == id);
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
