@@ -13,14 +13,8 @@ public class Registration
     public Event Event { get; set; } = null!;
 
     public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-    public RegistrationRole Role { get; set; }
+    public string Role { get; set; } = string.Empty;
 
-}
-
-public enum RegistrationRole
-{
-    Participant,
-    Organizer,
 }
 
 public static class RegistrationEndpoints
@@ -32,6 +26,7 @@ public static class RegistrationEndpoints
         events.MapPost("/", async (KeepGroupedDb db, string id, [FromForm] string role) =>
         {
             Event? ev = await db.Events.FindAsync(id);
+            // Fetch user with authentication
             ApplicationUser? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
 
             if ((ev is null) || (user is null))
