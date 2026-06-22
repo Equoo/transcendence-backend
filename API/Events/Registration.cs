@@ -26,9 +26,9 @@ public static class RegistrationEndpoints
 {
     public static void Map(WebApplication app)
     {
-        var events = app.MapGroup("/events/{id}/registration");
+        var registrations = app.MapGroup("/events/{id}/registration");
 
-        events.MapPost("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapPost("/", async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
@@ -46,7 +46,7 @@ public static class RegistrationEndpoints
             return Results.Ok();
         }).DisableAntiforgery();
 
-        events.MapGet("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.Include(e => e.Registrations).ThenInclude(r => r.User).SingleOrDefaultAsync(e => e.Id == id);
 
@@ -57,7 +57,7 @@ public static class RegistrationEndpoints
             return Results.Ok(ev.Registrations.Select(RegistrationResponse.FromEntity));
         });
 
-        events.MapDelete("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapDelete("/", async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication

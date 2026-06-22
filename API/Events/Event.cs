@@ -40,25 +40,6 @@ public record CreateEventRequest
     public string Description { get; init; } = string.Empty;
 }
 
-public record UpdateEventRequest
-{
-    [Required]
-    public string Name { get; init; } = null!;
-
-    [Required]
-    public DateTime Date { get; init; }
-
-    [Required]
-    [Range(1, int.MaxValue)]
-    public int Size { get; init; }
-
-    [Required]
-    public string Location { get; init; } = null!;
-
-    public string Description { get; init; } = string.Empty;
-    public ICollection<string> Tags { get; init; } = [];
-}
-
 public record EventResponse(
     string Id,
     string Name,
@@ -111,7 +92,7 @@ public static class EventEndpoints
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
-        events.MapPut("/{id}", async (KeepGroupedDb db, string id, UpdateEventRequest req) =>
+        events.MapPut("/{id}", async (KeepGroupedDb db, string id, CreateEventRequest req) =>
         {
             Event? ev = await db.Events.FindAsync(id);
             if (ev is null)
