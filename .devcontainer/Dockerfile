@@ -8,4 +8,4 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 RUN chsh -s $(which zsh)
 
-CMD [ "sleep", "infinity" ]h
+CMD [ "sleep", "infinity" ]
