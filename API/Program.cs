@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Mvc;
@@ -13,23 +14,32 @@ class Program
 
         // builder.Services.AddAuthorization();
         // builder.Services.AddAuthentication();
-        builder.Services.AddDbContextPool<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
+        {
+            db.Set<ApplicationUser>().Add(new ApplicationUser("asventi"));
+            db.Set<Event>().Add(new Event() { Name = "Default Event", Date = DateTime.UtcNow.AddMinutes(30), Location = "Default Location", Size = 10 });
+            db.SaveChanges();
+        }));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddValidation();
 
         var app = builder.Build();
-        using (var serviceScope = app.Services.CreateScope())
-        {
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.Migrate();
-            context.Database.EnsureCreated();
-        }
         if (app.Environment.IsDevelopment())
         {
+            var serviceScope = app.Services.CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
+        }
+        else
+        {
+            var serviceScope = app.Services.CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+            context.Database.Migrate();
         }
         app.MapGet("/", () => "Hello World from API!");
         app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
@@ -41,6 +51,7 @@ class Program
         }).DisableAntiforgery();
 
         EventEndpoints.Map(app);
+        RegistrationEndpoints.Map(app);
         app.Run();
 
     }

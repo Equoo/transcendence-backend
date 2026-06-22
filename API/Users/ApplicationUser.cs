@@ -21,3 +21,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
+
+public record UserResponse(string Id, string UserName)
+{
+    public static UserResponse FromEntity(ApplicationUser user) => new(user.Id, user.UserName!);
+}
