@@ -41,7 +41,7 @@ public record CreateEventRequest
 public record UpdateEventRequest
 {
     [Required]
-    public string Name { get; init; } = string.Empty;
+    public string Name { get; init; } = null!;
 
     [Required]
     public DateTime Date { get; init; }
@@ -51,7 +51,7 @@ public record UpdateEventRequest
     public int Size { get; init; }
 
     [Required]
-    public string Location { get; init; } = string.Empty;
+    public string Location { get; init; } = null!;
 
     public string Description { get; init; } = string.Empty;
     public ICollection<string> Tags { get; init; } = [];
