@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -8,10 +9,10 @@ namespace KeepGrouped.API.Events;
 public class Event
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = null!;
     public DateTime Date { get; set; }
     public int Size { get; set; }
-    public string Location { get; set; } = string.Empty;
+    public string Location { get; set; } = null!;
     public ICollection<string> Tags { get; set; } = [];
     public string Description { get; set; } = string.Empty;
 
@@ -22,16 +23,17 @@ public class Event
 public record CreateEventRequest
 {
     [Required]
-    public string Name { get; init; } = string.Empty;
+    public string Name { get; init; } = null!;
 
     [Required]
     public DateTime Date { get; init; }
 
+    [Required]
     [Range(1, int.MaxValue)]
     public int Size { get; init; }
 
     [Required]
-    public string Location { get; init; } = string.Empty;
+    public string Location { get; init; } = null!;
 
     public ICollection<string> Tags { get; init; } = [];
 
@@ -65,11 +67,11 @@ public record EventResponse(
     string Location,
     string Description,
     ICollection<string> Tags,
-    ICollection<UserResponse> Users)
+    ICollection<RegistrationResponse> Registrations)
 {
     public static EventResponse FromEntity(Event ev) => new(
         ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description, ev.Tags,
-        [.. ev.Users.Select(UserResponse.FromEntity)]);
+        [.. ev.Registrations.Select(RegistrationResponse.FromEntity)]);
 }
 
 public static class EventEndpoints
@@ -95,17 +97,17 @@ public static class EventEndpoints
 
             var response = EventResponse.FromEntity(ev);
             return Results.Created($"/events/{ev.Id}", response);
-        });
+        }).DisableAntiforgery();
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
-            var evs = await db.Events.Include(ev => ev.Users).ToListAsync();
+            var evs = await db.Events.Include(ev => ev.Registrations).ThenInclude(r => r.User).ToListAsync();
             return evs.Select(EventResponse.FromEntity);
         });
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
-            var ev = await db.Events.Include(e => e.Users).FirstAsync(e => e.Id == id);
+            var ev = await db.Events.Include(e => e.Registrations).ThenInclude(r => r.User).SingleOrDefaultAsync(e => e.Id == id);
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
@@ -126,7 +128,7 @@ public static class EventEndpoints
 
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        }).DisableAntiforgery();
 
         events.MapDelete("/{id}", async (KeepGroupedDb db, string id) =>
         {
