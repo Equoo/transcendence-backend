@@ -30,6 +30,7 @@ public static class RegistrationEndpoints
 
         registrations.MapPost("/", async (KeepGroupedDb db, string id) =>
         {
+            Thread.Sleep(500);
             Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
             ApplicationUser? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
@@ -42,8 +43,9 @@ public static class RegistrationEndpoints
             {
                 ev.Users.Add(user);
                 await db.SaveChangesAsync();
+                return Results.Created();
             }
-            return Results.Ok();
+            return Results.BadRequest("Already registered");
         }).DisableAntiforgery();
 
         registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
