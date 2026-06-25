@@ -26,15 +26,17 @@ class Program
             }
             db.SaveChanges();
         }));
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        builder.Services.AddValidation();
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddValidation();
+        }
 
         var app = builder.Build();
         if (app.Environment.IsDevelopment())
         {
-            var serviceScope = app.Services.CreateScope();
+            using var serviceScope = app.Services.CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
@@ -43,18 +45,18 @@ class Program
         }
         else
         {
-            var serviceScope = app.Services.CreateScope();
+            using var serviceScope = app.Services.CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
             context.Database.Migrate();
         }
         app.MapGet("/", () => "Hello World from API!");
-        app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
+        app.MapPost("/register", async ([FromBody] string username, KeepGroupedDb db) =>
         {
             var user = new ApplicationUser(username);
             db.Add(user);
             await db.SaveChangesAsync();
             return user;
-        }).DisableAntiforgery();
+        });
 
         EventEndpoints.Map(app);
         RegistrationEndpoints.Map(app);

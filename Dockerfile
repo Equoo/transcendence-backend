@@ -2,6 +2,10 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS builder
 
 WORKDIR /build
 
+COPY KeepGrouped.csproj .
+
+RUN dotnet restore
+
 COPY . .
 
 RUN dotnet publish

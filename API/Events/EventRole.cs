@@ -8,9 +8,9 @@ public class EventRole
     public string Name { get; set; } = null!;
 }
 
-public class CreateRole
+public record CreateRole
 {
     [Required]
-    public string Name = null!;
+    public string Name { get; set; } = null!;
 }
 
