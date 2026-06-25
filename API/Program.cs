@@ -16,8 +16,14 @@ class Program
         // builder.Services.AddAuthentication();
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
-            db.Set<ApplicationUser>().Add(new ApplicationUser("asventi"));
-            db.Set<Event>().Add(new Event() { Name = "Default Event", Date = DateTime.UtcNow.AddMinutes(30), Location = "Default Location", Size = 10 });
+            if (db.Set<ApplicationUser>().FirstOrDefault(u => u.UserName == "asventi") == null)
+            {
+                db.Set<ApplicationUser>().Add(new ApplicationUser("asventi"));
+            }
+            if (db.Set<Event>().FirstOrDefault(e => e.Name == "Default Event") == null)
+            {
+                db.Set<Event>().Add(new Event() { Name = "Default Event", Date = DateTime.UtcNow.AddMinutes(30), Location = "Default Location", Size = 10 });
+            }
             db.SaveChanges();
         }));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
