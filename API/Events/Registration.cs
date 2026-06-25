@@ -46,7 +46,7 @@ public static class RegistrationEndpoints
                 return Results.Created();
             }
             return Results.BadRequest("Already registered");
-        }).DisableAntiforgery();
+        });
 
         registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
         {

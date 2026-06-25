@@ -5,6 +5,9 @@ on:
         branches:
             - main
             - "ci/**"
+    pull_request:
+        branches:
+            - main
 
 env:
     REGISTRY: forgejo.asventi.net

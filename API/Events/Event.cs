@@ -78,12 +78,12 @@ public static class EventEndpoints
 
             var response = EventResponse.FromEntity(ev);
             return Results.Created($"/events/{ev.Id}", response);
-        }).DisableAntiforgery();
+        });
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
             var evs = await db.Events.Include(ev => ev.Registrations).ThenInclude(r => r.User).ToListAsync();
-            return evs.Select(EventResponse.FromEntity);
+            return Results.Ok(evs.Select(EventResponse.FromEntity));
         });
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
@@ -109,7 +109,7 @@ public static class EventEndpoints
 
             await db.SaveChangesAsync();
             return Results.NoContent();
-        }).DisableAntiforgery();
+        });
 
         events.MapDelete("/{id}", async (KeepGroupedDb db, string id) =>
         {
