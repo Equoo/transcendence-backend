@@ -1,8 +1,10 @@
 using System.Net.Mime;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Tests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace KeepGrouped.API;
 
@@ -12,18 +14,20 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // builder.Services.AddAuthorization();
-        // builder.Services.AddAuthentication();
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
             db.Set<ApplicationUser>().Add(new ApplicationUser("asventi"));
             db.Set<Event>().Add(new Event() { Name = "Default Event", Date = DateTime.UtcNow.AddMinutes(30), Location = "Default Location", Size = 10 });
             db.SaveChanges();
         }));
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        builder.Services.AddValidation();
+
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter()
+                        .AddEndpointsApiExplorer()
+                        .AddSwaggerGen()
+                        .AddValidation()
+                        .AddAuthorization()
+                        .AddIdentityApiEndpoints<ApplicationUser>()
+                        .AddEntityFrameworkStores<KeepGroupedDb>();
 
         var app = builder.Build();
         if (app.Environment.IsDevelopment())
@@ -34,6 +38,8 @@ class Program
             context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseAuthorization();
+
         }
         else
         {
@@ -42,16 +48,18 @@ class Program
             context.Database.Migrate();
         }
         app.MapGet("/", () => "Hello World from API!");
-        app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
-        {
-            var user = new ApplicationUser(username);
-            db.Add(user);
-            await db.SaveChangesAsync();
-            return user;
-        }).DisableAntiforgery();
+        // app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
+        // {
+        //     var user = new ApplicationUser(username);
+        //     db.Add(user);
+        //     await db.SaveChangesAsync();
+        //     return user;
+        // }).DisableAntiforgery();
 
         EventEndpoints.Map(app);
         RegistrationEndpoints.Map(app);
+        
+        TestEndpoint.Map(app);
         app.Run();
 
     }
