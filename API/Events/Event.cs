@@ -93,13 +93,13 @@ public static class EventEndpoints
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
-            var evs = await db.Events.Include(ev => ev.Organizer).Include(ev => ev.Registrations).ThenInclude(r => r.User).ToListAsync();
+            var evs = await db.Events.ToListAsync();
             return Results.Ok(evs.Select(EventResponse.FromEntity));
         });
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
-            var ev = await db.Events.Include(e => e.Registrations).ThenInclude(r => r.User).SingleOrDefaultAsync(e => e.Id == id);
+            var ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
