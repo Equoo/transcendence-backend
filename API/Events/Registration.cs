@@ -25,7 +25,7 @@ public record RegistrationResponse(UserResponse User, DateTime RegisteredAt, str
 
 public static class RegistrationEndpoints
 {
-    public static void Map(WebApplication app)
+    public static void MapRegistrations(this IEndpointRouteBuilder app)
     {
         var registrations = app.MapGroup("/events/{id}/registration");
 

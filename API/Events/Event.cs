@@ -60,7 +60,7 @@ public record EventResponse(
 
 public static class EventEndpoints
 {
-    public static void Map(WebApplication app)
+    public static void MapEvents(this IEndpointRouteBuilder app)
     {
         var events = app.MapGroup("/events");
 

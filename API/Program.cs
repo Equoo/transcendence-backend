@@ -68,8 +68,8 @@ class Program
             return user;
         });
 
-        EventEndpoints.Map(app);
-        RegistrationEndpoints.Map(app);
+        app.MapEvents();
+        app.MapRegistrations();
         app.Run();
 
     }
