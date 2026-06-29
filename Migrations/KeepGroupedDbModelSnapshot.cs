@@ -42,6 +42,10 @@ namespace KeepGrouped.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("OrganizerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Size")
                         .HasColumnType("integer");
 
@@ -50,6 +54,8 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("text[]");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrganizerId");
 
                     b.ToTable("Events");
                 });
@@ -285,6 +291,17 @@ namespace KeepGrouped.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Users.ApplicationUser", "Organizer")
+                        .WithMany()
+                        .HasForeignKey("OrganizerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organizer");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Events.Registration", b =>

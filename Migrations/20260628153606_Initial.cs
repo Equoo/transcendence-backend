@@ -52,20 +52,15 @@ namespace KeepGrouped.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Events",
+                name: "EventRoles",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Size = table.Column<int>(type: "integer", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Tags = table.Column<string[]>(type: "text[]", nullable: true)
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.PrimaryKey("PK_EventRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -175,13 +170,37 @@ namespace KeepGrouped.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Size = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: false),
+                    Tags = table.Column<string[]>(type: "text[]", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    OrganizerId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Events_AspNetUsers_OrganizerId",
+                        column: x => x.OrganizerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Registration",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
                     EventId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
                     RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -192,6 +211,11 @@ namespace KeepGrouped.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Registration_EventRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "EventRoles",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Registration_Events_EventId",
                         column: x => x.EventId,
@@ -238,6 +262,16 @@ namespace KeepGrouped.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Events_OrganizerId",
+                table: "Events",
+                column: "OrganizerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Registration_RoleId",
+                table: "Registration",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Registration_UserId",
                 table: "Registration",
                 column: "UserId");
@@ -268,10 +302,13 @@ namespace KeepGrouped.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "EventRoles");
 
             migrationBuilder.DropTable(
                 name: "Events");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

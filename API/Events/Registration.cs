@@ -32,7 +32,7 @@ public static class RegistrationEndpoints
         registrations.MapPost("/", async (KeepGroupedDb db, string id) =>
         {
             Thread.Sleep(500);
-            Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
+            Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
             ApplicationUser? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
 
@@ -55,7 +55,7 @@ public static class RegistrationEndpoints
 
         registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
         {
-            Event? ev = await db.Events.Include(e => e.Registrations).ThenInclude(r => r.User).SingleOrDefaultAsync(e => e.Id == id);
+            Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
 
             if (ev is null)
             {
@@ -66,7 +66,7 @@ public static class RegistrationEndpoints
 
         registrations.MapDelete("/", async (KeepGroupedDb db, string id) =>
         {
-            Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
+            Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
             ApplicationUser? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
 

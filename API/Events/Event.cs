@@ -16,6 +16,7 @@ public class Event
     public ICollection<string> Tags { get; set; } = [];
     public string Description { get; set; } = string.Empty;
 
+    public ApplicationUser Organizer { get; set; } = null!;
     public ICollection<ApplicationUser> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
@@ -47,11 +48,13 @@ public record EventResponse(
     int Size,
     string Location,
     string Description,
+    UserResponse Organizer,
     ICollection<string> Tags,
     ICollection<RegistrationResponse> Registrations)
 {
     public static EventResponse FromEntity(Event ev) => new(
-        ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description, ev.Tags,
+        ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
+        UserResponse.FromEntity(ev.Organizer), ev.Tags,
         [.. ev.Registrations.Select(RegistrationResponse.FromEntity)]);
 }
 
@@ -63,6 +66,13 @@ public static class EventEndpoints
 
         events.MapPost("/", async (KeepGroupedDb db, CreateEventRequest req) =>
         {
+            // Replace with authentication devan pitie j'en ai marre de faire sans
+            ApplicationUser? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
+
+            if (user == null)
+            {
+                return Results.Unauthorized();
+            }
             var ev = new Event
             {
                 Name = req.Name,
@@ -70,6 +80,7 @@ public static class EventEndpoints
                 Size = req.Size,
                 Location = req.Location,
                 Description = req.Description,
+                Organizer = user,
                 Tags = req.Tags,
             };
 
@@ -82,13 +93,13 @@ public static class EventEndpoints
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
-            var evs = await db.Events.Include(ev => ev.Registrations).ThenInclude(r => r.User).ToListAsync();
+            var evs = await db.Events.ToListAsync();
             return Results.Ok(evs.Select(EventResponse.FromEntity));
         });
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
-            var ev = await db.Events.Include(e => e.Registrations).ThenInclude(r => r.User).SingleOrDefaultAsync(e => e.Id == id);
+            var ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
