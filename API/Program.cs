@@ -3,6 +3,7 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace KeepGrouped.API;
 
@@ -12,14 +13,12 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // builder.Services.AddAuthorization();
-        // builder.Services.AddAuthentication();
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
-            ApplicationUser user = new("asventi");
-            if (db.Set<ApplicationUser>().FirstOrDefault(u => u.UserName == "asventi") == null)
+            User user = new("asventi");
+            if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") == null)
             {
-                db.Set<ApplicationUser>().Add(user);
+                db.Set<User>().Add(user);
             }
             if (db.Set<Event>().FirstOrDefault(e => e.Name == "Default Event") == null)
             {
@@ -37,6 +36,9 @@ class Program
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
+        builder.Services.AddAuthorization();
+        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
+        // builder.Services.AddScoped<IPasswordHasher<User>, >();
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
@@ -52,6 +54,8 @@ class Program
             context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseAuthorization();
+
         }
         else
         {
@@ -60,16 +64,17 @@ class Program
             context.Database.Migrate();
         }
         app.MapGet("/", () => "Hello World from API!");
-        app.MapPost("/register", async ([FromBody] string username, KeepGroupedDb db) =>
-        {
-            var user = new ApplicationUser(username);
-            db.Add(user);
-            await db.SaveChangesAsync();
-            return user;
-        });
+        // app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
+        // {
+        //     var user = new ApplicationUser(username);
+        //     db.Add(user);
+        //     await db.SaveChangesAsync();
+        //     return user;
+        // }).DisableAntiforgery();
 
         app.MapEvents();
         app.MapRegistrations();
+        app.MapUsers();
         app.Run();
 
     }
