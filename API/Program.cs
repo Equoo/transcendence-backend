@@ -26,14 +26,16 @@ class Program
             }
             db.SaveChanges();
         }));
+        builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddValidation();
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
-            builder.Services.AddValidation();
         }
 
         var app = builder.Build();
+        app.UseStatusCodePages();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();

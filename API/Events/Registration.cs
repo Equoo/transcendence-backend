@@ -1,4 +1,5 @@
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Problems;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,13 +40,17 @@ public static class RegistrationEndpoints
             {
                 return Results.NotFound();
             }
-            if (!ev.Users.Contains(user))
+            if (ev.Users.Contains(user))
             {
-                ev.Users.Add(user);
-                await db.SaveChangesAsync();
-                return Results.Created();
+                return EventProblems.AlreadyRegistered(user.UserName!, ev.Name);
             }
-            return Results.BadRequest("Already registered");
+            if (ev.Users.Count >= ev.Size)
+            {
+                return EventProblems.EventFull();
+            }
+            ev.Users.Add(user);
+            await db.SaveChangesAsync();
+            return Results.Created();
         });
 
         registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
@@ -71,7 +76,7 @@ public static class RegistrationEndpoints
             }
             if (!ev.Users.Contains(user))
             {
-                return Results.NotFound("You are not registered to this event");
+                return EventProblems.NotRegistered(user.UserName!, ev.Name);
             }
             ev.Users.Remove(user);
             await db.SaveChangesAsync();
