@@ -4,9 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Events;
-using KeepGrouped.API.Tests;
 
-public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDbContext<ApplicationUser>(options)
+public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDbContext<User>(options)
 {
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -16,7 +15,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDb
     }
     public DbSet<Event> Events { get; set; }
     public DbSet<EventRole> EventRoles { get; set; }
-    public DbSet<Test> Test { get; set; }
+    public DbSet<User> Users { get; set; }
 
 }
 

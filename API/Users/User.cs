@@ -1,33 +1,29 @@
-using KeepGrouped.API.Users;
-using Microsoft.AspNetCore.Mvc.Razor.TagHelpers;
-using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualBasic;
-using System.Data;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Server.HttpSys;
+using Microsoft.EntityFrameworkCore;
 
-namespace KeepGrouped.API.Tests;
+namespace KeepGrouped.API.Users;
 
-
-public class Test : IdentityUser {}
-
-
-public record TestRequest
+public class User : IdentityUser
 {
-    [Required]
+    public User() : base() { }
+    public User(string username) : base(username) { }
+
+    public ICollection<Event> Events { get; } = [];
+    public ICollection<Registration> Registrations { get; } = [];
+}
+
+
+public record UserRequest
+{
     public string UserName { get; init; } = null!;
-    [Required]
     public string PasswordHash { get; init; } = null!;
-    [Required]
     public string Email { get; init; } = null!;
     public string? PhoneNumber { get; init; } = null;
 
 }
 
-public record TestResponse(
+public record UserResponse(
 
     string Id,
     string UserName,
@@ -35,11 +31,11 @@ public record TestResponse(
     string? PhoneNumber
 )
 {
-    public static TestResponse FromEntity (Test te) => new (te.Id, te.UserName, te.Email, te.PhoneNumber);
+    public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName, usr.Email, usr.PhoneNumber);
 }
 
 
-public static class TestEndpoint
+public static class UserEndpoint
 {
     public static void Map(WebApplication app)
     {
@@ -47,24 +43,25 @@ public static class TestEndpoint
 
         users.MapGet("/", async (KeepGroupedDb db) =>
         {
-            var user = await db.Test.ToListAsync();
+            var user = await db.Users.ToListAsync();
             
-            return Results.Ok(user.Select(x => TestResponse.FromEntity(x)));
+            return Results.Ok(user.Select(x => UserResponse.FromEntity(x)));
         });
 
         users.MapGet("/{id}", async (string id, KeepGroupedDb db) =>
         {
             var user = await db
-            .Test
+            .Users
             .Where(user => user.Id == id)
             .FirstOrDefaultAsync();
 
-            return user is null ? Results.NotFound() : Results.Ok(TestResponse.FromEntity(user));
+            return user is null ? Results.NotFound() : Results.Ok(UserResponse.FromEntity(user));
+
         });
 
-        users.MapPost("/register", async (KeepGroupedDb db, TestRequest req) =>
+        users.MapPost("/register", async (KeepGroupedDb db, UserRequest req) =>
         {
-            var user = new Test
+            var user = new User
             {
                 UserName = req.UserName,
                 PasswordHash = req.PasswordHash,
@@ -72,9 +69,10 @@ public static class TestEndpoint
                 PhoneNumber = req.PhoneNumber
             };
 
+
             // Check info not already used in Db
 
-            var tmp = await db.Test.Where(e => e.UserName == req.UserName || e.Email == req.Email || e.PhoneNumber == req.PhoneNumber).ToListAsync(); 
+            var tmp = await db.Users.Where(e => e.UserName == req.UserName || e.Email == req.Email || e.PhoneNumber == req.PhoneNumber).ToListAsync(); 
             
             if (tmp.Count > 0)
             {
@@ -85,19 +83,22 @@ public static class TestEndpoint
                         flags |= 1;
                     if (user.Email == req.Email)
                         flags |= 2;
-                    if (user_find.PhoneNumber == req.PhoneNumber)
-                        flags |= 4;
                 }
                return Results.BadRequest($"Flags information used:{flags}");
             }
 
+            // Hashed password
 
-            db.Test.Add(user);
+
+
+
+            db.Users.Add(user);
             await db.SaveChangesAsync();
             return Results.Ok(user);
         });
 
+        // users.MapPost("/login" () => {});
+
         users.MapGet("/ping", () => "ping TestEndpoint");
     }
 }
-

@@ -1,7 +1,6 @@
 using System.Net.Mime;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
-using KeepGrouped.API.Tests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -16,9 +15,9 @@ class Program
 
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
-            if (db.Set<ApplicationUser>().FirstOrDefault(u => u.UserName == "asventi") == null)
+            if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") == null)
             {
-                db.Set<ApplicationUser>().Add(new ApplicationUser("asventi"));
+                db.Set<User>().Add(new User("asventi"));
             }
             if (db.Set<Event>().FirstOrDefault(e => e.Name == "Default Event") == null)
             {
@@ -28,6 +27,8 @@ class Program
         }));
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddAuthorization();
+        builder.Services.AddIdentity<User, User>();
+        builder.Services.AddScoped<IPasswordHasher<User>, B>
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
@@ -64,7 +65,7 @@ class Program
         EventEndpoints.Map(app);
         RegistrationEndpoints.Map(app);
         
-        TestEndpoint.Map(app);
+        UserEndpoint.Map(app);
         app.Run();
 
     }

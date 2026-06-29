@@ -16,7 +16,7 @@ public class Event
     public ICollection<string> Tags { get; set; } = [];
     public string Description { get; set; } = string.Empty;
 
-    public ICollection<ApplicationUser> Users { get; } = [];
+    public ICollection<User> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
 

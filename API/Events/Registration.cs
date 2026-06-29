@@ -6,7 +6,7 @@ namespace KeepGrouped.API.Events;
 
 public class Registration
 {
-    public ApplicationUser User { get; set; } = null!;
+    public User User { get; set; } = null!;
 
     public Event Event { get; set; } = null!;
 
@@ -33,7 +33,7 @@ public static class RegistrationEndpoints
             Thread.Sleep(500);
             Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            ApplicationUser? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
+            User? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
 
             if ((ev is null) || (user is null))
             {
@@ -63,7 +63,7 @@ public static class RegistrationEndpoints
         {
             Event? ev = await db.Events.Include(e => e.Users).SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            ApplicationUser? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
+            User? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
 
             if ((ev is null) || (user is null))
             {
