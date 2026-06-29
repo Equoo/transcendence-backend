@@ -2,6 +2,7 @@ using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace KeepGrouped.API.Users;
 
 public class User : IdentityUser

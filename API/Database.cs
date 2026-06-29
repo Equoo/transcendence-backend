@@ -19,7 +19,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDb
     }
     public DbSet<Event> Events { get; set; }
     public DbSet<EventRole> EventRoles { get; set; }
-    public DbSet<User> Users { get; set; }
 
 }
 

@@ -37,8 +37,8 @@ class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
         builder.Services.AddAuthorization();
-        builder.Services.AddIdentity<User, User>();
-        // builder.Services.AddScoped<IPasswordHasher<User>, B>
+        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
+        // builder.Services.AddScoped<IPasswordHasher<User>, >();
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
