@@ -9,6 +9,7 @@ using Amazon.S3;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
 using Microsoft.AspNetCore.HttpOverrides;
+using KeepGrouped.API.Password;
 
 namespace KeepGrouped.API;
 
@@ -76,7 +77,7 @@ class Program
         builder.Services.AddValidation();
         builder.Services.AddAuthorization();
         builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
-        // builder.Services.AddScoped<IPasswordHasher<User>, >();
+        builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();

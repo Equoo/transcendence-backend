@@ -20,7 +20,7 @@ public record UserRequest
     public string UserName { get; init; } = null!;
     public string PasswordHash { get; init; } = null!;
     public string Email { get; init; } = null!;
-    public string? PhoneNumber { get; init; } = null;
+    public string? PhoneNumber { get; init; }
 
 }
 
@@ -32,7 +32,7 @@ public record UserResponse(
     string? PhoneNumber
 )
 {
-    public static UserResponse FromEntity(User usr) => new(usr.Id, usr.UserName, usr.Email, usr.PhoneNumber);
+    public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName!, usr.Email!, usr.PhoneNumber);
 }
 
 
