@@ -16,8 +16,8 @@ public class Event
     public ICollection<string> Tags { get; set; } = [];
     public string Description { get; set; } = string.Empty;
 
-    public ApplicationUser Organizer { get; set; } = null!;
-    public ICollection<ApplicationUser> Users { get; } = [];
+    public User Organizer { get; set; } = null!;
+    public ICollection<User> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
 
@@ -67,7 +67,7 @@ public static class EventEndpoints
         events.MapPost("/", async (KeepGroupedDb db, CreateEventRequest req) =>
         {
             // Replace with authentication devan pitie j'en ai marre de faire sans
-            ApplicationUser? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
+            User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
 
             if (user == null)
             {
