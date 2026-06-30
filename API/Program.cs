@@ -78,6 +78,7 @@ class Program
         builder.Services.AddAuthorization();
         builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
         builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();

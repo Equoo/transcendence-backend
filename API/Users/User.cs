@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Password;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,8 @@ public class User : IdentityUser
 {
     public User() : base() { }
     public User(string username) : base(username) { }
+    
+    public string? Saltz { get; set; }
 
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
@@ -17,22 +21,20 @@ public class User : IdentityUser
 
 public record UserRequest
 {
+    [Required]
     public string UserName { get; init; } = null!;
-    public string PasswordHash { get; init; } = null!;
-    public string Email { get; init; } = null!;
-    public string? PhoneNumber { get; init; }
+    [Required]
+    public string Password { get; init; } = null!;
 
 }
 
 public record UserResponse(
 
     string Id,
-    string UserName,
-    string Email,
-    string? PhoneNumber
+    string UserName
 )
 {
-    public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName!, usr.Email!, usr.PhoneNumber);
+    public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName!);
 }
 
 
@@ -69,37 +71,28 @@ public static class UserEndpoint
         .Produces<UserResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        users.MapPost("/register", async (KeepGroupedDb db, UserRequest req) =>
+        users.MapPost("/register", async (KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass, IPasswordValidator<User> test, UserManager<User> manager, IUserValidator<User> testout, SignInManager<User> t) =>
         {
+
             var user = new User
             {
                 UserName = req.UserName,
-                PasswordHash = req.PasswordHash,
-                Email = req.Email,
-                PhoneNumber = req.PhoneNumber
             };
-
 
             // Check info not already used in Db
 
-            var tmp = await db.Users.Where(e => e.UserName == req.UserName || e.Email == req.Email || e.PhoneNumber == req.PhoneNumber).ToListAsync();
+            var tmp = await db.Users.Where(e => e.UserName == req.UserName ).AnyAsync();
+            if (tmp)
+                return  Results.BadRequest("UserName already used");
 
-            if (tmp.Count > 0)
-            {
-                int flags = 0;
-                foreach (var user_find in tmp)
-                {
-                    if (user_find.UserName == req.UserName)
-                        flags |= 1;
-                    if (user.Email == req.Email)
-                        flags |= 2;
-                }
-                return Results.BadRequest($"Flags information used:{flags}");
-            }
+
+            // Check UserName and password size etc...
+
+            if (!(await test.ValidateAsync(manager, user, req.Password)).Succeeded)
+                return Results.BadRequest("Password invalid");
 
             // Hashed password
-
-
+            user.PasswordHash = pass.HashPassword(user, req.Password);
 
 
             db.Users.Add(user);
@@ -112,7 +105,22 @@ public static class UserEndpoint
         .Produces<UserResponse>(StatusCodes.Status200OK)
         .Produces<string>(StatusCodes.Status400BadRequest);
 
-        // users.MapPost("/login" () => {});
+        users.MapPost("/login", async (KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass) =>
+        {
+            User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
+
+            if (user_db is null)
+            {
+                return Results.BadRequest("Probleme during connexion");
+            }
+
+            if (pass.VerifyHashedPassword(user_db, user_db.PasswordHash, req.Password) == PasswordVerificationResult.Failed)
+            {
+                return Results.BadRequest("Bad password authentification");
+            }
+
+            return Results.Ok($"connected to {req.UserName}");
+        });
 
         users.MapGet("/ping", () => "ping TestEndpoint")
         .WithName("users.ping")

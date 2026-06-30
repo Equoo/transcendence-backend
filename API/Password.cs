@@ -16,7 +16,8 @@ public class KeepGroupedPasswordHasher : IPasswordHasher<User>
 
     public PasswordVerificationResult VerifyHashedPassword(User user, string hashedPassword, string providedPassword)
     {
-        if (hashedPassword == HashPassword(user, providedPassword))
+
+        if (BC.Verify(providedPassword, hashedPassword))
             return PasswordVerificationResult.Success;
         else   
             return PasswordVerificationResult.Failed;
