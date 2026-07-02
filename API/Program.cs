@@ -10,6 +10,12 @@ using Microsoft.Extensions.Options;
 using Amazon.Runtime;
 using Microsoft.AspNetCore.HttpOverrides;
 using KeepGrouped.API.Password;
+using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace KeepGrouped.API;
 
@@ -72,12 +78,41 @@ class Program
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
+
+        
+        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
-        builder.Services.AddAuthorization();
-        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
         builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+       
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ValidIssuer = "KeepGrouped",
+                ValidAudience = "KeepGrouped",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"))
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies["Token"];
+                    return Task.CompletedTask;
+                },
+            };
+        });
+        builder.Services.AddAuthorization();
 
         if (builder.Environment.IsDevelopment())
         {
@@ -87,6 +122,8 @@ class Program
         var app = builder.Build();
         app.UseForwardedHeaders();
         app.UseStatusCodePages();
+        app.UseAuthentication();
+        app.UseAuthorization();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();
@@ -95,8 +132,6 @@ class Program
             context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseAuthorization();
-
         }
         else
         {
