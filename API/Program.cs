@@ -175,6 +175,10 @@ class Program
         app.MapUsers();
         app.MapEventRoles();
         app.MapStorage();
+        app.MapAuthentication();
+        
+        // ------------ Start the app
+
         app.Run();
 
     }

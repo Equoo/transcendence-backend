@@ -1,41 +1,77 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
-public static class Token
+public static class AuthenticationEndpoint
 {
-    public static string Build(string UserName, string Id)
-        {
-            var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, UserName),
-                    new Claim(ClaimTypes.NameIdentifier, Id),
-                };
-
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"));
-                var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-
-                var token = new JwtSecurityToken(
-                    issuer: "KeepGrouped",
-                    audience: "KeepGrouped",
-                    claims: claims,
-                    expires: DateTime.Now.AddMinutes(30),
-                    signingCredentials: creds
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-    public static void AddToCookie(string token, HttpContext http)
+    public static void MapAuthentication(this IEndpointRouteBuilder app)
     {
-            
-        http.Response.Cookies.Append("AuthToken", token, new CookieOptions
+        var auth = app.MapGroup("/auth");
+
+         // -------------- Create user 
+
+        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash, IPasswordValidator<User> pass, UserManager<User> manager) =>
         {
-            HttpOnly = true,
-            Secure = false
+
+            var user = new User
+            {               
+                Id = Guid.NewGuid().ToString().GetHashCode().ToString("x"),
+                UserName = req.UserName
+            };
+            
+            // Check password resistance
+            if (!(await pass.ValidateAsync(manager, user, req.Password)).Succeeded)
+                return Results.BadRequest("Password invalid");
+
+            // Check duplicate
+            var dup_usr = await db
+            .Users
+            .AnyAsync(e => e.UserName == req.UserName);
+
+            if (dup_usr)
+                return  Results.BadRequest("UserName already used");
+
+            // Hashed password
+            user.PasswordHash = hash.HashPassword(user, req.Password);
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+            
+            return Results.Ok(user);
         });
+
+
+        // -------------- Authenticate user and adding JWT
+
+        auth.MapPost("/login", async (KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass, HttpContext context) =>
+        {
+            User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
+
+            if (user_db is null)
+                return Results.BadRequest("Probleme during connexion");
+
+            if (pass.VerifyHashedPassword(user_db, user_db.PasswordHash, req.Password) == PasswordVerificationResult.Failed)
+                return Results.BadRequest("Bad password authentification");
+
+            // Handle Json Web Token
+            var token = Token.Build(user_db.UserName, user_db.Id);
+            Token.AddToCookie(token, context);
+
+            return Results.Ok("You are now connected !");
+        });
+
+        // -------------- Remove JWT
+
+        auth.MapPost("/logout", [Authorize] async (HttpContext http) =>
+        {
+            Token.RemoveCookie(http, "AuthToken");
+            return Results.Ok("You are now logout !");
+        });
+
+        auth.MapPost("/refresh", [Authorize] () => "Refresh the token !");
     }
+
 }
