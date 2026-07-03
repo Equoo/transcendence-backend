@@ -2,6 +2,7 @@ using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Problems;
 
 namespace KeepGrouped.API.Users;
 
@@ -24,7 +25,7 @@ public static class AuthenticationEndpoint
             
             // Check password resistance
             if (!(await pass.ValidateAsync(manager, user, req.Password)).Succeeded)
-                return Results.BadRequest("Password invalid");
+                return Problems.UserProblems.PasswordTooWeak();
 
             // Check duplicate
             var dup_usr = await db
@@ -32,7 +33,7 @@ public static class AuthenticationEndpoint
             .AnyAsync(e => e.UserName == req.UserName);
 
             if (dup_usr)
-                return  Results.BadRequest("UserName already used");
+                return  Problems.UserProblems.NameAlreadyUsed(req.UserName);
 
             // Hashed password
             user.PasswordHash = hash.HashPassword(user, req.Password);
@@ -40,7 +41,7 @@ public static class AuthenticationEndpoint
             db.Users.Add(user);
             await db.SaveChangesAsync();
             
-            return Results.Ok(user);
+            return Results.Created("/users/{id}", UserResponse.FromEntity(user));
         });
 
 
@@ -51,16 +52,16 @@ public static class AuthenticationEndpoint
             User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
 
             if (user_db is null)
-                return Results.BadRequest("Probleme during connexion");
+                return Problems.UserProblems.AuthenticationInvalid();
 
             if (pass.VerifyHashedPassword(user_db, user_db.PasswordHash, req.Password) == PasswordVerificationResult.Failed)
-                return Results.BadRequest("Bad password authentification");
+                return Problems.UserProblems.AuthenticationInvalid();
 
             // Handle Json Web Token
             var token = Token.Build(user_db.UserName, user_db.Id);
             Token.AddToCookie(token, context);
 
-            return Results.Ok("You are now connected !");
+            return Results.Ok();
         });
 
         // -------------- Remove JWT
@@ -68,7 +69,7 @@ public static class AuthenticationEndpoint
         auth.MapPost("/logout", [Authorize] async (HttpContext http) =>
         {
             Token.RemoveCookie(http, "AuthToken");
-            return Results.Ok("You are now logout !");
+            return Results.Ok();
         });
 
         auth.MapPost("/refresh", [Authorize] () => "Refresh the token !");

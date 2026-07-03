@@ -107,7 +107,7 @@ public static class UserEndpoint
             User? db_usr = await db.Users.SingleOrDefaultAsync(usr => usr.Id == me.Id);
 
             if (db_usr is null)
-                return Results.BadRequest("Your account is not inside the DB");
+                return Results.NotFound();
 
             db_usr.UserName = req.UserName;
 
@@ -133,16 +133,14 @@ public static class UserEndpoint
             User? db_usr = await db.Users.SingleOrDefaultAsync(usr => usr.Id == user.Id);
 
             if (db_usr is null)
-            {
-                return Results.BadRequest("Your account is not inside the DB");
-            }
+                return Results.NotFound();
 
             db.Users.Remove(db_usr);
             await db.SaveChangesAsync();
 
             Token.RemoveCookie(http, "AuthToken"); 
 
-            return Results.Ok();
+            return Results.Ok(user);
         });
     }
 }
