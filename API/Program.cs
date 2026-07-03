@@ -23,6 +23,8 @@ class Program
 {
     static void Main(string[] args)
     {
+        // ------------ Buildings Dependances
+
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddOptions<StorageOptions>()
@@ -80,7 +82,20 @@ class Program
         });
 
         
-        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
+        builder.Services.AddIdentity<User, IdentityRole>(options =>
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                options.Password.RequiredLength = 0;    
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
+            }
+        })
+        .AddEntityFrameworkStores<KeepGroupedDb>();
+        
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
@@ -107,17 +122,19 @@ class Program
             {
                 OnMessageReceived = context =>
                 {
-                    context.Token = context.Request.Cookies["Token"];
+                    context.Token = context.Request.Cookies["AuthToken"];
                     return Task.CompletedTask;
                 },
             };
         });
-        builder.Services.AddAuthorization();
 
+        builder.Services.AddAuthorization();
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
         }
+
+        // ------------ Prepare the app
 
         var app = builder.Build();
         app.UseForwardedHeaders();
