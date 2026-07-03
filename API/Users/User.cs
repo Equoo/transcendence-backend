@@ -156,16 +156,22 @@ public static class UserEndpoint
                 Secure = false
             });
 
-            return Results.Ok("Cookie sent");
+            return Results.Ok("You are now connected !");
+        });
+
+        users.MapGet("/logout", async (HttpContext context) =>
+        {
+            context.Response.Cookies.Delete("Token");
+            return Results.Ok("You are now logout !");
         });
 
         users.MapGet("/me", [Authorize] (HttpContext context) =>
         {
-            var cookie = context.Request.Cookies.FirstOrDefault();
+            var cookie = context.Request.Cookies["Token"];
 
             UserResponse resp = new();
             
-            JwtSecurityToken token = new JwtSecurityTokenHandler().ReadJwtToken(cookie.Value);
+            JwtSecurityToken token = new JwtSecurityTokenHandler().ReadJwtToken(cookie);
             
             foreach(Claim claim in token.Claims)
             {
