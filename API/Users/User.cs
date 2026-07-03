@@ -1,21 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using KeepGrouped.API.Events;
-using KeepGrouped.API.Password;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
-using KeepGrouped.API;
-using Npgsql.Replication;
-using System.Web;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace KeepGrouped.API.Users;
 
@@ -24,8 +15,6 @@ public class User : IdentityUser
     public User() : base() { }
     public User(string username) : base(username) { }
     
-    public string? Saltz { get; set; }
-
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
@@ -40,25 +29,33 @@ public record UserRequest
 
 }
 
-public record UserResponse(
-
-    string Id,
-    string UserName
-)
+public class UserResponse
 {
+    public string? Id { get; set; } = null;
+    public string? UserName { get; set; } = null;
+
+    public UserResponse(){}
+
+    public UserResponse(string id, string username)
+    {
+        Id = id;
+        UserName = username;
+    }
+        
     public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName!);
 }
+
 
 
 public static class UserEndpoint
 {
 
-    public static string BuildToken(string name)
+    public static string BuildToken(string UserName, string Id)
     {
          var claims = new[]
             {
-                new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, "admin")
+                new Claim(ClaimTypes.Name, UserName),
+                new Claim(ClaimTypes.NameIdentifier, Id),
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"));
@@ -108,27 +105,23 @@ public static class UserEndpoint
 
         users.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass, IPasswordValidator<User> test, UserManager<User> manager, IUserValidator<User> testout, SignInManager<User> t) =>
         {
-
             var user = new User
-            {
-                UserName = req.UserName,
+            {               
+                Id = Guid.NewGuid().ToString().GetHashCode().ToString("x"),
+                UserName = req.UserName
             };
-
-            
+                
 
             if (!HostEnvironmentEnvExtensions.IsDevelopment(env))
             {     
                 if (!(await test.ValidateAsync(manager, user, req.Password)).Succeeded)
                     return Results.BadRequest("Password invalid");
             }
-            // Check info not already used in Db
 
+            // Check info not already used in Db
             var tmp = await db.Users.Where(e => e.UserName == req.UserName ).AnyAsync();
             if (tmp)
                 return  Results.BadRequest("UserName already used");
-
-
-            // Check UserName and password size etc...
 
             // Hashed password
             user.PasswordHash = pass.HashPassword(user, req.Password);
@@ -157,21 +150,33 @@ public static class UserEndpoint
                 return Results.BadRequest("Bad password authentification");
             }
 
-            context.Response.Cookies.Append("Token", BuildToken(req.UserName), new CookieOptions
+            context.Response.Cookies.Append("Token", BuildToken(user_db.UserName, user_db.Id), new CookieOptions
             {
                 HttpOnly = true,
                 Secure = false
             });
-            // Creation of JWT 
+
             return Results.Ok("Cookie sent");
-
-
         });
 
-        users.MapGet("/ping" , [Authorize] () => "ping TestEndpoint")
-        .WithName("users.ping")
-        .WithSummary("Ping the users endpoints")
-        .WithDescription("Development helper that returns a constant string to check the API is reachable.")
-        .Produces<string>(StatusCodes.Status200OK);
+        users.MapGet("/me", [Authorize] (HttpContext context) =>
+        {
+            var cookie = context.Request.Cookies.FirstOrDefault();
+
+            UserResponse resp = new();
+            
+            JwtSecurityToken token = new JwtSecurityTokenHandler().ReadJwtToken(cookie.Value);
+            
+            foreach(Claim claim in token.Claims)
+            {
+                if (claim.Type == ClaimTypes.Name)
+                    resp.UserName = claim.Value;
+                if (claim.Type == ClaimTypes.NameIdentifier)
+                    resp.Id = claim.Value;
+            }
+
+            return Results.Ok(resp);
+        });
+
     }
 }
