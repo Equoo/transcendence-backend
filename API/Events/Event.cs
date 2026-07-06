@@ -19,25 +19,23 @@ public class Event
     public User Organizer { get; set; } = null!;
     public ICollection<User> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
+    public ICollection<EventRole> EventRoles { get; init; } = [];
 }
 
 public record CreateEventRequest
 {
     [Required]
     public string Name { get; init; } = null!;
-
     [Required]
     public DateTime Date { get; init; }
-
     [Required]
     [Range(1, int.MaxValue)]
     public int Size { get; init; }
-
     [Required]
     public string Location { get; init; } = null!;
 
     public ICollection<string> Tags { get; init; } = [];
-
+    public ICollection<string> EventRolesId { get; init; } = [];
     public string Description { get; init; } = string.Empty;
 }
 
@@ -50,12 +48,14 @@ public record EventResponse(
     string Description,
     UserResponse Organizer,
     ICollection<string> Tags,
-    ICollection<RegistrationResponse> Registrations)
+    ICollection<RegistrationResponse> Registrations,
+    ICollection<EventRoleResponse> EventRoles)
 {
     public static EventResponse FromEntity(Event ev) => new(
         ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
         UserResponse.FromEntity(ev.Organizer), ev.Tags,
-        [.. ev.Registrations.Select(RegistrationResponse.FromEntity)]);
+        [.. ev.Registrations.Select(RegistrationResponse.FromEntity)],
+        [.. ev.EventRoles.Select(EventRoleResponse.FromEntity)]);
 }
 
 public static class EventEndpoints
@@ -81,9 +81,13 @@ public static class EventEndpoints
                 Location = req.Location,
                 Description = req.Description,
                 Organizer = user,
+                EventRoles = await db.EventRoles.Where(er => req.EventRolesId.Contains(er.Id)).ToListAsync(),
                 Tags = req.Tags,
             };
 
+            EventRole anyRole = await db.EventRoles.SingleAsync(er => er.Name == "Any");
+
+            ev.EventRoles.Add(anyRole);
             db.Events.Add(ev);
             await db.SaveChangesAsync();
 

@@ -15,22 +15,32 @@ class Program
 
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
+            if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") != null)
+            {
+                return;
+            }
             User user = new("asventi");
-            if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") == null)
+            db.Set<User>().Add(user);
+            db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
+            db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
+            db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
+            db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
+            db.SaveChanges();
+
+            var ev = new Event()
             {
-                db.Set<User>().Add(user);
-            }
-            if (db.Set<Event>().FirstOrDefault(e => e.Name == "Default Event") == null)
-            {
-                db.Set<Event>().Add(new Event()
-                {
-                    Name = "Default Event",
-                    Date = DateTime.UtcNow.AddMinutes(30),
-                    Location = "Default Location",
-                    Size = 10,
-                    Organizer = user
-                });
-            }
+                Name = "Default Event",
+                Date = DateTime.UtcNow.AddMinutes(30),
+                Location = "Default Location",
+                Size = 10,
+                Organizer = user,
+                // EventRoles = [.. db.Set<EventRole>()]
+            };
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
+            db.Set<Event>().Add(ev);
+
             db.SaveChanges();
         }));
         builder.Services.AddProblemDetails();
@@ -75,6 +85,7 @@ class Program
         app.MapEvents();
         app.MapRegistrations();
         app.MapUsers();
+        app.MapEventRoles();
         app.Run();
 
     }
