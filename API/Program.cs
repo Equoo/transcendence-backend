@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using TokenContext = KeepGrouped.API.Users.TokenContext;
 
 namespace KeepGrouped.API;
 
@@ -100,6 +101,8 @@ class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
         builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+        builder.Services.AddScoped<TokenContext>();
+        
        
         builder.Services.AddAuthentication(options =>
         {
@@ -141,6 +144,7 @@ class Program
         app.UseStatusCodePages();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<TokenContextMiddleware>();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();

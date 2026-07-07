@@ -58,8 +58,8 @@ public static class AuthenticationEndpoint
                 return Problems.UserProblems.AuthenticationInvalid();
 
             // Handle Json Web Token
-            var token = Token.Build(user_db.UserName, user_db.Id);
-            Token.AddToCookie(token, context);
+            var token = Token.Build(user_db.Id);
+            Token.AddTokenCookie(token, context);
 
             return Results.Ok();
         });
@@ -68,7 +68,7 @@ public static class AuthenticationEndpoint
 
         auth.MapPost("/logout", [Authorize] async (HttpContext http) =>
         {
-            Token.RemoveCookie(http, "AuthToken");
+            Token.RemoveTokenCookie(http);
             return Results.Ok();
         });
 

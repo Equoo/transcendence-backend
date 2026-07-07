@@ -5,6 +5,7 @@ using System.Security.Claims;
 using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
@@ -13,11 +14,14 @@ public class User : IdentityUser
 {
     public User() : base() { }
     public User(string username) : base(username) { }
-    
+
+    public User Clone()
+    {
+        return new User{Id = this.Id, UserName = this.UserName};
+    }
+
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
-
-   
 }
 
 public record UserRequest
@@ -88,59 +92,33 @@ public static class UserEndpoint
 
         // -------------- Return connected User
 
-        me.MapGet("/", [Authorize] (HttpContext context) =>
+        me.MapGet("/", [Authorize] (TokenContext tk) =>
         {
-             
-            JwtSecurityToken token = Token.GetToken(context);
-            UserResponse resp = Token.GetUserRespByToken(token);
-
-            return Results.Ok(resp);
+            return Results.Ok(UserResponse.FromEntity(tk.User));
         });
 
         // -------------- Change UserName
 
-        me.MapPut("/", [Authorize] async (UserRequest req, KeepGroupedDb db, HttpContext http) =>
+        me.MapPut("/", [Authorize] async (UserRequest req, KeepGroupedDb db, TokenContext tk) =>
         {
-            JwtSecurityToken token = Token.GetToken(http);
-            UserResponse me = Token.GetUserRespByToken(token);
-
-            User? db_usr = await db.Users.SingleOrDefaultAsync(usr => usr.Id == me.Id);
-
-            if (db_usr is null)
-                return Results.NotFound();
-
-            db_usr.UserName = req.UserName;
+            tk.User.UserName = req.UserName;
 
             await db.SaveChangesAsync();
 
-            // Change the token by an new one with new username
-            
-            Token.RemoveCookie(http, "AuthToken");
-            string new_token = Token.Build(db_usr.UserName, db_usr.Id);
-            Token.AddToCookie(new_token, http);
-
-            return Results.Ok(db_usr);
+            return Results.Ok(UserResponse.FromEntity(tk.User));
         });
 
 
         // -------------- Delete User
 
-        me.MapDelete("/", [Authorize] async (KeepGroupedDb db, HttpContext http) =>
+        me.MapDelete("/", [Authorize] async (KeepGroupedDb db, HttpContext http, TokenContext tk) =>
         {
-            var token = Token.GetToken(http);
-            UserResponse user = Token.GetUserRespByToken(token);
-
-            User? db_usr = await db.Users.SingleOrDefaultAsync(usr => usr.Id == user.Id);
-
-            if (db_usr is null)
-                return Results.NotFound();
-
-            db.Users.Remove(db_usr);
+            db.Users.Remove(tk.User);
             await db.SaveChangesAsync();
 
-            Token.RemoveCookie(http, "AuthToken"); 
+            Token.RemoveTokenCookie(http);
 
-            return Results.Ok(user);
+            return Results.Ok(UserResponse.FromEntity(tk.User));
         });
     }
 }

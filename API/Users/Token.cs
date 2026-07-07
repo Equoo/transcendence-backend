@@ -8,11 +8,10 @@ namespace KeepGrouped.API.Users;
 
 public static class Token
 {
-    public static string Build(string UserName, string Id)
+    public static string Build(string Id)
         {
             var claims = new[]
                 {
-                    new Claim(ClaimTypes.Name, UserName),
                     new Claim(ClaimTypes.NameIdentifier, Id),
                 };
 
@@ -30,7 +29,7 @@ public static class Token
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-    public static void AddToCookie(string token, HttpContext http)
+    public static void AddTokenCookie(string token, HttpContext http)
     {
             
         http.Response.Cookies.Append("AuthToken", token, new CookieOptions
@@ -40,24 +39,10 @@ public static class Token
         });
     }
 
-    public static UserResponse GetUserRespByToken(JwtSecurityToken token)
+
+    public static void RemoveTokenCookie(HttpContext http)
     {
-       UserResponse resp = new();
-
-       foreach (Claim claim in token.Claims)
-        {
-            if (claim.Type == ClaimTypes.Name)
-                resp.UserName = claim.Value;
-            if (claim.Type == ClaimTypes.NameIdentifier)
-                resp.Id = claim.Value;
-        }
-
-        return resp;
-    }
-
-    public static void RemoveCookie(HttpContext http, string key)
-    {
-        http.Response.Cookies.Delete(key);
+        http.Response.Cookies.Delete("AuthToken");
     }
 
     public static string? GetCookie(HttpContext http, string key)
