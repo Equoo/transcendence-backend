@@ -22,7 +22,7 @@ public class Event
     public ICollection<EventRole> EventRoles { get; init; } = [];
 }
 
-public record CreateEventRequest
+public record EventCreate
 {
     [Required]
     public string Name { get; init; } = null!;
@@ -35,7 +35,7 @@ public record CreateEventRequest
     public string Location { get; init; } = null!;
 
     public ICollection<string> Tags { get; init; } = [];
-    public ICollection<string> EventRolesId { get; init; } = [];
+    public ICollection<string> EventRoleIds { get; init; } = [];
     public string Description { get; init; } = string.Empty;
 }
 
@@ -64,7 +64,7 @@ public static class EventEndpoints
     {
         var events = app.MapGroup("/events");
 
-        events.MapPost("/", async (KeepGroupedDb db, CreateEventRequest req) =>
+        events.MapPost("/", async (KeepGroupedDb db, EventCreate req) =>
         {
             // Replace with authentication devan pitie j'en ai marre de faire sans
             User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
@@ -81,7 +81,7 @@ public static class EventEndpoints
                 Location = req.Location,
                 Description = req.Description,
                 Organizer = user,
-                EventRoles = await db.EventRoles.Where(er => req.EventRolesId.Contains(er.Id)).ToListAsync(),
+                EventRoles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync(),
                 Tags = req.Tags,
             };
 
@@ -107,7 +107,7 @@ public static class EventEndpoints
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
         });
 
-        events.MapPut("/{id}", async (KeepGroupedDb db, string id, CreateEventRequest req) =>
+        events.MapPut("/{id}", async (KeepGroupedDb db, string id, EventCreate req) =>
         {
             Event? ev = await db.Events.FindAsync(id);
             if (ev is null)

@@ -23,20 +23,23 @@ public record RegistrationResponse(UserResponse User, DateTime RegisteredAt, str
         reg.Role?.Name);
 }
 
+public record RegistrationCreate(string EventRoleId);
+
 public static class RegistrationEndpoints
 {
     public static void MapRegistrations(this IEndpointRouteBuilder app)
     {
         var registrations = app.MapGroup("/events/{id}/registration");
 
-        registrations.MapPost("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapPost("/", async (KeepGroupedDb db, string id, RegistrationCreate reg) =>
         {
             Thread.Sleep(500);
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
             User? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
+            EventRole? eventRole = await db.EventRoles.SingleOrDefaultAsync(er => er.Id == reg.EventRoleId);
 
-            if ((ev is null) || (user is null))
+            if ((ev is null) || (user is null) || (eventRole is null))
             {
                 return Results.NotFound();
             }
@@ -48,7 +51,11 @@ public static class RegistrationEndpoints
             {
                 return EventProblems.EventFull();
             }
-            ev.Users.Add(user);
+            ev.Registrations.Add(new Registration()
+            {
+                User = user,
+                Role = eventRole
+            });
             await db.SaveChangesAsync();
             return Results.Created();
         });
