@@ -14,18 +14,17 @@ public static class AuthenticationEndpoint
 
          // -------------- Create user 
 
-        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash, IPasswordValidator<User> pass, UserManager<User> manager) =>
+        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash ) =>
         {
 
             var user = new User
             {               
-                Id = Guid.NewGuid().ToString().GetHashCode().ToString("x"),
+                
                 UserName = req.UserName
             };
             
             // Check password resistance
-            if (!(await pass.ValidateAsync(manager, user, req.Password)).Succeeded)
-                return Problems.UserProblems.PasswordTooWeak();
+            
 
             // Check duplicate
             var dup_usr = await db

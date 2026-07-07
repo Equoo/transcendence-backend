@@ -6,7 +6,7 @@ using KeepGrouped.API.Users;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;
 
-public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDbContext<User>(options)
+public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -22,8 +22,10 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : IdentityDb
         builder.Entity<Registration>().Navigation(e => e.User).AutoInclude();
         builder.Entity<File>().Navigation(f => f.Creator).AutoInclude();
     }
+    public DbSet<User> Users {get; set;}
     public DbSet<Event> Events { get; set; }
     public DbSet<EventRole> EventRoles { get; set; }
     public DbSet<File> Files { get; set; }
+
 }
 

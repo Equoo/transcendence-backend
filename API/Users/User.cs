@@ -10,14 +10,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
-public class User : IdentityUser
+public class User
 {
-    public User() : base() { }
-    public User(string username) : base(username) { }
+    public string UserName {get; set;} = null!;
+    public string PasswordHash {get; set;} = null!;
+    public string Id {get; set;} = Guid.NewGuid().ToString();
 
-    public User Clone()
+    public User() {}
+
+    public User(string username)
     {
-        return new User{Id = this.Id, UserName = this.UserName};
+        UserName = username;
+    }
+    public User(string username, string id)
+    {
+        UserName = username;
+        Id = id;
     }
 
     public ICollection<Event> Events { get; } = [];

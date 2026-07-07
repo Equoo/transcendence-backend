@@ -54,6 +54,8 @@ class Program
                 return;
             }
             User user = new("asventi");
+            
+            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
             db.Set<User>().Add(user);
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
@@ -83,26 +85,11 @@ class Program
         });
 
         
-        builder.Services.AddIdentity<User, IdentityRole>(options =>
-        {
-            if (builder.Environment.IsDevelopment())
-            {
-                options.Password.RequiredLength = 0;    
-                options.Password.RequireDigit = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireDigit = false;
-            }
-        })
-        .AddEntityFrameworkStores<KeepGroupedDb>();
-        
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
         builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
         builder.Services.AddScoped<TokenContext>();
-        
        
         builder.Services.AddAuthentication(options =>
         {
