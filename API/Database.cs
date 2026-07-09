@@ -1,7 +1,6 @@
 namespace KeepGrouped.API;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;

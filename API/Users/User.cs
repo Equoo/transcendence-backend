@@ -1,14 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
 
 namespace KeepGrouped.API.Users;
+
 
 public class User
 {

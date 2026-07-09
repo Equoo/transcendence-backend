@@ -1,11 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
+using KeepGrouped.API.Users;
 
-namespace KeepGrouped.API.Users;
+namespace KeepGrouped.API.Middlewares;
 
 public class TokenContext
 {

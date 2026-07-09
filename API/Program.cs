@@ -1,7 +1,5 @@
-using System.Net.Mime;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using KeepGrouped.API.Storage;
@@ -10,13 +8,11 @@ using Microsoft.Extensions.Options;
 using Amazon.Runtime;
 using Microsoft.AspNetCore.HttpOverrides;
 using KeepGrouped.API.Password;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TokenContext = KeepGrouped.API.Users.TokenContext;
+using KeepGrouped.API.Middlewares;
+using TokenContext = KeepGrouped.API.Middlewares.TokenContext;
 
 namespace KeepGrouped.API;
 
@@ -134,6 +130,7 @@ class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseMiddleware<TokenContextMiddleware>();
+        app.UseMiddleware<DelayMiddleware>();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();
