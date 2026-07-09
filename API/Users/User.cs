@@ -41,12 +41,10 @@ public record UserRequest
 
 }
 
-public class UserResponse
+public record UserResponse
 {
     public string? Id { get; set; } = null;
     public string? UserName { get; set; } = null;
-
-    public UserResponse(){}
 
     public UserResponse(string id, string username)
     {

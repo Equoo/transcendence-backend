@@ -31,7 +31,7 @@ public static class Token
 
     public static void AddTokenCookie(string token, HttpContext http)
     {
-            
+
         http.Response.Cookies.Append("AuthToken", token, new CookieOptions
         {
             HttpOnly = true,
