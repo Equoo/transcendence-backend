@@ -14,7 +14,7 @@ public class DelayMiddleware
     {
         if (context.Request.Method == "POST")
         {
-            Thread.Sleep(2000);
+            Thread.Sleep(1000);
         }
         await _next(context);
         return;

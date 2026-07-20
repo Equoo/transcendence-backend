@@ -14,7 +14,7 @@ public static class AuthenticationEndpoint
 
          // -------------- Create user 
 
-        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash ) =>
+        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash, HttpContext http) =>
         {
 
             var user = new User
@@ -39,6 +39,9 @@ public static class AuthenticationEndpoint
 
             db.Users.Add(user);
             await db.SaveChangesAsync();
+
+            var token = Token.Build(user.Id);
+            Token.AddTokenCookie(token, http);
             
             return Results.Created("/users/{id}", UserResponse.FromEntity(user));
         });
