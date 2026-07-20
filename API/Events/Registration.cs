@@ -2,6 +2,7 @@ using KeepGrouped.API.Users;
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
 
@@ -31,15 +32,14 @@ public static class RegistrationEndpoints
     {
         var registrations = app.MapGroup("/events/{id}/registration").WithTags("Registrations");
 
-        registrations.MapPost("/", async (KeepGroupedDb db, string id, TokenContext context, RegistrationCreate reg) =>
+        registrations.MapPost("/", [Authorize] async (KeepGroupedDb db, string id, TokenContext context, RegistrationCreate reg) =>
         {
-            // Thread.Sleep(500);
+
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            User? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
             EventRole? eventRole = await db.EventRoles.SingleOrDefaultAsync(er => er.Id == reg.EventRoleId);
 
-            if ((ev is null) || (user is null) || (eventRole is null))
+            if ((ev is null) || (context.User is null) || (eventRole is null))
             {
                 return Results.NotFound();
             }
@@ -51,11 +51,13 @@ public static class RegistrationEndpoints
             {
                 return EventProblems.EventFull();
             }
+           
             ev.Registrations.Add(new Registration()
             {
-                User = user,
+                User = context.User,
                 Role = eventRole
             });
+
             await db.SaveChangesAsync();
             return Results.Created();
         })
@@ -82,21 +84,20 @@ public static class RegistrationEndpoints
         .Produces<IEnumerable<RegistrationResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        registrations.MapDelete("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapDelete("/", async (KeepGroupedDb db, string id, TokenContext token) =>
         {
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            User? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
 
-            if ((ev is null) || (user is null))
+            if ((ev is null) || (token.User is null))
             {
                 return Results.NotFound();
             }
-            if (!ev.Users.Contains(user))
+            if (!ev.Users.Contains(token.User))
             {
-                return EventProblems.NotRegistered(user.UserName!, ev.Name);
+                return EventProblems.NotRegistered(token.User.UserName!, ev.Name);
             }
-            ev.Users.Remove(user);
+            ev.Users.Remove(token.User);
             await db.SaveChangesAsync();
             return Results.NoContent();
         })

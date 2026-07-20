@@ -65,9 +65,9 @@ public static class EventEndpoints
     {
         var events = app.MapGroup("/events").WithTags("Events");
 
-        events.MapPost("/", async (KeepGroupedDb db, EventCreate req, TokenContext context) =>
+        events.MapPost("/",[Authorize] async (KeepGroupedDb db, EventCreate req, TokenContext token) =>
         {
-
+          
             var ev = new Event
             {
                 Name = req.Name,
@@ -75,7 +75,7 @@ public static class EventEndpoints
                 Size = req.Size,
                 Location = req.Location,
                 Description = req.Description,
-                Organizer = context.User,
+                Organizer = token.User,
                 EventRoles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync(),
                 Tags = req.Tags,
             };
@@ -95,6 +95,7 @@ public static class EventEndpoints
         .Produces<EventResponse>(StatusCodes.Status201Created)
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
+
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
