@@ -4,6 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
+public enum Activity
+{
+    Online,
+    Afk,
+    Busy,
+    Invisible,
+    Offline,
+}
+
 public class User : IdentityUser
 {
     public User()
@@ -14,6 +23,8 @@ public class User : IdentityUser
 
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
+    public Activity Activity { get; set; } = Activity.Offline;
+    public bool IsOnline { get; set; } = false;
 }
 
 public record UserRequest

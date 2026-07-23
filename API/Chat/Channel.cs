@@ -4,9 +4,28 @@ public class Channel
 {
     public Channel() { }
 
-    public Channel(string name) { }
+    public Channel(string name, string topic)
+    {
+        Name = name;
+        Topic = topic;
+    }
 
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Name { get; set; } = null!;
-    public ICollection<string> Messages { get; } = [];
+    public string Id { get; } = Guid.NewGuid().ToString();
+    public string Name { get; init; } = null!;
+    public string Topic { get; } = null!;
+    public DateTime CreateAt { get; } = DateTime.UtcNow;
+    public string? EventId { get; } = null;
+    public string? Category { get; } = null;
+}
+
+public record ChannelResponse(
+    string Id,
+    string Name,
+    DateTime CreateAt,
+    string? EventId,
+    string? Category
+)
+{
+    public static ChannelResponse FromEntity(Channel c) =>
+        new(c.Id, c.Name, c.CreateAt, c.EventId, c.Category);
 }

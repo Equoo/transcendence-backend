@@ -24,6 +24,37 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options)
         builder.Entity<Event>().Navigation(e => e.Registrations).AutoInclude();
         builder.Entity<Event>().Navigation(e => e.EventRoles).AutoInclude();
         builder.Entity<Registration>().Navigation(e => e.User).AutoInclude();
+
+        builder.Entity<Message>(entity =>
+        {
+            entity.Property(c => c.Id).HasMaxLength(36);
+
+            entity
+                .HasOne(m => m.Channel)
+                .WithMany()
+                .HasForeignKey(m => m.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Speeds up: WHERE ChannelId = X ORDER BY SentAt DESC
+            entity
+                .HasIndex(m => new { m.ChannelId, m.SentAt })
+                .HasDatabaseName("IX_Messages_ChannelId_SentAt");
+
+            entity.Property(m => m.Content).HasMaxLength(4096);
+        });
+
+        builder.Entity<Channel>(entity =>
+        {
+            entity.Property(c => c.Id).HasMaxLength(36);
+
+            entity.HasIndex(c => c.Name);
+        });
     }
 
     public DbSet<Event> Events { get; set; } = null!;

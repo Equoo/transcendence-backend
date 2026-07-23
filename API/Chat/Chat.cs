@@ -18,26 +18,64 @@ public class ChatHub : Hub
     {
         var userId = Context.UserIdentifier;
         Console.WriteLine($"User connected: {userId}");
+
+        var user = await _db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
+        if (user is not null)
+        {
+            user.IsOnline = true;
+            await _db.SaveChangesAsync();
+        }
+
         await base.OnConnectedAsync();
     }
 
-    public async Task ChannelSend(string channelId, string message)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var ownerId = Context.UserIdentifier;
+        var userId = Context.UserIdentifier;
+        Console.WriteLine($"Disconnected: {Context.ConnectionId}");
 
+        if (exception != null)
+        {
+            Console.WriteLine($"Disconnected due to error: {exception.Message}");
+        }
+
+        var user = await _db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
+        if (user != null)
+        {
+            user.IsOnline = false;
+            await _db.SaveChangesAsync();
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task ChannelSend(string channelId, string content)
+    {
+        var senderId = Context.UserIdentifier;
+
+        var sender = await _db.Users.Where(user => user.Id == senderId).FirstOrDefaultAsync();
         var channel = await _db.Channels.SingleOrDefaultAsync(e => e.Id == channelId);
-        if (channel is null)
-            Results.NotFound();
+        if (sender is null || channel is null)
+            return;
 
-        await Clients.Users(channel.Messages).SendAsync("ReceiveMessage", ownerId, message);
+        var msg = new Message(sender, channel, content);
+        await _db.Messages.AddAsync(msg);
+        await _db.SaveChangesAsync();
+
+        var users = await _db
+            .Users.Where(user => user.IsOnline)
+            .Select(user => user.Id)
+            .ToListAsync();
+
+        await Clients.Users(users).SendAsync("ReceiveMessage", msg);
     }
 
-    public async Task UserSend(string userId, string message)
-    {
-        var ownerId = Context.UserIdentifier;
-
-        await Clients.User(userId).SendAsync("ReceiveMessage", "Server", message);
-    }
+    // public async Task UserSend(string userId, string content)
+    // {
+    //     var senderId = Context.UserIdentifier;
+    //
+    //     await Clients.User(userId).SendAsync("ReceiveMessage", senderId, msg);
+    // }
 }
 
 public static class ChatEndpoint
@@ -67,6 +105,16 @@ public static class ChatEndpoint
                 return channel is null
                     ? Results.NotFound()
                     : Results.Ok(ChannelResponse.FromEntity(channel));
+            }
+        );
+
+        channels.MapGet(
+            "/{id}/messages",
+            async (string id, KeepGroupedDb db) =>
+            {
+                var messages = await db.Messages.Where(msg => msg.ChannelId == id).ToListAsync();
+
+                return messages is null ? Results.NotFound() : Results.Ok(messages);
             }
         );
 
