@@ -4,6 +4,10 @@ using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using KeepGrouped.API.Storage;
+using Amazon.S3;
+using Microsoft.Extensions.Options;
+using Amazon.Runtime;
 
 namespace KeepGrouped.API;
 
@@ -13,6 +17,25 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddOptions<StorageOptions>()
+            .Bind(builder.Configuration.GetSection(StorageOptions.SectionName))
+            .ValidateDataAnnotations().ValidateOnStart();
+        builder.Services.AddScoped<IStorage, Garage>();
+        builder.Services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<StorageOptions>>().Value;
+            var s3config = new AmazonS3Config()
+            {
+                ServiceURL = options.ServiceUrl,
+                AuthenticationRegion = options.Region,
+                ForcePathStyle = true,
+                RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+                ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
+            };
+
+            var creds = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
+            return new AmazonS3Client(creds, s3config);
+        });
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
             if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") != null)
@@ -86,6 +109,7 @@ class Program
         app.MapRegistrations();
         app.MapUsers();
         app.MapEventRoles();
+        app.MapStorage();
         app.Run();
 
     }
