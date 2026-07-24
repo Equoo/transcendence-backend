@@ -72,155 +72,200 @@ public static class ChatEndpoint
             .WithDescription("Get all channels")
             .Produces<List<ChannelResponse>>(201);
 
-        channels.MapPost(
-            "/",
-            // [Authorize]
-            async (TokenContext tk, KeepGroupedDb db, ChannelCreate req) =>
-            {
-                var sender = tk.User;
-                if (sender is null)
-                    return Results.Unauthorized();
-
-                var channel = new Channel(req.Name, req.Topic);
-
-                await db.Channels.AddAsync(channel);
-                await db.SaveChangesAsync();
-
-                var response = ChannelResponse.FromEntity(channel);
-                return Results.Created($"/channel/{channel.Id}", response);
-            }
-        );
-
-        channels.MapGet(
-            "/{id}",
-            // [Authorize]
-            async (TokenContext tk, KeepGroupedDb db, string id) =>
-            {
-                var channel = await db.Channels.FindAsync(id);
-                return channel is null
-                    ? Results.NotFound()
-                    : Results.Ok(ChannelResponse.FromEntity(channel));
-            }
-        );
-
-        channels.MapDelete(
-            "/{id}",
-            // [Authorize]
-            async (TokenContext tk, KeepGroupedDb db, string id) =>
-            {
-                var sender = tk.User;
-                if (sender is null)
-                    return Results.Unauthorized();
-
-                var channel = await db.Channels.FindAsync(id);
-                if (channel is null)
-                    return Results.NotFound();
-
-                db.Channels.Remove(channel);
-                await db.SaveChangesAsync();
-
-                return Results.NoContent();
-            }
-        );
-
-        channels.MapGet(
-            "/{id}/messages",
-            // [Authorize]
-            async (TokenContext tk, KeepGroupedDb db, string id, DateTime? before, int take = 20) =>
-            {
-                var sender = tk.User;
-                if (sender is null)
-                    return Results.Unauthorized();
-
-                var channel = await db.Channels.FindAsync(id);
-                if (channel is null)
-                    return Results.NotFound();
-
-                var query = db.Messages.Include(m => m.Sender).Where(m => m.ChannelId == id);
-
-                if (before.HasValue)
+        channels
+            .MapPost(
+                "/",
+                // [Authorize]
+                async (TokenContext tk, KeepGroupedDb db, ChannelCreate req) =>
                 {
-                    query = query.Where(m => m.SentAt < before.Value);
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
+
+                    var channel = new Channel(req.Name, req.Topic);
+
+                    await db.Channels.AddAsync(channel);
+                    await db.SaveChangesAsync();
+
+                    var response = ChannelResponse.FromEntity(channel);
+                    return Results.Created($"/channel/{channel.Id}", response);
                 }
+            )
+            .WithName("CreateChannel")
+            .WithDescription("Create a new channel")
+            .Produces<ChannelResponse>(201)
+            .Produces(401);
 
-                var messages = await query
-                    .OrderByDescending(m => m.SentAt)
-                    .Take(take)
-                    .Select(m => MessageResponse.FromEntity(m))
-                    .ToListAsync();
+        channels
+            .MapGet(
+                "/{id}",
+                // [Authorize]
+                async (TokenContext tk, KeepGroupedDb db, string id) =>
+                {
+                    var channel = await db.Channels.FindAsync(id);
+                    return channel is null
+                        ? Results.NotFound()
+                        : Results.Ok(ChannelResponse.FromEntity(channel));
+                }
+            )
+            .WithName("GetChannelById")
+            .WithDescription("Get a channel by Id")
+            .Produces<ChannelResponse>(201)
+            .Produces(404);
 
-                return messages is null ? Results.NotFound() : Results.Ok(messages);
-            }
-        );
+        channels
+            .MapDelete(
+                "/{id}",
+                // [Authorize]
+                async (TokenContext tk, KeepGroupedDb db, string id) =>
+                {
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
 
-        channels.MapPost(
-            "/{id}/messages",
-            // [Authorize]
-            async (
-                TokenContext tk,
-                KeepGroupedDb db,
-                IHubContext<ChatHub> hubContext,
-                string id,
-                MessageCreate req
-            ) =>
-            {
-                var sender = tk.User;
-                if (sender is null)
-                    return Results.Unauthorized();
+                    var channel = await db.Channels.FindAsync(id);
+                    if (channel is null)
+                        return Results.NotFound();
 
-                var channel = await db.Channels.FindAsync(id);
-                if (channel is null)
-                    return Results.NotFound();
+                    db.Channels.Remove(channel);
+                    await db.SaveChangesAsync();
 
-                var msg = new Message(sender, channel, req.Content);
-                await db.Messages.AddAsync(msg);
-                await db.SaveChangesAsync();
+                    return Results.NoContent();
+                }
+            )
+            .WithName("RemoveChannel")
+            .WithDescription("Remove a channel by Id")
+            .Produces(401)
+            .Produces(404)
+            .Produces(204);
 
-                var users = await db
-                    .Users.Where(user => user.IsOnline)
-                    .Select(user => user.Id)
-                    .ToListAsync();
+        channels
+            .MapGet(
+                "/{id}/messages",
+                // [Authorize]
+                async (
+                    TokenContext tk,
+                    KeepGroupedDb db,
+                    string id,
+                    DateTime? before,
+                    int take = 20
+                ) =>
+                {
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
 
-                await hubContext.Clients.Users(users).SendAsync("ReceiveMessage", msg);
+                    var channel = await db.Channels.FindAsync(id);
+                    if (channel is null)
+                        return Results.NotFound();
 
-                var response = MessageResponse.FromEntity(msg);
-                return Results.Created($"/{id}/messages/{msg.Id}", response);
-            }
-        );
+                    var query = db.Messages.Include(m => m.Sender).Where(m => m.ChannelId == id);
 
-        channels.MapGet(
-            "/{id}/messages/{msgId}",
-            // [Authorize]
-            async (KeepGroupedDb db, string id, string msgId) =>
-            {
-                var msg = await db.Messages.FindAsync(msgId);
-                return msg is null
-                    ? Results.NotFound()
-                    : Results.Ok(MessageResponse.FromEntity(msg));
-            }
-        );
+                    if (before.HasValue)
+                    {
+                        query = query.Where(m => m.SentAt < before.Value);
+                    }
 
-        channels.MapDelete(
-            "/{id}/messages/{msgId}",
-            // [Authorize]
-            async (TokenContext tk, KeepGroupedDb db, string id, string msgId) =>
-            {
-                var sender = tk.User;
-                if (sender is null)
-                    return Results.Unauthorized();
+                    var messages = await query
+                        .OrderByDescending(m => m.SentAt)
+                        .Take(take)
+                        .Select(m => MessageResponse.FromEntity(m))
+                        .ToListAsync();
 
-                var msg = await db.Messages.FindAsync(msgId);
-                if (msg is null)
-                    return Results.NotFound();
+                    return messages is null ? Results.NotFound() : Results.Ok(messages);
+                }
+            )
+            .WithName("GetChannelMessages")
+            .WithDescription("Get channel last messages. Can be limit and get by time")
+            .Produces<List<MessageResponse>>(201)
+            .Produces(401)
+            .Produces(404);
 
-                if (msg.Sender != sender)
-                    return Results.Unauthorized();
+        channels
+            .MapPost(
+                "/{id}/messages",
+                // [Authorize]
+                async (
+                    TokenContext tk,
+                    KeepGroupedDb db,
+                    IHubContext<ChatHub> hubContext,
+                    string id,
+                    MessageCreate req
+                ) =>
+                {
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
 
-                db.Messages.Remove(msg);
-                await db.SaveChangesAsync();
+                    var channel = await db.Channels.FindAsync(id);
+                    if (channel is null)
+                        return Results.NotFound();
 
-                return Results.NoContent();
-            }
-        );
+                    var msg = new Message(sender, channel, req.Content);
+                    await db.Messages.AddAsync(msg);
+                    await db.SaveChangesAsync();
+
+                    var users = await db
+                        .Users.Where(user => user.IsOnline)
+                        .Select(user => user.Id)
+                        .ToListAsync();
+
+                    await hubContext.Clients.Users(users).SendAsync("ReceiveMessage", msg);
+
+                    var response = MessageResponse.FromEntity(msg);
+                    return Results.Created($"/{id}/messages/{msg.Id}", response);
+                }
+            )
+            .WithName("ChannelSendMessage")
+            .WithDescription("Send message in channel")
+            .Produces<MessageResponse>(201)
+            .Produces(401)
+            .Produces(404);
+
+        channels
+            .MapGet(
+                "/{id}/messages/{msgId}",
+                // [Authorize]
+                async (KeepGroupedDb db, string id, string msgId) =>
+                {
+                    var msg = await db.Messages.FindAsync(msgId);
+                    return msg is null
+                        ? Results.NotFound()
+                        : Results.Ok(MessageResponse.FromEntity(msg));
+                }
+            )
+            .WithName("GetChannelMessageById")
+            .WithDescription("Get message by Id")
+            .Produces<MessageResponse>(201)
+            .Produces(404);
+
+        channels
+            .MapDelete(
+                "/{id}/messages/{msgId}",
+                // [Authorize]
+                async (TokenContext tk, KeepGroupedDb db, string id, string msgId) =>
+                {
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
+
+                    var msg = await db.Messages.FindAsync(msgId);
+                    if (msg is null)
+                        return Results.NotFound();
+
+                    if (msg.Sender != sender)
+                        return Results.Unauthorized();
+
+                    db.Messages.Remove(msg);
+                    await db.SaveChangesAsync();
+
+                    return Results.NoContent();
+                }
+            )
+            .WithName("RemoveChannelMessage")
+            .WithDescription("Remove a channel message by Id")
+            .Produces(401)
+            .Produces(404)
+            .Produces(204);
     }
 }
