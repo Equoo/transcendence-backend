@@ -1,5 +1,6 @@
 using KeepGrouped.API.Chat;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,9 @@ class Program
                         }
                         User user = new("asventi");
                         db.Set<User>().Add(user);
+                        User user2 = new("equo");
+                        db.Set<User>().Add(user2);
+
                         db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
                         db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
                         db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
@@ -57,13 +61,15 @@ class Program
         builder
             .Services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<KeepGroupedDb>();
-        // builder.Services.AddScoped<IPasswordHasher<User>, >();
+        builder.Services.AddScoped<TokenContext>();
+
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddSwaggerGen();
         }
 
         var app = builder.Build();
+        app.UseMiddleware<TokenContextMiddleware>(); // NOTE: PLACEHOLDER
         app.UseStatusCodePages();
         using var serviceScope = app.Services.CreateScope();
         var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
@@ -80,13 +86,6 @@ class Program
             context.Database.Migrate();
         }
         app.MapGet("/", () => "Hello World from API!");
-        // app.MapPost("/register", async ([FromForm] string username, KeepGroupedDb db) =>
-        // {
-        //     var user = new ApplicationUser(username);
-        //     db.Add(user);
-        //     await db.SaveChangesAsync();
-        //     return user;
-        // }).DisableAntiforgery();
 
         app.MapHub<ChatHub>("/chat");
         app.MapEvents();
