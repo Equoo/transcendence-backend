@@ -76,7 +76,12 @@ public static class ChatEndpoint
             .MapPost(
                 "/",
                 // [Authorize]
-                async (TokenContext tk, KeepGroupedDb db, ChannelCreate req) =>
+                async (
+                    TokenContext tk,
+                    KeepGroupedDb db,
+                    IHubContext<ChatHub> hubContext,
+                    ChannelCreate req
+                ) =>
                 {
                     var sender = tk.User;
                     if (sender is null)
@@ -88,6 +93,13 @@ public static class ChatEndpoint
                     await db.SaveChangesAsync();
 
                     var response = ChannelResponse.FromEntity(channel);
+
+                    var users = await db
+                        .Users.Where(user => user.IsOnline)
+                        .Select(user => user.Id)
+                        .ToListAsync();
+                    await hubContext.Clients.Users(users).SendAsync("NewChannel", response);
+
                     return Results.Created($"/channel/{channel.Id}", response);
                 }
             )
@@ -117,7 +129,12 @@ public static class ChatEndpoint
             .MapDelete(
                 "/{id}",
                 // [Authorize]
-                async (TokenContext tk, KeepGroupedDb db, string id) =>
+                async (
+                    TokenContext tk,
+                    KeepGroupedDb db,
+                    IHubContext<ChatHub> hubContext,
+                    string id
+                ) =>
                 {
                     var sender = tk.User;
                     if (sender is null)
@@ -129,6 +146,12 @@ public static class ChatEndpoint
 
                     db.Channels.Remove(channel);
                     await db.SaveChangesAsync();
+
+                    var users = await db
+                        .Users.Where(user => user.IsOnline)
+                        .Select(user => user.Id)
+                        .ToListAsync();
+                    await hubContext.Clients.Users(users).SendAsync("RemoveChannel", channel.Id);
 
                     return Results.NoContent();
                 }
@@ -209,8 +232,7 @@ public static class ChatEndpoint
                         .Users.Where(user => user.IsOnline)
                         .Select(user => user.Id)
                         .ToListAsync();
-
-                    await hubContext.Clients.Users(users).SendAsync("ReceiveMessage", msg);
+                    await hubContext.Clients.Users(users).SendAsync("NewMessage", msg);
 
                     var response = MessageResponse.FromEntity(msg);
                     return Results.Created($"/{id}/messages/{msg.Id}", response);
@@ -243,7 +265,13 @@ public static class ChatEndpoint
             .MapDelete(
                 "/{id}/messages/{msgId}",
                 // [Authorize]
-                async (TokenContext tk, KeepGroupedDb db, string id, string msgId) =>
+                async (
+                    TokenContext tk,
+                    KeepGroupedDb db,
+                    IHubContext<ChatHub> hubContext,
+                    string id,
+                    string msgId
+                ) =>
                 {
                     var sender = tk.User;
                     if (sender is null)
@@ -259,6 +287,12 @@ public static class ChatEndpoint
                     db.Messages.Remove(msg);
                     await db.SaveChangesAsync();
 
+                    var users = await db
+                        .Users.Where(user => user.IsOnline)
+                        .Select(user => user.Id)
+                        .ToListAsync();
+                    await hubContext.Clients.Users(users).SendAsync("RemoveMessage", msgId);
+
                     return Results.NoContent();
                 }
             )
@@ -267,5 +301,33 @@ public static class ChatEndpoint
             .Produces(401)
             .Produces(404)
             .Produces(204);
+
+        channels
+            .MapPost(
+                "/{id}/messages/{msgId}/ack",
+                // [Authorize]
+                async (TokenContext tk, KeepGroupedDb db, string id, string msgId) =>
+                {
+                    var sender = tk.User;
+                    if (sender is null)
+                        return Results.Unauthorized();
+
+                    var channel = await db.Channels.FindAsync(id);
+                    if (channel is null)
+                        return Results.NotFound();
+
+                    var msg = await db.Messages.FindAsync(msgId);
+                    if (msg is null)
+                        return Results.NotFound();
+
+                    sender.ChannelsAckMsg[id] = msgId;
+                    return Results.NoContent();
+                }
+            )
+            .WithName("ChannelMessageAcknoledge")
+            .WithDescription("Change user read state to message given")
+            .Produces(204)
+            .Produces(401)
+            .Produces(404);
     }
 }

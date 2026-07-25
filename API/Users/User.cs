@@ -24,21 +24,37 @@ public class User : IdentityUser
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
     public Activity Activity { get; set; } = Activity.Offline;
+
+    public Dictionary<string, string> ChannelsAckMsg = [];
     public bool IsOnline { get; set; } = false;
 }
 
 public record UserRequest
 {
     public string UserName { get; init; } = null!;
+    public Activity Activity { get; init; } = Activity.Offline;
     public string PasswordHash { get; init; } = null!;
     public string Email { get; init; } = null!;
     public string? PhoneNumber { get; init; } = null;
+    public Dictionary<string, string> ChannelsAckMsg = null!;
 }
 
-public record UserResponse(string Id, string UserName, string Email, string? PhoneNumber)
+public record UserResponse(
+    string Id,
+    string UserName,
+    string Email,
+    string? PhoneNumber,
+    Dictionary<string, string> ChannelsAckMsg
+)
 {
     public static UserResponse FromEntity(User usr) =>
-        new(usr.Id, usr.UserName, usr.Email, usr.PhoneNumber);
+        new(
+            usr.Id,
+            usr.UserName ?? "Unknown",
+            usr.Email ?? "Unknown",
+            usr.PhoneNumber,
+            usr.ChannelsAckMsg
+        );
 }
 
 public static class UserEndpoint
