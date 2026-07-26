@@ -23,13 +23,14 @@ public class Channel
 public record ChannelResponse(
     string Id,
     string Name,
+    string Topic,
     DateTime CreateAt,
     string? EventId,
     string? Category
 )
 {
     public static ChannelResponse FromEntity(Channel c) =>
-        new(c.Id, c.Name, c.CreateAt, c.EventId, c.Category);
+        new(c.Id, c.Name, c.Topic, c.CreateAt, c.EventId, c.Category);
 }
 
 public record ChannelCreate
