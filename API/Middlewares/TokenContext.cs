@@ -1,4 +1,3 @@
-using System;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 

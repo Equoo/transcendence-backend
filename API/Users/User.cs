@@ -1,3 +1,4 @@
+using KeepGrouped.API.Chat;
 using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,9 @@ public record UserRequest
     public string PasswordHash { get; init; } = null!;
     public string Email { get; init; } = null!;
     public string? PhoneNumber { get; init; } = null;
+
     public Dictionary<string, string> ChannelsAckMsg = null!;
+    public Dictionary<string, ChannelSetting> ChannelsSettings = null!;
 }
 
 public record UserResponse(
