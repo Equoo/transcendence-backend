@@ -26,7 +26,7 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
         };
         var res = await _s3.PutObjectAsync(req, ct);
 
-        return new UploadResponse(key, res.ETag.Trim(['\"']), res.HttpStatusCode);
+        return new UploadResponse(key, res.ETag, res.HttpStatusCode);
     }
 
     async Task<DownloadResponse> IStorage.DownloadAsync(string key, CancellationToken ct)
