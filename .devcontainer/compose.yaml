@@ -23,6 +23,36 @@ services:
     networks:
       - keepgrouped-net
 
+  garage-webui:
+    image: khairul169/garage-webui:latest
+    container_name: garage-webui
+    restart: unless-stopped
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+    ports:
+      - 3909:3909
+    environment:
+      API_BASE_URL: "http://garage:3903"
+      S3_ENDPOINT_URL: "http://garage:3900"
+    networks:
+      - keepgrouped-net
+
+  garage:
+    image: dxflrs/garage:v2.3.0
+    command: /garage server --single-node --default-bucket
+    hostname: keepgrouped-storage-dev
+    environment:
+      GARAGE_DEFAULT_ACCESS_KEY: devdevdev
+      GARAGE_DEFAULT_SECRET_KEY: 2ac0102fe9bdf787ad6eb18ce19c9334
+      GARAGE_DEFAULT_BUCKET: keepgrouped-bucket
+    volumes:
+      - ./garage.toml:/etc/garage.toml
+    ports:
+      - 3902:3902
+      - 3903:3903
+    networks:
+      - keepgrouped-net
+
 networks:
   keepgrouped-net:
     external: true

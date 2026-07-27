@@ -1,0 +1,23 @@
+metadata_dir = "/storage/meta"
+data_dir = "/storage/data"
+db_engine = "sqlite"
+
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+rpc_secret = "11cbf29250b8a82d817415b8e38814e123c9bf8044fcdfd4b66073cce4217e20"
+
+[s3_api]
+root_domain = ""
+s3_region = "garage"
+api_bind_addr = "0.0.0.0:3900"
+
+[s3_web]
+root_domain = ""
+bind_addr = "0.0.0.0:3902"
+
+[admin]
+api_bind_addr = "0.0.0.0:3903"
+admin_token = "dev"
+metrics_token = "dev"
