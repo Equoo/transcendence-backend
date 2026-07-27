@@ -1,8 +1,5 @@
-using System.Drawing;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.Util;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 
 namespace KeepGrouped.API.Storage;
@@ -13,7 +10,7 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
     private readonly KeepGroupedDb _db = db;
     private readonly IAmazonS3 _s3 = s3;
 
-    async Task<UploadResponse> IStorage.UploadAsync(Stream stream, CancellationToken ct)
+    async Task<UploadResponse> IStorage.UploadAsync(Stream stream, string contentType, CancellationToken ct)
     {
         var key = Guid.CreateVersion7().ToString();
 
@@ -23,6 +20,7 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
             AutoCloseStream = true,
             BucketName = _options.BucketName,
             Key = key,
+            ContentType = contentType,
         };
         var res = await _s3.PutObjectAsync(req, ct);
 
@@ -40,5 +38,18 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
         var obj = await _s3.GetObjectAsync(req, ct);
 
         return new DownloadResponse(obj.ResponseStream, obj.HttpStatusCode);
+    }
+
+    async Task<DeleteResponse> IStorage.DeleteAsync(string key, CancellationToken ct)
+    {
+        var req = new DeleteObjectRequest()
+        {
+            BucketName = _options.BucketName,
+            Key = key
+        };
+
+        var res = await _s3.DeleteObjectAsync(req, ct);
+
+        return new DeleteResponse(res.HttpStatusCode);
     }
 }

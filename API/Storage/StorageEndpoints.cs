@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Drawing;
-using Amazon.S3.Model;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +28,7 @@ public class File
     public DateTime LastUpdated { get; set; }
 
     [Required]
-    public User Creator = null!;
+    public User Creator { get; set; } = null!;
 }
 
 public record FileResponse(string Key, string Name, long Length, string ETag, string ContentType, DateTime LastUpdated, UserResponse Creator)
@@ -39,13 +37,22 @@ public record FileResponse(string Key, string Name, long Length, string ETag, st
         file.LastUpdated, UserResponse.FromEntity(file.Creator));
 }
 
+public class FileUploadRequest
+{
+    [Required]
+    public string Name { get; set; } = null!;
+
+    [Required]
+    public IFormFile File { get; set; } = null!;
+}
+
 public static class StorageEndpoints
 {
     public static void MapStorage(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("files/");
+        var group = app.MapGroup("/files").WithTags("Files");
 
-        group.MapPost("/", async (IStorage storage, KeepGroupedDb db, [FromForm] string name, IFormFile file) =>
+        group.MapPost("/", async (IStorage storage, KeepGroupedDb db, [FromForm] FileUploadRequest req) =>
         {
             // Replace with authentication
             User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
@@ -54,18 +61,20 @@ public static class StorageEndpoints
             {
                 return Results.Unauthorized();
             }
-            var res = await storage.UploadAsync(file.OpenReadStream());
+
+            var res = await storage.UploadAsync(req.File.OpenReadStream(), req.File.ContentType);
             if ((int)res.Code >= 400)
             {
                 return Results.StatusCode((int)res.Code);
             }
+
             var filedb = new File()
             {
                 Key = res.Key,
-                Name = name,
+                Name = req.Name,
                 ETag = res.ETag,
-                ContentType = file.ContentType,
-                Length = file.Length,
+                ContentType = req.File.ContentType,
+                Length = req.File.Length,
                 LastUpdated = DateTime.UtcNow,
                 Creator = user
             };
@@ -73,11 +82,17 @@ public static class StorageEndpoints
             db.Files.Add(filedb);
 
             await db.SaveChangesAsync();
-            // return TypedResults.CreatedAtRoute($"{key}", "files/", new { key });
-            return Results.Ok(res.Key);
-        }).DisableAntiforgery();
+            return Results.CreatedAtRoute("files.get", new { key = res.Key }, FileResponse.FromEntity(filedb));
+        })
+        .DisableAntiforgery()
+        .WithName("files.upload")
+        .WithSummary("Upload a file")
+        .WithDescription("Uploads a file as `multipart/form-data` (fields `name` and `file`) and stores its metadata in the database.")
+        .Produces<FileResponse>(StatusCodes.Status201Created)
+        .ProducesValidationProblem()
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
 
-        group.MapGet("{key}/", async (IStorage storage, string key, KeepGroupedDb db) =>
+        group.MapGet("/{key}", async (IStorage storage, string key, KeepGroupedDb db) =>
         {
             var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
             if (filedb is null)
@@ -91,12 +106,45 @@ public static class StorageEndpoints
             }
             return Results.Stream(res.Stream, filedb.ContentType, filedb.Name,
                 filedb.LastUpdated, new EntityTagHeaderValue(filedb.ETag));
-        });
+        })
+        .WithName("files.get")
+        .WithSummary("Download a file")
+        .WithDescription("Streams the content of the file identified by its key.")
+        .Produces(StatusCodes.Status200OK, contentType: "application/octet-stream")
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/", async (KeepGroupedDb db) =>
         {
             var files = await db.Files.ToListAsync();
             return Results.Ok(files.Select(FileResponse.FromEntity));
-        });
+        })
+        .WithName("files.list")
+        .WithSummary("List files")
+        .WithDescription("Returns the metadata of every uploaded file, without their content.")
+        .Produces<IEnumerable<FileResponse>>(StatusCodes.Status200OK);
+
+        group.MapDelete("/{key}", async (IStorage storage, string key, KeepGroupedDb db) =>
+        {
+            var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
+            if (filedb is null)
+            {
+                return Results.NotFound();
+            }
+
+            var res = await storage.DeleteAsync(key);
+            if ((int)res.Code >= 400)
+            {
+                return Results.StatusCode((int)res.Code);
+            }
+
+            db.Files.Remove(filedb);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        })
+        .WithName("files.delete")
+        .WithSummary("Delete a file")
+        .WithDescription("Deletes the file from storage and removes its metadata record.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }
