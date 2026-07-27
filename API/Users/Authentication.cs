@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Problems;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 namespace KeepGrouped.API.Users;
 
@@ -42,6 +46,35 @@ public static class AuthenticationEndpoint
 
             var token = Token.Build(user.Id);
             Token.AddTokenCookie(token, http);
+
+            
+
+            // Refresh TOKEN
+
+
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"));
+            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+
+            string id = Guid.NewGuid().ToString();
+
+            IEnumerable<Claim> claim = [                
+                  new Claim(ClaimTypes.Authentication, id)
+            ];
+
+            JwtSecurityToken refresh_token = new (
+                issuer: "KeepGrouped",
+                audience: "KeepGrouped",
+                claims: claim,
+                expires: DateTime.Now.AddMinutes(1),
+                signingCredentials: creds
+            );
+
+            http.Response.Cookies.Append("RefreshToken", new JwtSecurityTokenHandler().WriteToken(refresh_token));
+
+            RefreshToken refresh = new(id, user.Id);
+         
+            db.RefreshTokens.Add(refresh);
             
             return Results.Created("/users/{id}", UserResponse.FromEntity(user));
         });
@@ -74,7 +107,10 @@ public static class AuthenticationEndpoint
             return Results.Ok();
         });
 
-        auth.MapPost("/refresh", [Authorize] () => "Refresh the token !");
+        auth.MapGet("/refresh", (HttpContext context) =>
+        {
+           Console.WriteLine("dsd");
+        });
     }
 
 }

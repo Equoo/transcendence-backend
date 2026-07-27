@@ -91,14 +91,13 @@ public static class UserEndpoint
         .Produces<UserResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-         
         var me = app.MapGroup("/me");
 
         // -------------- Return connected User
 
-        me.MapGet("/", [Authorize] (TokenContext tk) =>
+        me.MapGet("/", [Authorize] (TokenContext token) =>
         {
-            return Results.Ok(UserResponse.FromEntity(tk.User));
+            return Results.Ok(UserResponse.FromEntity(token.User));
         });
 
         // -------------- Change UserName

@@ -25,6 +25,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
     public DbSet<Event> Events { get; set; }
     public DbSet<EventRole> EventRoles { get; set; }
     public DbSet<File> Files { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 }
 

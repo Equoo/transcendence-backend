@@ -98,6 +98,7 @@ class Program
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
+                ClockSkew = TimeSpan.Zero,
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateIssuerSigningKey = true,
@@ -131,6 +132,7 @@ class Program
         app.UseAuthorization();
         app.UseMiddleware<TokenContextMiddleware>();
         app.UseMiddleware<DelayMiddleware>();
+        app.UseMiddleware<TokenHandlingMiddleware>();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();
