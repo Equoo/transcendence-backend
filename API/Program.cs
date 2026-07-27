@@ -8,6 +8,7 @@ using KeepGrouped.API.Storage;
 using Amazon.S3;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace KeepGrouped.API;
 
@@ -66,6 +67,10 @@ class Program
 
             db.SaveChanges();
         }));
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        });
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
@@ -78,6 +83,7 @@ class Program
         }
 
         var app = builder.Build();
+        app.UseForwardedHeaders();
         app.UseStatusCodePages();
         if (app.Environment.IsDevelopment())
         {
