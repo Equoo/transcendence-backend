@@ -12,22 +12,16 @@ public class File
     [Key]
     public string Key { get; set; } = null!;
 
-    [Required]
     public string Name { get; set; } = null!;
 
-    [Required]
     public long Length { get; set; }
 
-    [Required]
     public string ETag { get; set; } = null!;
 
-    [Required]
     public string ContentType { get; set; } = null!;
 
-    [Required]
     public DateTime LastUpdated { get; set; }
 
-    [Required]
     public User Creator { get; set; } = null!;
 }
 
