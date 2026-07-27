@@ -82,6 +82,7 @@ public static class StorageEndpoints
         .WithName("files.upload")
         .WithSummary("Upload a file")
         .WithDescription("Uploads a file as `multipart/form-data` (fields `name` and `file`) and stores its metadata in the database.")
+        .Accepts<FileUploadRequest>("multipart/form-data")
         .Produces<FileResponse>(StatusCodes.Status201Created)
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized);

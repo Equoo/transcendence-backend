@@ -40,14 +40,18 @@ public static class UserEndpoint
 {
     public static void MapUsers(this IEndpointRouteBuilder app)
     {
-        var users = app.MapGroup("/users");
+        var users = app.MapGroup("/users").WithTags("Users");
 
         users.MapGet("/", async (KeepGroupedDb db) =>
         {
             var user = await db.Users.ToListAsync();
 
             return Results.Ok(user.Select(x => UserResponse.FromEntity(x)));
-        });
+        })
+        .WithName("users.list")
+        .WithSummary("List users")
+        .WithDescription("Returns the public profile of every registered user.")
+        .Produces<IEnumerable<UserResponse>>(StatusCodes.Status200OK);
 
         users.MapGet("/{id}", async (string id, KeepGroupedDb db) =>
         {
@@ -58,7 +62,12 @@ public static class UserEndpoint
 
             return user is null ? Results.NotFound() : Results.Ok(UserResponse.FromEntity(user));
 
-        });
+        })
+        .WithName("users.get")
+        .WithSummary("Get a user")
+        .WithDescription("Returns the public profile of a single user identified by their id.")
+        .Produces<UserResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
         users.MapPost("/register", async (KeepGroupedDb db, UserRequest req) =>
         {
@@ -95,11 +104,20 @@ public static class UserEndpoint
 
             db.Users.Add(user);
             await db.SaveChangesAsync();
-            return Results.Ok(user);
-        });
+            return Results.Ok(UserResponse.FromEntity(user));
+        })
+        .WithName("users.register")
+        .WithSummary("Register a user")
+        .WithDescription("Creates a user account. The username, email and phone number must not already be in use.")
+        .Produces<UserResponse>(StatusCodes.Status200OK)
+        .Produces<string>(StatusCodes.Status400BadRequest);
 
         // users.MapPost("/login" () => {});
 
-        users.MapGet("/ping", () => "ping TestEndpoint");
+        users.MapGet("/ping", () => "ping TestEndpoint")
+        .WithName("users.ping")
+        .WithSummary("Ping the users endpoints")
+        .WithDescription("Development helper that returns a constant string to check the API is reachable.")
+        .Produces<string>(StatusCodes.Status200OK);
     }
 }

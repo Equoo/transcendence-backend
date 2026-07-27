@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -62,7 +61,7 @@ public static class EventEndpoints
 {
     public static void MapEvents(this IEndpointRouteBuilder app)
     {
-        var events = app.MapGroup("/events");
+        var events = app.MapGroup("/events").WithTags("Events");
 
         events.MapPost("/", async (KeepGroupedDb db, EventCreate req) =>
         {
@@ -92,20 +91,35 @@ public static class EventEndpoints
             await db.SaveChangesAsync();
 
             var response = EventResponse.FromEntity(ev);
-            return Results.Created($"/events/{ev.Id}", response);
-        });
+            return Results.CreatedAtRoute("events.get", new { id = ev.Id }, response);
+        })
+        .WithName("events.create")
+        .WithSummary("Create an event")
+        .WithDescription("Creates an event owned by the current user. The roles listed in `eventRoleIds` are attached to the event, plus the implicit `Any` role.")
+        .Produces<EventResponse>(StatusCodes.Status201Created)
+        .ProducesValidationProblem()
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {
             var evs = await db.Events.ToListAsync();
             return Results.Ok(evs.Select(EventResponse.FromEntity));
-        });
+        })
+        .WithName("events.list")
+        .WithSummary("List events")
+        .WithDescription("Returns every event with its organizer, registrations and available roles.")
+        .Produces<IEnumerable<EventResponse>>(StatusCodes.Status200OK);
 
         events.MapGet("/{id}", async (KeepGroupedDb db, string id) =>
         {
             var ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             return ev is null ? Results.NotFound() : Results.Ok(EventResponse.FromEntity(ev));
-        });
+        })
+        .WithName("events.get")
+        .WithSummary("Get an event")
+        .WithDescription("Returns a single event identified by its id, with its organizer, registrations and available roles.")
+        .Produces<EventResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
         events.MapPut("/{id}", async (KeepGroupedDb db, string id, EventCreate req) =>
         {
@@ -124,7 +138,13 @@ public static class EventEndpoints
 
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        })
+        .WithName("events.update")
+        .WithSummary("Update an event")
+        .WithDescription("Replaces the editable fields of an event. The organizer and the attached roles are not modified.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesValidationProblem()
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
         events.MapDelete("/{id}", async (KeepGroupedDb db, string id) =>
         {
@@ -137,6 +157,11 @@ public static class EventEndpoints
             db.Events.Remove(ev);
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        })
+        .WithName("events.delete")
+        .WithSummary("Delete an event")
+        .WithDescription("Deletes an event and every registration attached to it.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }
