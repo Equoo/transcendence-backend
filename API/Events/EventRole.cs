@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 namespace KeepGrouped.API.Events;
@@ -29,13 +28,17 @@ public static class EventRoleEndpoints
 {
     public static void MapEventRoles(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/events/roles/");
+        var group = app.MapGroup("/events/roles/").WithTags("Event roles");
 
         group.MapGet("/", async (KeepGroupedDb db) =>
         {
             var ers = await db.EventRoles.Where(er => er.Name != "Any").ToListAsync();
             return Results.Ok(ers.Select(EventRoleResponse.FromEntity));
-        });
+        })
+        .WithName("eventroles.list")
+        .WithSummary("List the event roles")
+        .WithDescription("Returns every role that can be attached to an event. The implicit `Any` role is excluded.")
+        .Produces<IEnumerable<EventRoleResponse>>(StatusCodes.Status200OK);
 
         group.MapPost("/", async (KeepGroupedDb db, CreateEventRole req) =>
         {
@@ -49,6 +52,12 @@ public static class EventRoleEndpoints
             db.EventRoles.Add(er);
             await db.SaveChangesAsync();
             return Results.Ok(EventRoleResponse.FromEntity(er));
-        });
+        })
+        .WithName("eventroles.create")
+        .WithSummary("Create an event role")
+        .WithDescription("Creates a new role that events can offer. Role names are unique.")
+        .Produces<EventRoleResponse>(StatusCodes.Status200OK)
+        .ProducesValidationProblem()
+        .ProducesProblem(StatusCodes.Status409Conflict);
     }
 }
