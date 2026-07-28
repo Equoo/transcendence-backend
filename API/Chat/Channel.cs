@@ -14,7 +14,8 @@ public class Channel
 
     public string Id { get; } = Guid.NewGuid().ToString();
     public string Name { get; init; } = null!;
-    public string Topic { get; } = null!;
+    public string Topic { get; init; } = null!;
+    public uint Order { get; init; } = 0;
     public DateTime CreateAt { get; } = DateTime.UtcNow;
     public string? EventId { get; } = null;
     public string? Category { get; } = null;
