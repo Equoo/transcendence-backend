@@ -195,6 +195,8 @@ public static class ChatEndpoint
                         .Select(m => MessageResponse.FromEntity(m))
                         .ToListAsync();
 
+                    messages.Reverse();
+
                     return messages is null ? Results.NotFound() : Results.Ok(messages);
                 }
             )

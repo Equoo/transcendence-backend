@@ -19,6 +19,7 @@ public class Message
     public string Id { get; } = Guid.NewGuid().ToString();
     public string Content { get; init; } = null!;
     public DateTime SentAt { get; } = DateTime.UtcNow;
+    public DateTime? EditAt { get; set; } = null;
     public string? MessageReference { get; } = null;
 
     public string SenderId { get; init; } = null!;
