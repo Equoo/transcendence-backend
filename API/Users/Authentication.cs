@@ -1,116 +1,155 @@
-using System.Data;
+using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Problems;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
-using System.Security.Claims;
+
 
 namespace KeepGrouped.API.Users;
 
 public static class AuthenticationEndpoint
 {
-    public static void MapAuthentication(this IEndpointRouteBuilder app)
-    {
-        var auth = app.MapGroup("/auth");
+	public static void MapAuthentication(this IEndpointRouteBuilder app)
+	{
+		var auth = app.MapGroup("/auth");
 
-         // -------------- Create user 
+		// -------------- Create user 
 
-        auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash, HttpContext http) =>
-        {
+		auth.MapPost("/register", async (IHostEnvironment env, KeepGroupedDb db, UserRequest req, IPasswordHasher<User> hash, HttpContext http) =>
+		{
 
-            var user = new User
-            {               
-                
-                UserName = req.UserName
-            };
-            
-            // Check password resistance
-            
+			var user = new User
+			{
 
-            // Check duplicate
-            var dup_usr = await db
-            .Users
-            .AnyAsync(e => e.UserName == req.UserName);
+				UserName = req.UserName
+			};
 
-            if (dup_usr)
-                return  Problems.UserProblems.NameAlreadyUsed(req.UserName);
+			// Check duplicate
+			var dup_usr = await db
+			.Users
+			.AnyAsync(e => e.UserName == req.UserName);
 
-            // Hashed password
-            user.PasswordHash = hash.HashPassword(user, req.Password);
+			if (dup_usr)
+				return UserProblems.NameAlreadyUsed(req.UserName);
 
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
+			// Hashed password
+			user.PasswordHash = hash.HashPassword(user, req.Password);
 
-            var token = Token.Build(user.Id);
-            Token.AddTokenCookie(token, http);
+			db.Users.Add(user);
 
-            
+			//Acess TOKEN
+			string acess_token = Token.BuildAcess(user.Id, http);
 
-            // Refresh TOKEN
+			// Refresh TOKEN
+			string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
+			string refresh_token = Token.BuildRefresh(id, http);
 
+			RefreshToken refresh = new()
+			{ 
+				Id = id,
+				UserId = user.Id,
+				ExpireAt = DateTime.Now.AddMinutes(2).Kind
+			};
 
+			db.RefreshTokens.Add(refresh);
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"));
-            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+			await db.SaveChangesAsync();
 
-            string id = Guid.NewGuid().ToString();
-
-            IEnumerable<Claim> claim = [                
-                  new Claim(ClaimTypes.Authentication, id)
-            ];
-
-            JwtSecurityToken refresh_token = new (
-                issuer: "KeepGrouped",
-                audience: "KeepGrouped",
-                claims: claim,
-                expires: DateTime.Now.AddMinutes(1),
-                signingCredentials: creds
-            );
-
-            http.Response.Cookies.Append("RefreshToken", new JwtSecurityTokenHandler().WriteToken(refresh_token));
-
-            RefreshToken refresh = new(id, user.Id);
-         
-            db.RefreshTokens.Add(refresh);
-            
-            return Results.Created("/users/{id}", UserResponse.FromEntity(user));
-        });
+			return Results.Created("/users/{id}", UserResponse.FromEntity(user));
+		});
 
 
-        // -------------- Authenticate user and adding JWT
+		// -------------- Authenticate user and adding JWT
 
-        auth.MapPost("/login", async (KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass, HttpContext context) =>
-        {
-            User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
+		auth.MapPost("/login", async (KeepGroupedDb db, UserRequest req, IPasswordHasher<User> pass, HttpContext http) =>
+		{
+			User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
 
-            if (user_db is null)
-                return Problems.UserProblems.AuthenticationInvalid();
+			if (user_db is null)
+				return UserProblems.AuthenticationInvalid();
 
-            if (pass.VerifyHashedPassword(user_db, user_db.PasswordHash, req.Password) == PasswordVerificationResult.Failed)
-                return Problems.UserProblems.AuthenticationInvalid();
+			if (pass.VerifyHashedPassword(user_db, user_db.PasswordHash, req.Password) == PasswordVerificationResult.Failed)
+				return UserProblems.AuthenticationInvalid();
 
-            // Handle Json Web Token
-            var token = Token.Build(user_db.Id);
-            Token.AddTokenCookie(token, context);
+			// Acess TOKEN
+			var token = Token.BuildAcess(user_db.Id, http);
 
-            return Results.Ok();
-        });
+			// Refresh TOKEN
+			string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
+			string refresh_token = Token.BuildRefresh(id, http);
 
-        // -------------- Remove JWT
+			byte[] hash = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(id));
 
-        auth.MapPost("/logout", [Authorize] async (HttpContext http) =>
-        {
-            Token.RemoveTokenCookie(http);
-            return Results.Ok();
-        });
+			RefreshToken refresh = new()
+			{
+				IdHashed = hash,
+				UserId = user_db.Id,
+				ExpireAt = DateTime.Now.AddMinutes(2).Kind
+			};
 
-        auth.MapGet("/refresh", (HttpContext context) =>
-        {
-           Console.WriteLine("dsd");
-        });
-    }
+			db.RefreshTokens.Add(refresh);
+
+			await db.SaveChangesAsync();
+
+			return Results.Ok();
+		});
+
+		// -------------- Remove JWT
+
+		auth.MapPost("/logout", [Authorize] async (HttpContext http) =>
+		{
+			Token.RemoveCookies(http);
+			return Results.Ok();
+		});
+
+		auth.MapGet("/refresh", async (HttpContext http, KeepGroupedDb db) =>
+		{
+
+			string? cookie_refresh = http.Request.Cookies["RefreshToken"];
+
+			if (cookie_refresh is null || !Token.IsValid(cookie_refresh))
+			{
+				Token.RemoveCookies(http);
+				return Results.BadRequest();
+			}
+
+			JwtSecurityToken refresh_token = new JwtSecurityTokenHandler().ReadJwtToken(cookie_refresh);
+
+			// Can have any if your are log in different computer in the same account
+			RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == refresh_token.Claims.First().Value);
+
+			if (refresh_db is null)
+			{
+				Token.RemoveCookies(http);
+				return Results.BadRequest();
+			}
+
+			//Renew AccesToken
+			string new_acess = Token.BuildAcess(refresh_db.UserId, http);
+
+			//Renew RefreshToken
+			string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
+			string new_refresh = Token.BuildRefresh(id, http);
+
+
+			RefreshToken new_refresh_db = new()
+			{
+				Id = id,
+				UserId = refresh_db.UserId,
+				ExpireAt = DateTime.Now.AddMinutes(2).Kind
+			};
+
+			db.RefreshTokens.Remove(refresh_db);
+			db.RefreshTokens.Add(new_refresh_db);
+
+			await db.SaveChangesAsync();
+
+			return Results.Ok();
+		});
+	}
 
 }

@@ -18,13 +18,12 @@ namespace KeepGrouped.API;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        // ------------ Buildings Dependances
+	static void Main(string[] args)
+	{
+		// ------------ Buildings Dependances
 
-   
+		var builder = WebApplication.CreateBuilder(args);
 
-        var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddOptions<StorageOptions>()
             .Bind(builder.Configuration.GetSection(StorageOptions.SectionName))
@@ -54,29 +53,31 @@ class Program
             User user = new("asventi");
             
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
-            db.Set<User>().Add(user);
-            db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
-            db.SaveChanges();
+			db.Set<User>().Add(user);
+			db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
+			db.SaveChanges();
 
-            var ev = new Event()
-            {
-                Name = "Default Event",
-                Date = DateTime.UtcNow.AddMinutes(30),
-                Location = "Default Location",
-                Size = 10,
-                Organizer = user,
-                // EventRoles = [.. db.Set<EventRole>()]
-            };
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
-            db.Set<Event>().Add(ev);
+			var ev = new Event()
+			{
+				Name = "Default Event",
+				Date = DateTime.UtcNow.AddMinutes(30),
+				Location = "Default Location",
+				Size = 10,
+				Organizer = user,
+				// EventRoles = [.. db.Set<EventRole>()]
+			};
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
+			db.Set<Event>().Add(ev);
 
-            db.SaveChanges();
-        }));
+			db.SaveChanges();
+		}));
+
+		
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -116,14 +117,7 @@ class Program
                 },
             };
         });
-
-        builder.Services.AddAuthorization();
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddSwaggerGen();
-        }
-
-        // ------------ Prepare the app
+		
 
         var app = builder.Build();
         app.UseForwardedHeaders();
@@ -132,7 +126,6 @@ class Program
         app.UseAuthorization();
         app.UseMiddleware<TokenContextMiddleware>();
         app.UseMiddleware<DelayMiddleware>();
-        app.UseMiddleware<TokenHandlingMiddleware>();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();
@@ -169,9 +162,7 @@ class Program
         app.MapStorage();
         app.MapAuthentication();
         
-        // ------------ Start the app
+		app.Run();
 
-        app.Run();
-
-    }
+	}
 }

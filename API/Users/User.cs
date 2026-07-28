@@ -10,47 +10,47 @@ namespace KeepGrouped.API.Users;
 
 public class User
 {
-    public string UserName {get; set;} = null!;
-    public string PasswordHash {get; set;} = null!;
-    public string Id {get; set;} = Guid.NewGuid().ToString();
+	public string UserName { get; set; } = null!;
+	public string PasswordHash { get; set; } = null!;
+	public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    public User() {}
+	public User() { }
 
-    public User(string username)
-    {
-        UserName = username;
-    }
-    public User(string username, string id)
-    {
-        UserName = username;
-        Id = id;
-    }
+	public User(string username)
+	{
+		UserName = username;
+	}
+	public User(string username, string id)
+	{
+		UserName = username;
+		Id = id;
+	}
 
-    public ICollection<Event> Events { get; } = [];
-    public ICollection<Registration> Registrations { get; } = [];
+	public ICollection<Event> Events { get; } = [];
+	public ICollection<Registration> Registrations { get; } = [];
 }
 
 public record UserRequest
 {
-    [Required]
-    public string UserName { get; init; } = null!;
-    [Required]
-    public string Password { get; init; } = null!;
+	[Required]
+	public string UserName { get; init; } = null!;
+	[Required]
+	public string Password { get; init; } = null!;
 
 }
 
 public record UserResponse
 {
-    public string? Id { get; set; } = null;
-    public string? UserName { get; set; } = null;
+	public string? Id { get; set; } = null;
+	public string? UserName { get; set; } = null;
 
-    public UserResponse(string id, string username)
-    {
-        Id = id;
-        UserName = username;
-    }
-        
-    public static UserResponse FromEntity (User usr) => new (usr.Id, usr.UserName!);
+	public UserResponse(string id, string username)
+	{
+		Id = id;
+		UserName = username;
+	}
+
+	public static UserResponse FromEntity(User usr) => new(usr.Id, usr.UserName!);
 }
 
 public static class UserEndpoint
@@ -59,13 +59,13 @@ public static class UserEndpoint
     {
         var users = app.MapGroup("/users").WithTags("Users");
 
-        // -------------- Return all users
+		// -------------- Return all users
 
-        users.MapGet("/", async (KeepGroupedDb db) =>
-        {
-            var user = await db
-            .Users
-            .ToListAsync();
+		users.MapGet("/", async (KeepGroupedDb db) =>
+		{
+			var user = await db
+			.Users
+			.ToListAsync();
 
             return Results.Ok(user.Select(x => UserResponse.FromEntity(x)));
         })
@@ -74,13 +74,13 @@ public static class UserEndpoint
         .WithDescription("Returns the public profile of every registered user.")
         .Produces<IEnumerable<UserResponse>>(StatusCodes.Status200OK);
 
-         // -------------- Return user from id
+		// -------------- Return user from id
 
-        users.MapGet("/{id}", [Authorize] async (string id, KeepGroupedDb db) =>
-        {
-            var user = await db
-            .Users
-            .FirstOrDefaultAsync(user => user.Id == id);
+		users.MapGet("/{id}", [Authorize] async (string id, KeepGroupedDb db) =>
+		{
+			var user = await db
+			.Users
+			.FirstOrDefaultAsync(user => user.Id == id);
 
             return user is null ? Results.NotFound() : Results.Ok(UserResponse.FromEntity(user));
 
@@ -91,37 +91,37 @@ public static class UserEndpoint
         .Produces<UserResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        var me = app.MapGroup("/me");
+		var me = app.MapGroup("/me");
 
-        // -------------- Return connected User
+		// -------------- Return connected User
 
-        me.MapGet("/", [Authorize] (TokenContext token) =>
-        {
-            return Results.Ok(UserResponse.FromEntity(token.User));
-        });
+		me.MapGet("/", [Authorize] (TokenContext token) =>
+		{
+			return Results.Ok(UserResponse.FromEntity(token.User));
+		});
 
-        // -------------- Change UserName
+		// -------------- Change UserName
 
-        me.MapPut("/", [Authorize] async (UserRequest req, KeepGroupedDb db, TokenContext tk) =>
-        {
-            tk.User.UserName = req.UserName;
+		me.MapPut("/", [Authorize] async (UserRequest req, KeepGroupedDb db, TokenContext tk) =>
+		{
+			tk.User.UserName = req.UserName;
 
-            await db.SaveChangesAsync();
+			await db.SaveChangesAsync();
 
-            return Results.Ok(UserResponse.FromEntity(tk.User));
-        });
+			return Results.Ok(UserResponse.FromEntity(tk.User));
+		});
 
 
-        // -------------- Delete User
+		// -------------- Delete User
 
-        me.MapDelete("/", [Authorize] async (KeepGroupedDb db, HttpContext http, TokenContext tk) =>
-        {
-            db.Users.Remove(tk.User);
-            await db.SaveChangesAsync();
+		me.MapDelete("/", [Authorize] async (KeepGroupedDb db, HttpContext http, TokenContext tk) =>
+		{
+			db.Users.Remove(tk.User);
+			await db.SaveChangesAsync();
 
-            Token.RemoveTokenCookie(http);
+			Token.RemoveCookies(http);
 
-            return Results.Ok(UserResponse.FromEntity(tk.User));
-        });
-    }
+			return Results.Ok(UserResponse.FromEntity(tk.User));
+		});
+	}
 }
