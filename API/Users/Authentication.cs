@@ -50,7 +50,7 @@ public static class AuthenticationEndpoint
 
 			RefreshToken refresh = new()
 			{ 
-				Id = id,
+				Id = Password.Hash256.GetHashSha256(id),
 				UserId = user.Id,
 				ExpireAt = DateTime.Now.AddMinutes(2).Kind
 			};
@@ -82,11 +82,10 @@ public static class AuthenticationEndpoint
 			string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
 			string refresh_token = Token.BuildRefresh(id, http);
 
-			byte[] hash = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(id));
 
 			RefreshToken refresh = new()
 			{
-				IdHashed = hash,
+				Id = Password.Hash256.GetHashSha256(id),
 				UserId = user_db.Id,
 				ExpireAt = DateTime.Now.AddMinutes(2).Kind
 			};
@@ -119,8 +118,8 @@ public static class AuthenticationEndpoint
 
 			JwtSecurityToken refresh_token = new JwtSecurityTokenHandler().ReadJwtToken(cookie_refresh);
 
-			// Can have any if your are log in different computer in the same account
-			RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == refresh_token.Claims.First().Value);
+			// Can have many if your are log in different computer in the same account
+			RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == Password.Hash256.GetHashSha256(refresh_token.Claims.First().Value));
 
 			if (refresh_db is null)
 			{
@@ -138,7 +137,7 @@ public static class AuthenticationEndpoint
 
 			RefreshToken new_refresh_db = new()
 			{
-				Id = id,
+				Id = Password.Hash256.GetHashSha256(id),
 				UserId = refresh_db.UserId,
 				ExpireAt = DateTime.Now.AddMinutes(2).Kind
 			};
