@@ -65,9 +65,9 @@ public static class EventEndpoints
     {
         var events = app.MapGroup("/events").WithTags("Events");
 
-        events.MapPost("/",[Authorize] async (KeepGroupedDb db, EventCreate req, TokenContext token) =>
+        events.MapPost("/", [Authorize] async (KeepGroupedDb db, EventCreate req, TokenContext token) =>
         {
-          
+
             var ev = new Event
             {
                 Name = req.Name,
@@ -97,7 +97,7 @@ public static class EventEndpoints
         .ProducesProblem(StatusCodes.Status401Unauthorized);
 
 
-        events.MapGet("/", async (KeepGroupedDb db) =>
+        events.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
         {
             var evs = await db.Events.ToListAsync();
             return Results.Ok(evs.Select(EventResponse.FromEntity));
@@ -118,7 +118,7 @@ public static class EventEndpoints
         .Produces<EventResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        events.MapPut("/{id}", async (KeepGroupedDb db, string id, EventCreate req) =>
+        events.MapPut("/{id}", [Authorize] async (KeepGroupedDb db, string id, EventCreate req) =>
         {
             Event? ev = await db.Events.FindAsync(id);
             if (ev is null)
@@ -143,7 +143,7 @@ public static class EventEndpoints
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        events.MapDelete("/{id}", async (KeepGroupedDb db, string id) =>
+        events.MapDelete("/{id}", [Authorize] async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.FindAsync(id);
             if (ev is null)

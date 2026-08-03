@@ -51,7 +51,7 @@ public static class RegistrationEndpoints
             {
                 return EventProblems.EventFull();
             }
-           
+
             ev.Registrations.Add(new Registration()
             {
                 User = context.User,

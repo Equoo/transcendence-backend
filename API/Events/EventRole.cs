@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Problems;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 namespace KeepGrouped.API.Events;
 
@@ -30,7 +31,7 @@ public static class EventRoleEndpoints
     {
         var group = app.MapGroup("/events/roles/").WithTags("Event roles");
 
-        group.MapGet("/", async (KeepGroupedDb db) =>
+        group.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
         {
             var ers = await db.EventRoles.Where(er => er.Name != "Any").ToListAsync();
             return Results.Ok(ers.Select(EventRoleResponse.FromEntity));
@@ -40,7 +41,7 @@ public static class EventRoleEndpoints
         .WithDescription("Returns every role that can be attached to an event. The implicit `Any` role is excluded.")
         .Produces<IEnumerable<EventRoleResponse>>(StatusCodes.Status200OK);
 
-        group.MapPost("/", async (KeepGroupedDb db, CreateEventRole req) =>
+        group.MapPost("/", [Authorize] async (KeepGroupedDb db, CreateEventRole req) =>
         {
             if (db.EventRoles.Any(er => er.Name == req.Name))
             {
