@@ -7,6 +7,7 @@ using KeepGrouped.API.Storage;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

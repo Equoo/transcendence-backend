@@ -4,6 +4,7 @@ using KeepGrouped.API.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;
+using Npgsql.Replication;
 
 namespace KeepGrouped.API.Users;
 
@@ -122,6 +123,14 @@ public static class UserEndpoint
 			Token.RemoveCookies(http);
 
 			return Results.Ok(UserResponse.FromEntity(tk.User));
+		});
+
+		// -------------- Refresh Token User
+
+		me.MapGet("/tokens", [Authorize] async (KeepGroupedDb db, TokenContext tk) =>
+		{
+			List<RefreshToken> refreshes = await db.RefreshTokens.Where(o => o.UserId == tk.User.Id).ToListAsync();
+			Results.Ok(refreshes[0].Id);
 		});
 	}
 }

@@ -68,7 +68,7 @@ public static class RegistrationEndpoints
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict);
 
-        registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapGet("/", [Authorize] async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
 
@@ -84,7 +84,7 @@ public static class RegistrationEndpoints
         .Produces<IEnumerable<RegistrationResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        registrations.MapDelete("/", async (KeepGroupedDb db, string id, TokenContext token) =>
+        registrations.MapDelete("/", [Authorize] async (KeepGroupedDb db, string id, TokenContext token) =>
         {
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication

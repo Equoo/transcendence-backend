@@ -83,41 +83,43 @@ class Program
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
 
-        
-        builder.Services.AddProblemDetails();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddValidation();
-        builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
-        builder.Services.AddScoped<TokenContext>();
-       
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ClockSkew = TimeSpan.Zero,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true,
-                ValidIssuer = "KeepGrouped",
-                ValidAudience = "KeepGrouped",
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"))
-            };
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
-                {
-                    context.Token = context.Request.Cookies["AuthToken"];
-                    return Task.CompletedTask;
-                },
-            };
-        });
-		
+		builder.Services.AddAuthentication(options =>
+		{
+			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		})
+		.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+		{
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ClockSkew = TimeSpan.Zero,
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateIssuerSigningKey = true,
+				ValidateLifetime = true,
+				ValidIssuer = "KeepGrouped",
+				ValidAudience = "KeepGrouped",
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"))
+			};
+			options.Events = new JwtBearerEvents
+			{
+				OnMessageReceived = context =>
+				{
+					context.Token = context.Request.Cookies["AccessToken"];
+					return Task.CompletedTask;
+				},
+				OnAuthenticationFailed = context =>
+				{
+					if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+					{
+						context.Response.Headers.Add("Token-Expired", "True");
+						return Task.CompletedTask;
+					}
+					context.Response.Cookies.Delete("AccessToken");
+					return Task.CompletedTask;
+				},
+			};
+		});
 
         var app = builder.Build();
         app.UseForwardedHeaders();

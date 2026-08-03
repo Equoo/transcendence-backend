@@ -55,7 +55,7 @@ public static class Token
 			issuer: "KeepGrouped",
 			audience: "KeepGrouped",
 			claims: claims,
-			expires: DateTime.Now.AddMinutes(2),
+			expires: DateTime.Now.AddMinutes(15),
 			signingCredentials: creds
 		);
 
