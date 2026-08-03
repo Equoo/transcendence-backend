@@ -1,7 +1,8 @@
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Problems;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
 
@@ -23,37 +24,51 @@ public record RegistrationResponse(UserResponse User, DateTime RegisteredAt, str
         reg.Role?.Name);
 }
 
+public record RegistrationCreate(string EventRoleId);
+
 public static class RegistrationEndpoints
 {
     public static void MapRegistrations(this IEndpointRouteBuilder app)
     {
-        var registrations = app.MapGroup("/events/{id}/registration");
+        var registrations = app.MapGroup("/events/{id}/registration").WithTags("Registrations");
 
-        registrations.MapPost("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapPost("/", [Authorize] async (KeepGroupedDb db, string id, TokenContext context, RegistrationCreate reg) =>
         {
-            Thread.Sleep(500);
+
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            User? user = await db.Users.SingleOrDefaultAsync(u => u.UserName == "asventi");
+            EventRole? eventRole = await db.EventRoles.SingleOrDefaultAsync(er => er.Id == reg.EventRoleId);
 
-            if ((ev is null) || (user is null))
+            if ((ev is null) || (context.User is null) || (eventRole is null))
             {
                 return Results.NotFound();
             }
-            if (ev.Users.Contains(user))
+            if (ev.Users.Contains(context.User))
             {
-                return EventProblems.AlreadyRegistered(user.UserName!, ev.Name);
+                return EventProblems.AlreadyRegistered(context.User.UserName!, ev.Name);
             }
             if (ev.Users.Count >= ev.Size)
             {
                 return EventProblems.EventFull();
             }
-            ev.Users.Add(user);
+
+            ev.Registrations.Add(new Registration()
+            {
+                User = context.User,
+                Role = eventRole
+            });
+
             await db.SaveChangesAsync();
             return Results.Created();
-        });
+        })
+        .WithName("registrations.create")
+        .WithSummary("Register to an event")
+        .WithDescription("Registers the current user to the event with the requested role. Fails if the user is already registered or if the event has reached its capacity.")
+        .Produces(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict);
 
-        registrations.MapGet("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapGet("/", [Authorize] async (KeepGroupedDb db, string id) =>
         {
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
 
@@ -62,25 +77,34 @@ public static class RegistrationEndpoints
                 return Results.NotFound();
             }
             return Results.Ok(ev.Registrations.Select(RegistrationResponse.FromEntity));
-        });
+        })
+        .WithName("registrations.list")
+        .WithSummary("List the registrations of an event")
+        .WithDescription("Returns every user registered to the event, with their role and registration date.")
+        .Produces<IEnumerable<RegistrationResponse>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
-        registrations.MapDelete("/", async (KeepGroupedDb db, string id) =>
+        registrations.MapDelete("/", [Authorize] async (KeepGroupedDb db, string id, TokenContext token) =>
         {
             Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
             // Fetch user with authentication
-            User? user = await db.Users.Where(u => u.UserName == "asventi").FirstAsync();
 
-            if ((ev is null) || (user is null))
+            if ((ev is null) || (token.User is null))
             {
                 return Results.NotFound();
             }
-            if (!ev.Users.Contains(user))
+            if (!ev.Users.Contains(token.User))
             {
-                return EventProblems.NotRegistered(user.UserName!, ev.Name);
+                return EventProblems.NotRegistered(token.User.UserName!, ev.Name);
             }
-            ev.Users.Remove(user);
+            ev.Users.Remove(token.User);
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        })
+        .WithName("registrations.delete")
+        .WithSummary("Cancel a registration")
+        .WithDescription("Removes the current user's registration from the event.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

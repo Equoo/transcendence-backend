@@ -29,4 +29,14 @@ static public class EventProblems
             extensions: new Dictionary<string, object?> { ["errorCode"] = "EVENT_FULL" }
         );
     }
+
+    static public IResult EventRoleAlreadyExists(string name)
+    {
+        return Results.Problem(
+            title: "Event role already exists",
+            detail: $"An event role with this name: '{name}' already exists.",
+            statusCode: StatusCodes.Status409Conflict,
+            extensions: new Dictionary<string, object?> { ["errorCode"] = "EVENTROLE_ALREADY_EXISTS" }
+        );
+    }
 }
