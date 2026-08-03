@@ -1,12 +1,9 @@
-using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Problems;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
 
 
 namespace KeepGrouped.API.Users;
@@ -49,7 +46,7 @@ public static class AuthenticationEndpoint
 			string refresh_token = Token.BuildRefresh(id, http);
 
 			RefreshToken refresh = new()
-			{ 
+			{
 				Id = Password.Hash256.GetHashSha256(id),
 				UserId = user.Id,
 				ExpireAt = DateTime.Now.AddMinutes(2).Kind
