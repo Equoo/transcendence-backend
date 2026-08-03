@@ -77,11 +77,18 @@ class Program
 			db.SaveChanges();
 		}));
 
+        builder.Services.AddAuthorization();
 		
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
+
+        builder.Services.AddProblemDetails();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddValidation();
+		builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+		builder.Services.AddScoped<TokenContext>();
 
 		builder.Services.AddAuthentication(options =>
 		{
@@ -120,6 +127,12 @@ class Program
 				},
 			};
 		});
+
+        if (builder.Environment.IsDevelopment())
+		{
+			builder.Services.AddSwaggerGen();
+		}
+
 
         var app = builder.Build();
         app.UseForwardedHeaders();
