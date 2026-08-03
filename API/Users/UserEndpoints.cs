@@ -55,10 +55,14 @@ public record UserResponse
 }
 
 public static class UserEndpoint
-{    
-    public static void MapUsers(this IEndpointRouteBuilder app)
-    {
-        var users = app.MapGroup("/users").WithTags("Users");
+{
+	public static void MapUsers(this WebApplication app)
+	{
+		app.UseAuthentication();
+		app.UseMiddleware<TokenContextMiddleware>();
+		app.UseMiddleware<DelayMiddleware>();
+
+		var users = app.MapGroup("/users").WithTags("Users");
 
 		// -------------- Return all users
 
@@ -68,12 +72,12 @@ public static class UserEndpoint
 			.Users
 			.ToListAsync();
 
-            return Results.Ok(user.Select(x => UserResponse.FromEntity(x)));
-        })
-        .WithName("users.list")
-        .WithSummary("List users")
-        .WithDescription("Returns the public profile of every registered user.")
-        .Produces<IEnumerable<UserResponse>>(StatusCodes.Status200OK);
+			return Results.Ok(user.Select(x => UserResponse.FromEntity(x)));
+		})
+		.WithName("users.list")
+		.WithSummary("List users")
+		.WithDescription("Returns the public profile of every registered user.")
+		.Produces<IEnumerable<UserResponse>>(StatusCodes.Status200OK);
 
 		// -------------- Return user from id
 
@@ -83,14 +87,14 @@ public static class UserEndpoint
 			.Users
 			.FirstOrDefaultAsync(user => user.Id == id);
 
-            return user is null ? Results.NotFound() : Results.Ok(UserResponse.FromEntity(user));
+			return user is null ? Results.NotFound() : Results.Ok(UserResponse.FromEntity(user));
 
-        })
-        .WithName("users.get")
-        .WithSummary("Get a user")
-        .WithDescription("Returns the public profile of a single user identified by their id.")
-        .Produces<UserResponse>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status404NotFound);
+		})
+		.WithName("users.get")
+		.WithSummary("Get a user")
+		.WithDescription("Returns the public profile of a single user identified by their id.")
+		.Produces<UserResponse>(StatusCodes.Status200OK)
+		.ProducesProblem(StatusCodes.Status404NotFound);
 
 		var me = app.MapGroup("/me");
 
