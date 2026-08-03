@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
 
 
 namespace KeepGrouped.API.Events;
@@ -63,15 +65,9 @@ public static class EventEndpoints
     {
         var events = app.MapGroup("/events").WithTags("Events");
 
-        events.MapPost("/", async (KeepGroupedDb db, EventCreate req) =>
+        events.MapPost("/",[Authorize] async (KeepGroupedDb db, EventCreate req, TokenContext token) =>
         {
-            // Replace with authentication devan pitie j'en ai marre de faire sans
-            User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
-
-            if (user == null)
-            {
-                return Results.Unauthorized();
-            }
+          
             var ev = new Event
             {
                 Name = req.Name,
@@ -79,7 +75,7 @@ public static class EventEndpoints
                 Size = req.Size,
                 Location = req.Location,
                 Description = req.Description,
-                Organizer = user,
+                Organizer = token.User,
                 EventRoles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync(),
                 Tags = req.Tags,
             };
@@ -99,6 +95,7 @@ public static class EventEndpoints
         .Produces<EventResponse>(StatusCodes.Status201Created)
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
+
 
         events.MapGet("/", async (KeepGroupedDb db) =>
         {

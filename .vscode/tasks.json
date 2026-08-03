@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "../root/.vscode-server/data/User/workspaceStorage/d00b9cafcd45c8ca7de9d5ab43f32269/ms-dotnettools.csdevkit/Backend.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "../root/.vscode-server/data/User/workspaceStorage/d00b9cafcd45c8ca7de9d5ab43f32269/ms-dotnettools.csdevkit/Backend.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "../root/.vscode-server/data/User/workspaceStorage/d00b9cafcd45c8ca7de9d5ab43f32269/ms-dotnettools.csdevkit/Backend.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

@@ -1,7 +1,5 @@
-using System.Net.Mime;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Users;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using KeepGrouped.API.Storage;
@@ -9,14 +7,23 @@ using Amazon.S3;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
 using Microsoft.AspNetCore.HttpOverrides;
+using KeepGrouped.API.Password;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using KeepGrouped.API.Middlewares;
+using TokenContext = KeepGrouped.API.Middlewares.TokenContext;
 
 namespace KeepGrouped.API;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+	static void Main(string[] args)
+	{
+		// ------------ Buildings Dependances
+
+		var builder = WebApplication.CreateBuilder(args);
+
 
         builder.Services.AddOptions<StorageOptions>()
             .Bind(builder.Configuration.GetSection(StorageOptions.SectionName))
@@ -44,47 +51,96 @@ class Program
                 return;
             }
             User user = new("asventi");
-            db.Set<User>().Add(user);
-            db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
-            db.SaveChanges();
+            
+            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
+			db.Set<User>().Add(user);
+			db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
+			db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
+			db.SaveChanges();
 
-            var ev = new Event()
-            {
-                Name = "Default Event",
-                Date = DateTime.UtcNow.AddMinutes(30),
-                Location = "Default Location",
-                Size = 10,
-                Organizer = user,
-                // EventRoles = [.. db.Set<EventRole>()]
-            };
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
-            db.Set<Event>().Add(ev);
+			var ev = new Event()
+			{
+				Name = "Default Event",
+				Date = DateTime.UtcNow.AddMinutes(30),
+				Location = "Default Location",
+				Size = 10,
+				Organizer = user,
+				// EventRoles = [.. db.Set<EventRole>()]
+			};
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
+			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
+			db.Set<Event>().Add(ev);
 
-            db.SaveChanges();
-        }));
+			db.SaveChanges();
+		}));
+
+        builder.Services.AddAuthorization();
+		
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
+
         builder.Services.AddProblemDetails();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddValidation();
-        builder.Services.AddAuthorization();
-        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<KeepGroupedDb>();
-        // builder.Services.AddScoped<IPasswordHasher<User>, >();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddValidation();
+		builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+		builder.Services.AddScoped<TokenContext>();
+
+		builder.Services.AddAuthentication(options =>
+		{
+			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		})
+		.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+		{
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ClockSkew = TimeSpan.Zero,
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateIssuerSigningKey = true,
+				ValidateLifetime = true,
+				ValidIssuer = "KeepGrouped",
+				ValidAudience = "KeepGrouped",
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"))
+			};
+			options.Events = new JwtBearerEvents
+			{
+				OnMessageReceived = context =>
+				{
+					context.Token = context.Request.Cookies["AccessToken"];
+					return Task.CompletedTask;
+				},
+				OnAuthenticationFailed = context =>
+				{
+					if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+					{
+						context.Response.Headers.Add("Token-Expired", "True");
+						return Task.CompletedTask;
+					}
+					context.Response.Cookies.Delete("AccessToken");
+					return Task.CompletedTask;
+				},
+			};
+		});
+
         if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddSwaggerGen();
-        }
+		{
+			builder.Services.AddSwaggerGen();
+		}
+
 
         var app = builder.Build();
         app.UseForwardedHeaders();
         app.UseStatusCodePages();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<TokenContextMiddleware>();
+        app.UseMiddleware<DelayMiddleware>();
         if (app.Environment.IsDevelopment())
         {
             using var serviceScope = app.Services.CreateScope();
@@ -93,8 +149,6 @@ class Program
             context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseAuthorization();
-
         }
         else
         {
@@ -121,7 +175,9 @@ class Program
         app.MapUsers();
         app.MapEventRoles();
         app.MapStorage();
-        app.Run();
+        app.MapAuthentication();
+        
+		app.Run();
 
-    }
+	}
 }
