@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
@@ -46,7 +47,7 @@ public static class StorageEndpoints
     {
         var group = app.MapGroup("/files").WithTags("Files");
 
-        group.MapPost("/", async (IStorage storage, KeepGroupedDb db, [FromForm] FileUploadRequest req) =>
+        group.MapPost("/", [Authorize] async (IStorage storage, KeepGroupedDb db, [FromForm] FileUploadRequest req) =>
         {
             // Replace with authentication
             User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
@@ -87,7 +88,7 @@ public static class StorageEndpoints
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
 
-        group.MapGet("/{key}", async (IStorage storage, string key, KeepGroupedDb db) =>
+        group.MapGet("/{key}", [Authorize] async (IStorage storage, string key, KeepGroupedDb db) =>
         {
             var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
             if (filedb is null)
@@ -108,7 +109,7 @@ public static class StorageEndpoints
         .Produces(StatusCodes.Status200OK, contentType: "application/octet-stream")
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapGet("/", async (KeepGroupedDb db) =>
+        group.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
         {
             var files = await db.Files.ToListAsync();
             return Results.Ok(files.Select(FileResponse.FromEntity));
@@ -118,7 +119,7 @@ public static class StorageEndpoints
         .WithDescription("Returns the metadata of every uploaded file, without their content.")
         .Produces<IEnumerable<FileResponse>>(StatusCodes.Status200OK);
 
-        group.MapDelete("/{key}", async (IStorage storage, string key, KeepGroupedDb db) =>
+        group.MapDelete("/{key}", [Authorize] async (IStorage storage, string key, KeepGroupedDb db) =>
         {
             var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
             if (filedb is null)
