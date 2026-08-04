@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations
 {
     [DbContext(typeof(KeepGroupedDb))]
-    [Migration("20260804201349_Init")]
-    partial class Init
+    [Migration("20260804215820_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
