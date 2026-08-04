@@ -4,14 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Problems;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using KeepGrouped.API.Middlewares;
 
 
 namespace KeepGrouped.API.Users;
 
 public static class AuthenticationEndpoint
 {
-	public static void MapAuthentication(this IEndpointRouteBuilder app)
+	public static void MapAuthentication(this WebApplication app)
 	{
+		app.UseAuthentication();
+		app.UseAuthorization();
+		app.UseMiddleware<TokenContextMiddleware>();
+		app.UseMiddleware<DelayMiddleware>();
+
 		var auth = app.MapGroup("/auth");
 
 		// -------------- Create user 

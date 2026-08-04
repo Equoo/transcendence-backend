@@ -58,10 +58,6 @@ public static class UserEndpoint
 {
 	public static void MapUsers(this WebApplication app)
 	{
-		app.UseAuthentication();
-		app.UseMiddleware<TokenContextMiddleware>();
-		app.UseMiddleware<DelayMiddleware>();
-
 		var users = app.MapGroup("/users").WithTags("Users");
 
 		// -------------- Return all users
