@@ -90,7 +90,7 @@ public static class AuthenticationEndpoint
 			{
 				Id = Password.Hash256.GetHashSha256(id),
 				UserId = user_db.Id,
-				ExpireAt = DateTime.Now.AddMinutes(2).Kind
+				ExpireAt = DateTime.Now.AddDays(7).Kind
 			};
 
 			db.RefreshTokens.Add(refresh);
@@ -142,7 +142,7 @@ public static class AuthenticationEndpoint
 			{
 				Id = Password.Hash256.GetHashSha256(id),
 				UserId = refresh_db.UserId,
-				ExpireAt = DateTime.Now.AddMinutes(2).Kind
+				ExpireAt = DateTime.Now.AddDays(7).Kind
 			};
 
 			db.RefreshTokens.Remove(refresh_db);
