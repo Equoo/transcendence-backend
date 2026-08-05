@@ -15,21 +15,23 @@ public enum Perms
     CreateEvent = 2,
     DeleteEvent = 4,
     GetEvents = 8,
-    
     ChangeEvent = 16,
+    
     // User
     GetUser = 32,
     CreateUser = 64,
     ChangeUserName = 128,
     DeleteUser = 256,
+    ResetUserPassword = 516,
 
     // Chat
-    SendMessage = 516,
-    CreateChannel = 1024,
-    DeleteChannel = 2048,
+    SendMessage = 1024,
+    CreateChannel = 2048,
+    DeleteChannel = 5096,
 
+    // Knowledge
 
-    
+    // Calendar
 }
 
 public class Role
