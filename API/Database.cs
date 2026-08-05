@@ -24,6 +24,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
     public DbSet<StorageFile> Files { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Invitation> Invitations { get; set; }
+    public DbSet<Role> Roles {get; set;}
 }
 
 static public class DbBuilder
@@ -63,5 +64,6 @@ static public class DbBuilder
             db.SaveChanges();
         }));
     }
+
 }
 

@@ -2,6 +2,16 @@ using KeepGrouped.API.Events;
 
 namespace KeepGrouped.API.Users;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
+using Npgsql.Replication;
+using KeepGrouped.API.Attributes.Roles;
+
+
+
+
+
 public class User
 {
     public string UserName { get; set; } = null!;
