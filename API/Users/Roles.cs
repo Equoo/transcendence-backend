@@ -12,10 +12,7 @@ public enum Perms
     isAdmin = 1,
     
     // Event
-    CreateEvent = 2,
-    DeleteEvent = 4,
-    GetEvents = 8,
-    ChangeEvent = 16,
+    HandleEvent = 2,
     
     // User
     GetUser = 32,
@@ -25,9 +22,7 @@ public enum Perms
     ResetUserPassword = 516,
 
     // Chat
-    SendMessage = 1024,
-    CreateChannel = 2048,
-    DeleteChannel = 5096,
+    HandleChannel = 2048,
 
     // Knowledge
 
