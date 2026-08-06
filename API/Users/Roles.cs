@@ -59,6 +59,18 @@ public static class RolesEndpoints
 
         var role = app.MapGroup("/roles").WithTags("Roles");
 
+        // -------------- Return all Roles
+
+        role.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
+        {
+            List<Role>? db_roles = await db.Roles.ToListAsync();
+            if (db_roles is null)
+            {
+                return Results.NoContent();
+            }
+            return Results.Ok(db_roles);
+        });
+
         // -------------- Create a new roles
         role.MapPost("/", [Authorize] async (KeepGroupedDb db, RoleRequest request) =>
         {
@@ -68,8 +80,7 @@ public static class RolesEndpoints
               Permission = request.Permission
             };
 
-
-
+ 
             db.Roles.Add(role);
             await db.SaveChangesAsync();
             return Results.Ok(role);
@@ -88,12 +99,7 @@ public static class RolesEndpoints
             return Results.Ok(db_role);
         });
 
-        // -------------- Return user roles
-
-        role.MapGet("/", [Authorize] async (TokenContext tk) =>
-        {
-            return Results.Ok(tk.User.Role);
-        });
+        
 
         role.MapGet("/kg-admin", [Authorize] [Roles ((int) Perms.isAdmin)]  async () => "Administator panel");
     }
