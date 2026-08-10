@@ -109,6 +109,22 @@ public static class StorageEndpoints
         .Produces(StatusCodes.Status200OK, contentType: "application/octet-stream")
         .ProducesProblem(StatusCodes.Status404NotFound);
 
+        group.MapGet("/meta/{key}", [Authorize] async (IStorage storage, string key, KeepGroupedDb db) =>
+        {
+            var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
+            if (filedb is null)
+            {
+                return Results.NotFound();
+            }
+
+            return Results.Ok(FileResponse.FromEntity(filedb));
+        })
+        .WithName("meta.files.get")
+        .WithSummary("Get a file metadata")
+        .WithDescription("Get information of a file without downloading it.")
+        .Produces<FileResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound);
+
         group.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
         {
             var files = await db.Files.ToListAsync();
