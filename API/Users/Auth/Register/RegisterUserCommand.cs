@@ -29,10 +29,16 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> 
             return UserProblems.NameAlreadyUsed(req.UserName);
         }
 
-        var user = new User
-        {
-            UserName = req.UserName
-        };
+
+			var role_db = await db.Roles.SingleOrDefaultAsync(o => o.Name == "Member");
+
+
+			var user = new User
+			{
+				UserName = req.UserName,
+				Role = role_db
+			};
+
 
         user.PasswordHash = hash.HashPassword(user, req.Password);
 

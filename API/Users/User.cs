@@ -12,6 +12,7 @@ public class User
     public string UserName { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
     public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Role? Role { get; set; } = null;
 
     public User() { }
 
@@ -24,6 +25,13 @@ public class User
         UserName = username;
         Id = id;
     }
+
+
+	public User(string username, Role role)
+	{
+		UserName = username;
+		Role = role;
+	}
 
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
