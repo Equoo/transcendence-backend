@@ -86,12 +86,37 @@ public static class RolesEndpoints
         {
            Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Name == name);
            if (db_role is null)
-        {
+            {
                 return Results.BadRequest();
             } 
             tk.User.Role = db_role;
             await db.SaveChangesAsync();
             return Results.Ok(db_role);
+        });
+
+        // Adding role to a specific user
+
+        role.MapPost("/give/{id_user}/{id_role}", async (string id_user, string id_role, KeepGroupedDb db) =>
+        {
+            User? db_user = await db.Users.SingleOrDefaultAsync(u => u.Id == id_user);
+
+            if (db_user is null)
+            {
+                return Results.BadRequest();
+            }
+
+            Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Id == id_role);
+
+            if (db_role is null)
+            {
+                return Results.BadRequest();
+            }
+
+            db_user.Role = db_role;
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok();
         });
 
         
