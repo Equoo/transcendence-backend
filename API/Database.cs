@@ -47,6 +47,24 @@ static public class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
             db.SaveChanges();
 
+            User user5 = new("a", new (){Name = "Admin", Permission = 1});
+            User user1 = new("devan", new (){Name = "Modo", Permission = 1});
+            User user2 = new("pierre", new (){Name = "Helper", Permission = 1});
+            User user3 = new("tom", new (){Name = "Member", Permission = 1});
+            User user4 = new("david", new (){Name = "Guest", Permission = 1});
+
+            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "a");
+            user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");
+            user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user2, "a");
+            user3.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user3, "a");
+            user4.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user4, "a");
+
+            db.Set<User>().Add(user5);
+            db.Set<User>().Add(user1);
+            db.Set<User>().Add(user2);
+            db.Set<User>().Add(user3);
+            db.Set<User>().Add(user4);
+
             var ev = new Event()
             {
                 Name = "Default Event",

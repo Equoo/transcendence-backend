@@ -20,11 +20,6 @@ public class User
     {
         UserName = username;
     }
-    public User(string username, string id)
-    {
-        UserName = username;
-        Id = id;
-    }
 
 
 	public User(string username, Role role)
