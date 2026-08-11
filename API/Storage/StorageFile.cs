@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Events;
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 
-
 namespace KeepGrouped.API.Storage;
 
-public class File
+public class StorageFile
 {
     [Key]
     public string Key { get; set; } = null!;
@@ -24,46 +25,40 @@ public class File
     public DateTime LastUpdated { get; set; }
 
     public User Creator { get; set; } = null!;
+
+    public ICollection<Event> Events { get; } = [];
 }
 
 public record FileResponse(string Key, string Name, long Length, string ETag, string ContentType, DateTime LastUpdated, UserResponse Creator)
 {
-    public static FileResponse FromEntity(File file) => new(file.Key, file.Name, file.Length, file.ETag, file.ContentType,
+    public static FileResponse FromEntity(StorageFile file) => new(file.Key, file.Name, file.Length, file.ETag, file.ContentType,
         file.LastUpdated, UserResponse.FromEntity(file.Creator));
 }
 
-public class FileUploadRequest
+public record FileUploadRequest
 {
     [Required]
-    public string Name { get; set; } = null!;
+    public string Name { get; init; } = null!;
 
     [Required]
-    public IFormFile File { get; set; } = null!;
+    public IFormFile File { get; init; } = null!;
 }
 
-public static class StorageEndpoints
+public static class StorageFileEndpoints
 {
-    public static void MapStorage(this IEndpointRouteBuilder app)
+    public static void MapStorageFiles(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/files").WithTags("Files");
 
-        group.MapPost("/", [Authorize] async (IStorage storage, KeepGroupedDb db, [FromForm] FileUploadRequest req) =>
+        group.MapPost("/", [Authorize] async (IStorage storage, KeepGroupedDb db, TokenContext token, [FromForm] FileUploadRequest req) =>
         {
-            // Replace with authentication
-            User? user = await db.Users.FirstOrDefaultAsync(u => u.UserName == "asventi");
-
-            if (user is null)
-            {
-                return Results.Unauthorized();
-            }
-
             var res = await storage.UploadAsync(req.File.OpenReadStream(), req.File.ContentType);
             if ((int)res.Code >= 400)
             {
                 return Results.StatusCode((int)res.Code);
             }
 
-            var filedb = new File()
+            var filedb = new StorageFile()
             {
                 Key = res.Key,
                 Name = req.Name,
@@ -71,7 +66,7 @@ public static class StorageEndpoints
                 ContentType = req.File.ContentType,
                 Length = req.File.Length,
                 LastUpdated = DateTime.UtcNow,
-                Creator = user
+                Creator = token.User
             };
 
             db.Files.Add(filedb);
