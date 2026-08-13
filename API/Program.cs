@@ -71,7 +71,7 @@ class Program
         app.MapRegistrations();
         app.MapUsers();
         app.MapEventRoles();
-        app.MapStorage();
+        app.MapStorageFiles();
         app.MapAuthentication();
 
         app.Run();

@@ -3,7 +3,7 @@ using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;
-
+using KeepGrouped.API.Storage;
 
 namespace KeepGrouped.API.Events;
 
@@ -21,6 +21,7 @@ public class Event
     public ICollection<User> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
     public ICollection<EventRole> EventRoles { get; init; } = [];
+    public ICollection<StorageFile> Files { get; init; } = [];
 }
 
 public record EventCreate
@@ -38,6 +39,7 @@ public record EventCreate
     public ICollection<string> Tags { get; init; } = [];
     public ICollection<string> EventRoleIds { get; init; } = [];
     public string Description { get; init; } = string.Empty;
+    public ICollection<string> FileKeys { get; init; } = [];
 }
 
 public record EventResponse(
@@ -50,13 +52,16 @@ public record EventResponse(
     UserResponse Organizer,
     ICollection<string> Tags,
     ICollection<RegistrationResponse> Registrations,
-    ICollection<EventRoleResponse> EventRoles)
+    ICollection<EventRoleResponse> EventRoles,
+    ICollection<FileResponse> Files
+)
 {
     public static EventResponse FromEntity(Event ev) => new(
         ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
         UserResponse.FromEntity(ev.Organizer), ev.Tags,
         [.. ev.Registrations.Select(RegistrationResponse.FromEntity)],
-        [.. ev.EventRoles.Select(EventRoleResponse.FromEntity)]);
+        [.. ev.EventRoles.Select(EventRoleResponse.FromEntity)],
+        [.. ev.Files.Select(FileResponse.FromEntity)]);
 }
 
 public static class EventEndpoints
@@ -67,7 +72,6 @@ public static class EventEndpoints
 
         events.MapPost("/", [Authorize] async (KeepGroupedDb db, EventCreate req, TokenContext token) =>
         {
-
             var ev = new Event
             {
                 Name = req.Name,
@@ -77,6 +81,7 @@ public static class EventEndpoints
                 Description = req.Description,
                 Organizer = token.User,
                 EventRoles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync(),
+                Files = await db.Files.Where(fi => req.FileKeys.Contains(fi.Key)).ToListAsync(),
                 Tags = req.Tags,
             };
 
