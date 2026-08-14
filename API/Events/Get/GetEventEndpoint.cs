@@ -1,3 +1,4 @@
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 
@@ -15,24 +16,28 @@ public record GetEventResponse(
     ICollection<string> Tags,
     ICollection<RegistrationSummary> Registrations,
     ICollection<EventRoleSummary> EventRoles,
-    ICollection<FileSummary> Files
+    ICollection<FileSummary> Files,
+    int RegisteredCount,
+    bool IsRegistered
 )
 {
-    public static GetEventResponse FromEntity(Event ev) => new(
+    public static GetEventResponse FromEntity(Event ev, bool isRegistered) => new(
         ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
         UserSummary.FromEntity(ev.Organizer), ev.Tags,
         [.. ev.Registrations.Select(RegistrationSummary.FromEntity)],
         [.. ev.EventRoles.Select(EventRoleSummary.FromEntity)],
-        [.. ev.Files.Select(FileSummary.FromEntity)]);
+        [.. ev.Files.Select(FileSummary.FromEntity)],
+        ev.Registrations.Count,
+        isRegistered);
 }
 
 public static class GetEventEndpoint
 {
     public static void MapGetEvent(this IEndpointRouteBuilder events)
     {
-        events.MapGet("/{id}", async (GetEventQuery query, string id) =>
+        events.MapGet("/{id}", async (GetEventQuery query, string id, TokenContext tk) =>
         {
-            var result = await query.ExecuteAsync(id);
+            var result = await query.ExecuteAsync(id, tk.User);
             if (result.Problem is { } problem)
             {
                 return problem;
