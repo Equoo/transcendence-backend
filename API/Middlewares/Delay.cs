@@ -3,7 +3,7 @@ namespace KeepGrouped.API.Middlewares;
 
 public class DelayMiddleware
 {
-    private  readonly RequestDelegate _next;
+    private readonly RequestDelegate _next;
 
     public DelayMiddleware(RequestDelegate next)
     {
