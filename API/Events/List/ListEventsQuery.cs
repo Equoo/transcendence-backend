@@ -4,7 +4,7 @@ namespace KeepGrouped.API.Events;
 
 public sealed class ListEventsQuery(KeepGroupedDb db) : IHandler
 {
-    public async Task<Result<List<ListEventsResponse>>> ExecuteAsync()
+    public async Task<Result<List<EventSummary>>> ExecuteAsync()
     {
         var evs = await db.Events
             .AsNoTracking()
@@ -12,6 +12,6 @@ public sealed class ListEventsQuery(KeepGroupedDb db) : IHandler
             .Include(e => e.Registrations)
             .ToListAsync();
 
-        return evs.Select(ListEventsResponse.FromEntity).ToList();
+        return evs.Select(EventSummary.FromEntity).ToList();
     }
 }
