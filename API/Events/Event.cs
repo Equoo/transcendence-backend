@@ -27,10 +27,12 @@ public record EventSummary(string Id,
     string Location,
     ICollection<string> Tags,
     ICollection<EventRoleSummary> EventRoles,
-    int RegisteredCount)
+    int RegisteredCount,
+    bool IsRegistered)
 {
-    public static EventSummary FromEntity(Event ev) => new(ev.Id, ev.Name,
+    public static EventSummary FromEntity(Event ev, bool isRegistered) => new(ev.Id, ev.Name,
         ev.Date, ev.Size, ev.Location, ev.Tags,
         [.. ev.EventRoles.Select(EventRoleSummary.FromEntity)],
-        ev.Registrations.Count);
+        ev.Registrations.Count,
+        isRegistered);
 }
