@@ -11,3 +11,4 @@ public static class RegistrationEndpoints
         registrations.MapDeleteRegistration();
     }
 }
+

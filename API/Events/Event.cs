@@ -19,3 +19,18 @@ public class Event
     public ICollection<EventRole> EventRoles { get; init; } = [];
     public ICollection<StorageFile> Files { get; init; } = [];
 }
+
+public record EventSummary(string Id,
+    string Name,
+    DateTime Date,
+    int Size,
+    string Location,
+    ICollection<string> Tags,
+    ICollection<EventRoleSummary> EventRoles,
+    int RegisteredCount)
+{
+    public static EventSummary FromEntity(Event ev) => new(ev.Id, ev.Name,
+        ev.Date, ev.Size, ev.Location, ev.Tags,
+        [.. ev.EventRoles.Select(EventRoleSummary.FromEntity)],
+        ev.Registrations.Count);
+}
