@@ -12,6 +12,7 @@ public sealed class GetEventQuery(KeepGroupedDb db) : IHandler
             .AsNoTracking()
             .Include(e => e.Organizer)
             .Include(e => e.Registrations).ThenInclude(r => r.User)
+            .Include(e => e.Registrations).ThenInclude(r => r.Role)
             .Include(e => e.EventRoles)
             .Include(e => e.Files)
             .SingleOrDefaultAsync(e => e.Id == id);
