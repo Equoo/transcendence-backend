@@ -10,5 +10,7 @@ public static class InvitationEndpoints
         var group = app.MapGroup("/auth/invitation").WithTags("Invitations");
 
         group.MapCreateInvitation();
+        group.MapListInvitation();
+        group.MapDeleteInvitation();
     }
 }

@@ -10,6 +10,8 @@ public record RegisterRequest
     [Required]
     [Length(1, 255)]
     public string Password { get; init; } = null!;
+    [Required]
+    public string InvitationCode { get; init; } = null!;
 }
 
 public record RegisterResponse(string Id, string UserName)

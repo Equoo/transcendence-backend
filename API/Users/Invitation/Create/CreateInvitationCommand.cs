@@ -1,11 +1,10 @@
-using KeepGrouped.API;
-using KeepGrouped.API.Users.Invitation;
+namespace KeepGrouped.API.Users.Invitation;
 
 public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
 {
     private readonly KeepGroupedDb _db = db;
 
-    public async Task<Result> ExecuteAsync(CreateInvitationRequest req)
+    public async Task<Result<string>> ExecuteAsync(CreateInvitationRequest req)
     {
         Invitation invitation = new()
         {
@@ -15,6 +14,6 @@ public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
 
         _db.Invitations.Add(invitation);
         await _db.SaveChangesAsync();
-        return Result.Success;
+        return invitation.Id;
     }
 }

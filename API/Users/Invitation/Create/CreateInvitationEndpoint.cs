@@ -26,12 +26,12 @@ public static class CreateInvitationEndpoint
             {
                 return problem;
             }
-            return Results.Created();
+            return Results.Ok(result.Value);
         })
         .WithName("invitations.create")
         .WithSummary("Create an invatation")
         .WithDescription("Creates an invitation with and id that will serve as the invitation link with a limited amount of uses, infinite uses means uint max")
-        .Produces(StatusCodes.Status201Created)
+        .Produces<string>(StatusCodes.Status200OK)
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status500InternalServerError); ;
