@@ -21,6 +21,30 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 		builder.Entity<Event>().HasOne(e => e.Organizer);
 		builder.Entity<StorageFile>().HasOne(f => f.Creator);
 		builder.Entity<EventRole>().HasAlternateKey(er => er.Name);
+
+		builder.Entity<Message>(entity =>
+		{
+			entity.Property(c => c.Id).HasMaxLength(36);
+
+			entity
+				.HasOne(m => m.Channel)
+				.WithMany()
+				.HasForeignKey(m => m.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity
+				.HasOne(m => m.Sender)
+				.WithMany()
+				.HasForeignKey(m => m.SenderId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// Speeds up: WHERE ChannelId = X ORDER BY SentAt DESC
+			entity
+				.HasIndex(m => new { m.ChannelId, m.SentAt })
+				.HasDatabaseName("IX_Messages_ChannelId_SentAt");
+
+			entity.Property(m => m.Content).HasMaxLength(4096);
+		});
 	}
 
 	public DbSet<User> Users { get; set; }

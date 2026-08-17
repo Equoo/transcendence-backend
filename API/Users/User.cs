@@ -2,26 +2,37 @@ using KeepGrouped.API.Events;
 
 namespace KeepGrouped.API.Users;
 
+public enum Activity
+{
+	Online,
+	Afk,
+	Busy,
+	Invisible,
+	Offline,
+}
+
 public class User
 {
-    public string UserName { get; set; } = null!;
-    public string PasswordHash { get; set; } = null!;
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+	public string UserName { get; set; } = null!;
+	public string PasswordHash { get; set; } = null!;
+	public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    public User() { }
+	public User() { }
 
-    public User(string username)
-    {
-        UserName = username;
-    }
-    public User(string username, string id)
-    {
-        UserName = username;
-        Id = id;
-    }
+	public User(string username)
+	{
+		UserName = username;
+	}
+	public User(string username, string id)
+	{
+		UserName = username;
+		Id = id;
+	}
 
-    public ICollection<Event> Events { get; } = [];
-    public ICollection<Registration> Registrations { get; } = [];
+	public ICollection<Event> Events { get; } = [];
+	public ICollection<Registration> Registrations { get; } = [];
+	public Activity Activity { get; set; } = Activity.Offline;
+	public bool IsOnline { get; set; } = false;
 }
 
 /// <summary>
@@ -30,5 +41,5 @@ public class User
 /// </summary>
 public record UserSummary(string Id, string UserName)
 {
-    public static UserSummary FromEntity(User user) => new(user.Id, user.UserName);
+	public static UserSummary FromEntity(User user) => new(user.Id, user.UserName);
 }
