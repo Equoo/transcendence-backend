@@ -13,6 +13,17 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> 
 {
     public async Task<Result<RegisteredUser>> ExecuteAsync(RegisterRequest req)
     {
+        var invitation = await db.Invitations.SingleOrDefaultAsync(inv => inv.Id == req.InvitationCode);
+        if (invitation is null)
+        {
+            return InvitationProblems.InvalidInvitation();
+        }
+        if ((DateTime.UtcNow > invitation.ExpiresAt) || invitation.Usages < 1)
+        {
+            db.Invitations.Remove(invitation);
+            await db.SaveChangesAsync();
+            return InvitationProblems.InvalidInvitation();
+        }
         if (await db.Users.AnyAsync(e => e.UserName == req.UserName))
         {
             return UserProblems.NameAlreadyUsed(req.UserName);
@@ -39,6 +50,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> 
             ExpireAt = DateTime.Now.AddMinutes(2).Kind
         });
 
+        invitation.Usages -= 1;
         await db.SaveChangesAsync();
 
         return new RegisteredUser(RegisterResponse.FromEntity(user), new IssuedTokens(acess_token, refresh_token));

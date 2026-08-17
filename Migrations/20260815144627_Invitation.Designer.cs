@@ -3,6 +3,7 @@ using System;
 using KeepGrouped.API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations
 {
     [DbContext(typeof(KeepGroupedDb))]
-    partial class KeepGroupedDbModelSnapshot : ModelSnapshot
+    [Migration("20260815144627_Invitation")]
+    partial class Invitation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

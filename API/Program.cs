@@ -1,6 +1,7 @@
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,6 +66,7 @@ class Program
         app.MapEventRoles();
         app.MapStorageFiles();
         app.MapAuthentication();
+        app.MapInvitations();
 
         app.Run();
 

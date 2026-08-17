@@ -5,6 +5,7 @@ using KeepGrouped.API.Users;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Password;
+using KeepGrouped.API.Users.Invitation;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
@@ -22,6 +23,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
     public DbSet<EventRole> EventRoles { get; set; }
     public DbSet<StorageFile> Files { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Invitation> Invitations { get; set; }
 }
 
 static public class DbBuilder
