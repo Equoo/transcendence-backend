@@ -1,3 +1,4 @@
+using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -48,76 +49,178 @@ public class ChatHub : Hub
 
         await base.OnDisconnectedAsync(exception);
     }
-
-    public async Task ChannelSend(string channelId, string content)
-    {
-        var senderId = Context.UserIdentifier;
-
-        var sender = await _db.Users.Where(user => user.Id == senderId).FirstOrDefaultAsync();
-        var channel = await _db.Channels.SingleOrDefaultAsync(e => e.Id == channelId);
-        if (sender is null || channel is null)
-            return;
-
-        var msg = new Message(sender, channel, content);
-        await _db.Messages.AddAsync(msg);
-        await _db.SaveChangesAsync();
-
-        var users = await _db
-            .Users.Where(user => user.IsOnline)
-            .Select(user => user.Id)
-            .ToListAsync();
-
-        await Clients.Users(users).SendAsync("ReceiveMessage", msg);
-    }
-
-    // public async Task UserSend(string userId, string content)
-    // {
-    //     var senderId = Context.UserIdentifier;
-    //
-    //     await Clients.User(userId).SendAsync("ReceiveMessage", senderId, msg);
-    // }
 }
 
 public static class ChatEndpoint
 {
     public static void MapChat(this IEndpointRouteBuilder app)
     {
-        var channels = app.MapGroup("/channels");
+        var channels = app.MapGroup("/channels").WithTags("Channels");
 
-        channels.MapGet(
+        channels
+            .MapGet(
+                "/",
+                // [Authorize]
+                async (KeepGroupedDb db) =>
+                {
+                    var channels = await db.Channels.ToListAsync();
+
+                    return Results.Ok(channels.Select(ChannelResponse.FromEntity));
+                }
+            )
+            .WithName("GetChannels")
+            .WithDescription("Get all channels")
+            .Produces<List<ChannelResponse>>(201);
+
+        channels.MapPost(
             "/",
-            async (KeepGroupedDb db) =>
+            // [Authorize]
+            async (TokenContext tk, KeepGroupedDb db, ChannelCreate req) =>
             {
-                var channels = await db.Channels.ToListAsync();
+                var sender = tk.User;
+                if (sender is null)
+                    return Results.Unauthorized();
 
-                return Results.Ok(channels.Select(x => x));
+                var channel = new Channel(req.Name, req.Topic);
+
+                await db.Channels.AddAsync(channel);
+                await db.SaveChangesAsync();
+
+                var response = ChannelResponse.FromEntity(channel);
+                return Results.Created($"/channel/{channel.Id}", response);
             }
         );
 
         channels.MapGet(
             "/{id}",
-            async (string id, KeepGroupedDb db) =>
+            // [Authorize]
+            async (TokenContext tk, KeepGroupedDb db, string id) =>
             {
-                var channel = await db
-                    .Channels.Where(channel => channel.Id == id)
-                    .FirstOrDefaultAsync();
-
+                var channel = await db.Channels.FindAsync(id);
                 return channel is null
                     ? Results.NotFound()
                     : Results.Ok(ChannelResponse.FromEntity(channel));
             }
         );
 
+        channels.MapDelete(
+            "/{id}",
+            // [Authorize]
+            async (TokenContext tk, KeepGroupedDb db, string id) =>
+            {
+                var sender = tk.User;
+                if (sender is null)
+                    return Results.Unauthorized();
+
+                var channel = await db.Channels.FindAsync(id);
+                if (channel is null)
+                    return Results.NotFound();
+
+                db.Channels.Remove(channel);
+                await db.SaveChangesAsync();
+
+                return Results.NoContent();
+            }
+        );
+
         channels.MapGet(
             "/{id}/messages",
-            async (string id, KeepGroupedDb db) =>
+            // [Authorize]
+            async (TokenContext tk, KeepGroupedDb db, string id, DateTime? before, int take = 20) =>
             {
-                var messages = await db.Messages.Where(msg => msg.ChannelId == id).ToListAsync();
+                var sender = tk.User;
+                if (sender is null)
+                    return Results.Unauthorized();
+
+                var channel = await db.Channels.FindAsync(id);
+                if (channel is null)
+                    return Results.NotFound();
+
+                var query = db.Messages.Include(m => m.Sender).Where(m => m.ChannelId == id);
+
+                if (before.HasValue)
+                {
+                    query = query.Where(m => m.SentAt < before.Value);
+                }
+
+                var messages = await query
+                    .OrderByDescending(m => m.SentAt)
+                    .Take(take)
+                    .Select(m => MessageResponse.FromEntity(m))
+                    .ToListAsync();
 
                 return messages is null ? Results.NotFound() : Results.Ok(messages);
             }
         );
 
-        var messages = app.MapGroup("/messages");
+        channels.MapPost(
+            "/{id}/messages",
+            // [Authorize]
+            async (
+                TokenContext tk,
+                KeepGroupedDb db,
+                IHubContext<ChatHub> hubContext,
+                string id,
+                MessageCreate req
+            ) =>
+            {
+                var sender = tk.User;
+                if (sender is null)
+                    return Results.Unauthorized();
+
+                var channel = await db.Channels.FindAsync(id);
+                if (channel is null)
+                    return Results.NotFound();
+
+                var msg = new Message(sender, channel, req.Content);
+                await db.Messages.AddAsync(msg);
+                await db.SaveChangesAsync();
+
+                var users = await db
+                    .Users.Where(user => user.IsOnline)
+                    .Select(user => user.Id)
+                    .ToListAsync();
+
+                await hubContext.Clients.Users(users).SendAsync("ReceiveMessage", msg);
+
+                var response = MessageResponse.FromEntity(msg);
+                return Results.Created($"/{id}/messages/{msg.Id}", response);
+            }
+        );
+
+        channels.MapGet(
+            "/{id}/messages/{msgId}",
+            // [Authorize]
+            async (KeepGroupedDb db, string id, string msgId) =>
+            {
+                var msg = await db.Messages.FindAsync(msgId);
+                return msg is null
+                    ? Results.NotFound()
+                    : Results.Ok(MessageResponse.FromEntity(msg));
+            }
+        );
+
+        channels.MapDelete(
+            "/{id}/messages/{msgId}",
+            // [Authorize]
+            async (TokenContext tk, KeepGroupedDb db, string id, string msgId) =>
+            {
+                var sender = tk.User;
+                if (sender is null)
+                    return Results.Unauthorized();
+
+                var msg = await db.Messages.FindAsync(msgId);
+                if (msg is null)
+                    return Results.NotFound();
+
+                if (msg.Sender != sender)
+                    return Results.Unauthorized();
+
+                db.Messages.Remove(msg);
+                await db.SaveChangesAsync();
+
+                return Results.NoContent();
+            }
+        );
     }
 }

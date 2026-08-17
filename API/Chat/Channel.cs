@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace KeepGrouped.API.Chat;
 
 public class Channel
@@ -28,4 +30,12 @@ public record ChannelResponse(
 {
     public static ChannelResponse FromEntity(Channel c) =>
         new(c.Id, c.Name, c.CreateAt, c.EventId, c.Category);
+}
+
+public record ChannelCreate
+{
+    [Required]
+    public string Name { get; init; } = null!;
+    public string Topic { get; init; } = null!;
+    public string EventId { get; init; } = null!;
 }

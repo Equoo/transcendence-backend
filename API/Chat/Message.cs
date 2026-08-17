@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Chat;
@@ -26,11 +27,16 @@ public class Message
     public Channel Channel { get; init; } = null!;
 }
 
+public record MessageUserResponse(string Id, string UserName)
+{
+    public static MessageUserResponse FromEntity(User u) => new(u.Id, u.UserName ?? "Unknown");
+}
+
 public record MessageResponse(
     string Id,
     string Content,
     DateTime SentAt,
-    UserResponse Sender,
+    MessageUserResponse Sender,
     ChannelResponse Channel
 )
 {
@@ -39,7 +45,13 @@ public record MessageResponse(
             msg.Id,
             msg.Content,
             msg.SentAt,
-            UserResponse.FromEntity(msg.Sender),
+            MessageUserResponse.FromEntity(msg.Sender),
             ChannelResponse.FromEntity(msg.Channel)
         );
+}
+
+public record MessageCreate
+{
+    [Required]
+    public string Content { get; init; } = null!;
 }
