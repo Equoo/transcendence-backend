@@ -13,7 +13,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> 
 {
     public async Task<Result<RegisteredUser>> ExecuteAsync(RegisterRequest req)
     {
-        var invitation = await db.Invitations.SingleOrDefaultAsync();
+        var invitation = await db.Invitations.SingleOrDefaultAsync(inv => inv.Id == req.InvitationCode);
         if (invitation is null)
         {
             return InvitationProblems.InvalidInvitation();
