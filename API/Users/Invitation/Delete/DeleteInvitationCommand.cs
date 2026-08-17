@@ -17,6 +17,6 @@ public sealed class DeleteInvitationCommand(KeepGroupedDb db) : IHandler
 
         _db.Invitations.Remove(invitation);
         await _db.SaveChangesAsync();
-        return Result.Success;
+        return Result.OK;
     }
 }
