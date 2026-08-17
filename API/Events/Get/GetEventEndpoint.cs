@@ -37,9 +37,9 @@ public static class GetEventEndpoint
         events.MapGet("/{id}", async (GetEventQuery query, string id, TokenContext tk) =>
         {
             var result = await query.ExecuteAsync(id, tk.User);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

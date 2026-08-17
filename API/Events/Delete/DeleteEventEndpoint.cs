@@ -9,9 +9,9 @@ public static class DeleteEventEndpoint
         events.MapDelete("/{id}", [Authorize] async (DeleteEventCommand command, string id) =>
         {
             var result = await command.ExecuteAsync(id);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.NoContent();

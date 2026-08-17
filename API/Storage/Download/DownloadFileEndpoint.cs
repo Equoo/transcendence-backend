@@ -10,9 +10,9 @@ public static class DownloadFileEndpoint
         group.MapGet("/{key}", [Authorize] async (DownloadFileQuery query, string key) =>
         {
             var result = await query.ExecuteAsync(key);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             var file = result.Value;

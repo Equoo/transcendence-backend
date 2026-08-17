@@ -10,9 +10,9 @@ public static class DeleteRegistrationEndpoint
         registrations.MapDelete("/", [Authorize] async (DeleteRegistrationCommand command, string id, TokenContext token) =>
         {
             var result = await command.ExecuteAsync(id, token.User);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.NoContent();

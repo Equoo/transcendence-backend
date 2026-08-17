@@ -22,9 +22,9 @@ public static class CreateEventRoleEndpoint
         group.MapPost("/", [Authorize] async (CreateEventRoleCommand command, CreateEventRoleRequest req) =>
         {
             var result = await command.ExecuteAsync(req);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

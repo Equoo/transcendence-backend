@@ -9,9 +9,9 @@ public static class DeleteFileEndpoint
         group.MapDelete("/{key}", [Authorize] async (DeleteFileCommand command, string key) =>
         {
             var result = await command.ExecuteAsync(key);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.NoContent();

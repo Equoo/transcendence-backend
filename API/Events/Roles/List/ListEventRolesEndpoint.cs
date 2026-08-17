@@ -14,9 +14,9 @@ public static class ListEventRolesEndpoint
         group.MapGet("/", [Authorize] async (ListEventRolesQuery query) =>
         {
             var result = await query.ExecuteAsync();
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

@@ -28,9 +28,9 @@ public static class UpdateEventEndpoint
         events.MapPut("/{id}", [Authorize] async (UpdateEventCommand command, string id, UpdateEventRequest req) =>
         {
             var result = await command.ExecuteAsync(id, req);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.NoContent();

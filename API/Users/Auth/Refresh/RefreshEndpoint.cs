@@ -13,11 +13,11 @@ public static class RefreshEndpoint
         auth.MapGet("/refresh", async (RefreshTokensCommand command, HttpContext http) =>
         {
             var result = await command.ExecuteAsync(TokenCookies.Get(http, "RefreshToken"));
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
                 // Every failure path of this route drops the cookies before answering.
                 TokenCookies.Remove(http);
-                return problem;
+                return result.Problem;
             }
 
             TokenCookies.Write(http, result.Value.Tokens);

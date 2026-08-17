@@ -19,9 +19,9 @@ public static class ListMyTokensEndpoint
         me.MapGet("/tokens", [Authorize] async (ListMyTokensQuery query, TokenContext tk) =>
         {
             var result = await query.ExecuteAsync(tk.User.Id);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

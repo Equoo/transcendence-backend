@@ -24,9 +24,9 @@ public static class ListFilesEndpoint
         group.MapGet("/", [Authorize] async (ListFilesQuery query) =>
         {
             var result = await query.ExecuteAsync();
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

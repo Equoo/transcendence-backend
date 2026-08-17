@@ -15,9 +15,9 @@ public static class DeleteMeEndpoint
         me.MapDelete("/", [Authorize] async (DeleteMeCommand command, HttpContext http, TokenContext tk) =>
         {
             var result = await command.ExecuteAsync(tk.User);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             TokenCookies.Remove(http);

@@ -40,9 +40,9 @@ public static class UploadFileEndpoint
             var result = await command.ExecuteAsync(
                 req.File.OpenReadStream(), req.Name, req.File.ContentType, req.File.Length, token.User);
 
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.CreatedAtRoute("files.get", new { key = result.Value.Key }, result.Value);

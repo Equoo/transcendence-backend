@@ -17,9 +17,9 @@ public static class CreateRegistrationEndpoint
         registrations.MapPost("/", [Authorize] async (CreateRegistrationCommand command, string id, TokenContext context, CreateRegistrationRequest reg) =>
         {
             var result = await command.ExecuteAsync(id, context.User, reg);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.CreatedAtRoute("events.get", new { id });

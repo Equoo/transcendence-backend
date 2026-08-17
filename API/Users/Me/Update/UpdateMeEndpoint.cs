@@ -27,9 +27,9 @@ public static class UpdateMeEndpoint
         me.MapPut("/", [Authorize] async (UpdateMeCommand command, UpdateMeRequest req, TokenContext tk) =>
         {
             var result = await command.ExecuteAsync(tk.User, req);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

@@ -18,9 +18,9 @@ public static class ListRegistrationsEndpoint
         registrations.MapGet("/", [Authorize] async (ListRegistrationsQuery query, string id) =>
         {
             var result = await query.ExecuteAsync(id);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

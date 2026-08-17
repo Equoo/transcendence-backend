@@ -25,9 +25,9 @@ public static class GetFileMetaEndpoint
         group.MapGet("/meta/{key}", [Authorize] async (GetFileMetaQuery query, string key) =>
         {
             var result = await query.ExecuteAsync(key);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

@@ -10,9 +10,9 @@ public static class ListEventsEndpoint
         events.MapGet("/", [Authorize] async (ListEventsQuery query, TokenContext token) =>
         {
             var result = await query.ExecuteAsync(token.User);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.Ok(result.Value);

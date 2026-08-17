@@ -25,9 +25,9 @@ public static class LoginEndpoint
         auth.MapPost("/login", async (LoginUserCommand command, LoginRequest req, HttpContext http) =>
         {
             var result = await command.ExecuteAsync(req);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             TokenCookies.Write(http, result.Value.Tokens);
