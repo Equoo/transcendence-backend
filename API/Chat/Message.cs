@@ -19,6 +19,7 @@ public class Message
     public string Id { get; } = Guid.NewGuid().ToString();
     public string Content { get; init; } = null!;
     public DateTime SentAt { get; } = DateTime.UtcNow;
+    public string? MessageReference { get; } = null;
 
     public string SenderId { get; init; } = null!;
     public User Sender { get; init; } = null!;
@@ -36,6 +37,7 @@ public record MessageResponse(
     string Id,
     string Content,
     DateTime SentAt,
+    string? MessageReference,
     MessageUserResponse Sender,
     ChannelResponse Channel
 )
@@ -45,6 +47,7 @@ public record MessageResponse(
             msg.Id,
             msg.Content,
             msg.SentAt,
+            msg.MessageReference,
             MessageUserResponse.FromEntity(msg.Sender),
             ChannelResponse.FromEntity(msg.Channel)
         );
@@ -54,4 +57,5 @@ public record MessageCreate
 {
     [Required]
     public string Content { get; init; } = null!;
+    public string? MessageReference { get; init; } = null;
 }
