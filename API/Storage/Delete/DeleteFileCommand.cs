@@ -21,6 +21,6 @@ public sealed class DeleteFileCommand(IStorage storage, KeepGroupedDb db) : IHan
 
         db.Files.Remove(filedb);
         await db.SaveChangesAsync();
-        return Result.Success;
+        return Result.OK;
     }
 }

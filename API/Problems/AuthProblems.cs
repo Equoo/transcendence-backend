@@ -4,10 +4,6 @@ namespace KeepGrouped.API.Problems;
 
 static public class AuthProblems
 {
-    /// <summary>
-    /// Deliberately does not say whether the user name or the password was wrong, and deliberately
-    /// keeps the 406 status this API has always answered — clients branch on it.
-    /// </summary>
     static public ProblemHttpResult InvalidCredentials() => ProblemFactory.Create(
         StatusCodes.Status406NotAcceptable, "INVALID_AUTH",
         "Invalid Authentication",

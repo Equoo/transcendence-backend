@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
 
-/// <summary>
-/// Only the fields this use case actually writes. The roles and files attached to an event are not
-/// editable here, so they are absent rather than accepted and silently dropped.
-/// </summary>
 public record UpdateEventRequest
 {
     [Required]

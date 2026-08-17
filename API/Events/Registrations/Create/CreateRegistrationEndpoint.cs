@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Middlewares;
-using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;

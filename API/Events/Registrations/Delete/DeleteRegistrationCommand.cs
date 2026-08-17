@@ -29,6 +29,6 @@ public sealed class DeleteRegistrationCommand(KeepGroupedDb db) : IHandler
 
         ev.Registrations.Remove(registration);
         await db.SaveChangesAsync();
-        return Result.Success;
+        return Result.OK;
     }
 }

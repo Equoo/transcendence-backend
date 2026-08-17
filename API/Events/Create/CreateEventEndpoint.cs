@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Middlewares;
-using KeepGrouped.API.Storage;
-using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
@@ -38,9 +36,9 @@ public static class CreateEventEndpoint
         events.MapPost("/", [Authorize] async (CreateEventCommand command, CreateEventRequest req, TokenContext token) =>
         {
             var result = await command.ExecuteAsync(req, token.User);
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
 
             return Results.CreatedAtRoute("events.get", new { id = result.Value.Id }, result.Value);

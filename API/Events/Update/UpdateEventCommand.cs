@@ -28,6 +28,6 @@ public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
         ev.Tags = req.Tags;
 
         await db.SaveChangesAsync();
-        return Result.Success;
+        return Result.OK;
     }
 }

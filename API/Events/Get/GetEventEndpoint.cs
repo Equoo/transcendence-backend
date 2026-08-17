@@ -4,7 +4,6 @@ using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Events;
 
-/// <summary>The detail view of an event: everything the API knows about it.</summary>
 public record GetEventResponse(
     string Id,
     string Name,

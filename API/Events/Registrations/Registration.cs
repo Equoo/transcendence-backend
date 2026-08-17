@@ -12,7 +12,6 @@ public class Registration
     public EventRole Role { get; set; } = null!;
 }
 
-/// <summary>A registration as embedded in an event response.</summary>
 public record RegistrationSummary(UserSummary User, DateTime RegisteredAt, string? Role)
 {
     public static RegistrationSummary FromEntity(Registration reg) => new(

@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Storage;
 
-/// <summary>
-/// A file as it appears in a listing. The ETag is left out: it is a cache validator for one
-/// specific representation, fetch the file or its metadata to get it.
-/// </summary>
 public record ListFilesResponse(
     string Key,
     string Name,

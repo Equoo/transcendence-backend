@@ -14,10 +14,6 @@ static public class UserProblems
         "Username already used",
         $"'{username}' is already used by an other user.");
 
-    /// <summary>
-    /// The route allows anonymous access, or the access token resolved to no user. Distinct from a
-    /// missing resource: answering 404 here hides an authentication problem behind a routing one.
-    /// </summary>
     static public ProblemHttpResult NotAuthenticated() => ProblemFactory.Create(
         StatusCodes.Status401Unauthorized, "NOT_AUTHENTICATED",
         "Not authenticated",

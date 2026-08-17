@@ -23,10 +23,6 @@ static public class StorageProblems
     static public ProblemHttpResult DeleteFailed(int status) => Upstream(
         "STORAGE_DELETE_FAILED", "Delete failed", "delete the file", status);
 
-    /// <summary>
-    /// The object store answered an error. It is reported as 502: the caller's request was fine,
-    /// a dependency of this API failed — and its raw status is surfaced as <c>storageStatus</c>.
-    /// </summary>
     static ProblemHttpResult Upstream(string errorCode, string title, string action, int status) =>
         TypedResults.Problem(
             title: title,

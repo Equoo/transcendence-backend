@@ -1,4 +1,3 @@
-using KeepGrouped.API.Users;
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 

@@ -15,6 +15,6 @@ public sealed class DeleteEventCommand(KeepGroupedDb db) : IHandler
 
         db.Events.Remove(ev);
         await db.SaveChangesAsync();
-        return Result.Success;
+        return Result.OK;
     }
 }

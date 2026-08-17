@@ -53,6 +53,6 @@ public sealed class CreateRegistrationCommand(KeepGroupedDb db) : IHandler
 
         await db.SaveChangesAsync();
 
-        return Result.Success;
+        return Result.OK;
     }
 }

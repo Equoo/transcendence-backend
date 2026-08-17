@@ -14,7 +14,6 @@ static public class EventRoleProblems
         "Event role already exists",
         $"An event role with this name: '{name}' already exists.");
 
-    /// <summary>`Any` is attached to every event implicitly; it cannot be created or requested by name.</summary>
     static public ProblemHttpResult Reserved(string name) => ProblemFactory.Create(
         StatusCodes.Status422UnprocessableEntity, "EVENTROLE_RESERVED",
         "Reserved event role",
