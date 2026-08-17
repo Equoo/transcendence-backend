@@ -32,6 +32,8 @@ public class User
 	public ICollection<Event> Events { get; } = [];
 	public ICollection<Registration> Registrations { get; } = [];
 	public Activity Activity { get; set; } = Activity.Offline;
+
+	public Dictionary<string, string> ChannelsAckMsg = [];
 	public bool IsOnline { get; set; } = false;
 }
 
