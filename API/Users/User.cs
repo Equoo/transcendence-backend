@@ -41,7 +41,7 @@ public class User
 /// The public face of a user, embedded wherever another resource points at one (an event organizer,
 /// a registration, a file creator). Shared on purpose: it is one projection, not one per use case.
 /// </summary>
-public record UserSummary(string Id, string UserName)
+public record UserSummary(string Id, string UserName, Activity Activity)
 {
-	public static UserSummary FromEntity(User user) => new(user.Id, user.UserName);
+	public static UserSummary FromEntity(User user) => new(user.Id, user.UserName, user.Activity);
 }
