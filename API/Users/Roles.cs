@@ -9,119 +9,119 @@ namespace KeepGrouped.API.Users;
 
 public enum Perms
 {
-    isAdmin = 1,
-    
-    // Event
-    HandleEvent = 2,
-    
-    // User
-    GetUser = 32,
-    CreateUser = 64,
-    ChangeUserName = 128,
-    DeleteUser = 256,
-    ResetUserPassword = 516,
+	isAdmin = 1,
 
-    // Chat
-    HandleChannel = 2048,
+	// Event
+	HandleEvent = 2,
 
-    // Knowledge
+	// User
+	GetUser = 32,
+	CreateUser = 64,
+	ChangeUserName = 128,
+	DeleteUser = 256,
+	ResetUserPassword = 516,
 
-    // Calendar
+	// Chat
+	HandleChannel = 2048,
+
+	// Knowledge
+
+	// Calendar
 }
 
 public class Role
 {
-    public string Id {get; set; } = Guid.NewGuid().ToString();
-    public string Name {get; set;} = null!;
+	public string Id { get; set; } = Guid.NewGuid().ToString();
+	public string Name { get; set; } = null!;
 
-    public int Permission {get; set;} = 0;
+	public int Permission { get; set; } = 0;
 }
 
 public record RoleRequest
 {
-    [Required]
-    public string Name {get; init;} = null!;
-    [Required]
-    public int Permission {get; set;} = 0;
+	[Required]
+	public string Name { get; init; } = null!;
+	[Required]
+	public int Permission { get; set; } = 0;
 }
 
 
 public static class RolesEndpoints
 {
 
-    public static void MapRoles(this IEndpointRouteBuilder app)
-    {
+	public static void MapRoles(this IEndpointRouteBuilder app)
+	{
 
-        var role = app.MapGroup("/roles").WithTags("Roles");
+		var role = app.MapGroup("/roles").WithTags("Roles");
 
-        // -------------- Return all Roles
+		// -------------- Return all Roles
 
-        role.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
-        {
-            List<Role>? db_roles = await db.Roles.ToListAsync();
-            if (db_roles is null)
-            {
-                return Results.NoContent();
-            }
-            return Results.Ok(db_roles);
-        });
+		role.MapGet("/", [Authorize] async (KeepGroupedDb db) =>
+		{
+			List<Role>? db_roles = await db.Roles.ToListAsync();
+			if (db_roles is null)
+			{
+				return Results.NoContent();
+			}
+			return Results.Ok(db_roles);
+		});
 
-        // -------------- Create a new roles
-        role.MapPost("/", [Authorize] async (KeepGroupedDb db, RoleRequest request) =>
-        {
-            Role role = new()
-            {
-              Name = request.Name,
-              Permission = request.Permission
-            };
+		// -------------- Create a new roles
+		role.MapPost("/", [Authorize] async (KeepGroupedDb db, RoleRequest request) =>
+		{
+			Role role = new()
+			{
+				Name = request.Name,
+				Permission = request.Permission
+			};
 
- 
-            db.Roles.Add(role);
-            await db.SaveChangesAsync();
-            return Results.Ok(role);
-        });
 
-        // -------------- Adding role to my user
-        role.MapPost("/add/${name}", async (string name, TokenContext tk, KeepGroupedDb db) =>
-        {
-           Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Name == name);
-           if (db_role is null)
-            {
-                return Results.BadRequest();
-            } 
-            tk.User.Role = db_role;
-            await db.SaveChangesAsync();
-            return Results.Ok(db_role);
-        });
+			db.Roles.Add(role);
+			await db.SaveChangesAsync();
+			return Results.Ok(role);
+		});
 
-        // Adding role to a specific user
+		// -------------- Adding role to my user
+		role.MapPost("/add/${name}", async (string name, TokenContext tk, KeepGroupedDb db) =>
+		{
+			Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Name == name);
+			if (db_role is null)
+			{
+				return Results.BadRequest();
+			}
+			tk.User.Role = db_role;
+			await db.SaveChangesAsync();
+			return Results.Ok(db_role);
+		});
 
-        role.MapPost("/give/{id_user}/{id_role}", async (string id_user, string id_role, KeepGroupedDb db) =>
-        {
-            User? db_user = await db.Users.SingleOrDefaultAsync(u => u.Id == id_user);
+		// Adding role to a specific user
 
-            if (db_user is null)
-            {
-                return Results.BadRequest();
-            }
+		role.MapPost("/give/{id_user}/{id_role}", async (string id_user, string id_role, KeepGroupedDb db) =>
+		{
+			User? db_user = await db.Users.SingleOrDefaultAsync(u => u.Id == id_user);
 
-            Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Id == id_role);
+			if (db_user is null)
+			{
+				return Results.BadRequest();
+			}
 
-            if (db_role is null)
-            {
-                return Results.BadRequest();
-            }
+			Role? db_role = await db.Roles.SingleOrDefaultAsync(o => o.Id == id_role);
 
-            db_user.Role = db_role;
+			if (db_role is null)
+			{
+				return Results.BadRequest();
+			}
 
-            await db.SaveChangesAsync();
+			db_user.Role = db_role;
 
-            return Results.Ok();
-        });
+			await db.SaveChangesAsync();
 
-        
+			return Results.Ok();
+		});
 
-        role.MapGet("/kg-admin", [Authorize] [Roles ((int) Perms.isAdmin)]  async () => "Administator panel");
-    }
+
+
+		role.MapGet("/kg-admin", [Authorize][Roles((int)Perms.isAdmin)] async () => "Administator panel");
+	}
 
 }
