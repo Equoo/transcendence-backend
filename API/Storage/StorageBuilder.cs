@@ -1,7 +1,8 @@
 using Amazon.Runtime;
 using Amazon.S3;
-using KeepGrouped.API.Storage;
 using Microsoft.Extensions.Options;
+
+namespace KeepGrouped.API.Storage;
 
 static class StorageBuilder
 {

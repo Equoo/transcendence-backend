@@ -118,6 +118,7 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RoleId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("EventId", "UserId");
@@ -248,7 +249,9 @@ namespace KeepGrouped.Migrations
 
                     b.HasOne("KeepGrouped.API.Events.EventRole", "Role")
                         .WithMany()
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("KeepGrouped.API.Users.User", "User")
                         .WithMany("Registrations")

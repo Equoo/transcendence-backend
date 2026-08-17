@@ -1,56 +1,50 @@
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Users;
-using System.ComponentModel;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace KeepGrouped.API.Middlewares;
 
 public class TokenContext
 {
 
-	public User User { get; set; } = null!;
+    public User User { get; set; } = null!;
 }
 
 public class TokenContextMiddleware
 {
-	private readonly RequestDelegate _next;
+    private readonly RequestDelegate _next;
 
-	public TokenContextMiddleware(RequestDelegate next)
-	{
-		_next = next;
-	}
+    public TokenContextMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
 
-	public async Task InvokeAsync(HttpContext http, KeepGroupedDb db, TokenContext tcontext)
-	{
-		string? token_cookie = http.Request.Cookies["AccessToken"];
+    public async Task InvokeAsync(HttpContext http, KeepGroupedDb db, TokenContext tcontext)
+    {
+        string? token_cookie = TokenCookies.Get(http, "AccessToken");
 
-		if (token_cookie is null)
-		{
-			await _next(http);
-			return;
-		}
+        if (token_cookie is null)
+        {
+            await _next(http);
+            return;
+        }
 
-		if (!new JwtSecurityTokenHandler().CanReadToken(token_cookie))
-		{
-			Token.RemoveCookies(http);
-		}
+        if (!Token.CanRead(token_cookie))
+        {
+            TokenCookies.Remove(http);
+        }
 
-		JwtSecurityToken token = new JwtSecurityTokenHandler().ReadJwtToken(token_cookie);
+        string id = Token.ReadFirstClaim(token_cookie);
 
-		string id = token.Claims.First().Value;
+        User? db_user = await db.Users.SingleOrDefaultAsync(usr => usr.Id == id);
 
-		User? db_user = await db.Users.SingleOrDefaultAsync(usr => usr.Id == id);
+        if (db_user is null)
+        {
+            await _next(http);
+            return;
+        }
 
-		if (db_user is null)
-		{
-			await _next(http);
-			return;
-		}
+        tcontext.User = db_user;
 
-		tcontext.User = db_user;
-
-		await _next(http);
-	}
+        await _next(http);
+    }
 }

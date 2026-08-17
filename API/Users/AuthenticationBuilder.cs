@@ -1,10 +1,10 @@
 using System.Text;
-using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Password;
-using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+
+namespace KeepGrouped.API.Users;
 
 static public class AuthenticationBuilder
 {

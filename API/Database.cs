@@ -16,13 +16,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
         builder.Entity<Event>().HasOne(e => e.Organizer);
         builder.Entity<StorageFile>().HasOne(f => f.Creator);
         builder.Entity<EventRole>().HasAlternateKey(er => er.Name);
-
-        builder.Entity<Event>().Navigation(e => e.Organizer).AutoInclude();
-        builder.Entity<Event>().Navigation(e => e.Registrations).AutoInclude();
-        builder.Entity<Event>().Navigation(e => e.EventRoles).AutoInclude();
-        builder.Entity<Event>().Navigation(e => e.Files).AutoInclude();
-        builder.Entity<Registration>().Navigation(e => e.User).AutoInclude();
-        builder.Entity<StorageFile>().Navigation(f => f.Creator).AutoInclude();
     }
     public DbSet<User> Users { get; set; }
     public DbSet<Event> Events { get; set; }
@@ -48,7 +41,7 @@ static public class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            db.Set<EventRole>().Add(new EventRole() { Name = "Any" });
+            db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
             db.SaveChanges();
 
             var ev = new Event()
@@ -62,7 +55,7 @@ static public class DbBuilder
             };
             ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
             ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
-            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Any"));
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == EventRole.Implicit));
             db.Set<Event>().Add(ev);
 
             db.SaveChanges();

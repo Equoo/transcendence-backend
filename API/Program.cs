@@ -1,18 +1,8 @@
 using KeepGrouped.API.Events;
-using KeepGrouped.API.Users;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using KeepGrouped.API.Storage;
-using Amazon.S3;
-using Microsoft.Extensions.Options;
-using Amazon.Runtime;
+using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.HttpOverrides;
-using KeepGrouped.API.Password;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using KeepGrouped.API.Middlewares;
-using TokenContext = KeepGrouped.API.Middlewares.TokenContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API;
 
@@ -27,6 +17,7 @@ class Program
         builder.BuildStorage();
         builder.BuildDb();
         builder.BuildAuthentication();
+        builder.AddHandlers();
 
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -70,6 +61,7 @@ class Program
         app.MapEvents();
         app.MapRegistrations();
         app.MapUsers();
+        app.MapMe();
         app.MapEventRoles();
         app.MapStorageFiles();
         app.MapAuthentication();
