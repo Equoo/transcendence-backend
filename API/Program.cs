@@ -1,4 +1,5 @@
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Invitation;
@@ -67,6 +68,7 @@ class Program
         app.MapStorageFiles();
         app.MapAuthentication();
         app.MapInvitations();
+        app.MapRoles();
 
         app.Run();
 
