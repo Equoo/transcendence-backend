@@ -3,7 +3,6 @@ using KeepGrouped.API.Attributes.Roles;
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.Replication.PgOutput;
 
 namespace KeepGrouped.API.Users;
 
