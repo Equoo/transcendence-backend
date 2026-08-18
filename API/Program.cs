@@ -29,6 +29,7 @@ class Program
 		builder.Services.AddProblemDetails();
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddValidation();
+		builder.Services.AddSignalR();
 
 		if (builder.Environment.IsDevelopment())
 		{

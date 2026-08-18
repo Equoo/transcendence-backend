@@ -71,13 +71,21 @@ public static class DbBuilder
 						{
 							return;
 						}
-						User user = new("asventi");
 
+						User user = new("asventi");
 						user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(
 							user,
 							"1234"
 						);
 						db.Set<User>().Add(user);
+
+						User user2 = new("equo");
+						user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(
+							user2,
+							"feur"
+						);
+						db.Set<User>().Add(user2);
+
 						db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
 						db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
 						db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
