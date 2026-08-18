@@ -16,8 +16,8 @@ public class Event
     public User Organizer { get; set; } = null!;
     public ICollection<User> Users { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
-    public ICollection<EventRole> EventRoles { get; init; } = [];
-    public ICollection<StorageFile> Files { get; init; } = [];
+    public ICollection<EventRole> EventRoles { get; set; } = [];
+    public ICollection<StorageFile> Files { get; set; } = [];
 }
 
 public record EventSummary(string Id,
