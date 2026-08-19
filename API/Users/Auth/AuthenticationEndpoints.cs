@@ -1,3 +1,4 @@
+using KeepGrouped.API.Events;
 using KeepGrouped.API.Middlewares;
 
 namespace KeepGrouped.API.Users;
@@ -16,6 +17,7 @@ public static class AuthenticationEndpoint
         auth.MapRegister();
         auth.MapLogin();
         auth.MapLogout();
+        auth.MapLogoutUser();
         auth.MapRefresh();
     }
 }
