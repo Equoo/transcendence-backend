@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -43,7 +44,7 @@ public class ChatHub : Hub
 	}
 }
 
-public static class ChatEndpoint
+public static partial class ChatEndpoint
 {
 	public static void MapChat(this IEndpointRouteBuilder app)
 	{
@@ -79,8 +80,22 @@ public static class ChatEndpoint
 					if (sender is null)
 						return Results.Unauthorized();
 
-					var channel = new Channel(req.Name, req.Topic);
+					var name = req.Name;
+					if (name.Length > 25)
+						return Results.UnprocessableEntity("Name length exceed 25 characters.");
+					if (ChannelNameValidation().IsMatch(name))
+						return Results.UnprocessableEntity("Name contain unauthorized characters.");
 
+					var topic = req.Topic;
+					if (topic.Length > 255)
+						return Results.UnprocessableEntity("Topic length exceed 100 characters.");
+
+					if ((await db.Channels.Where(chan => chan.Name == name)
+						.Select(chan => chan.Id)
+						.ToListAsync()).Count != 0)
+						return Results.Conflict("Name must be unique.");
+
+					var channel = new Channel(name, topic);
 					await db.Channels.AddAsync(channel);
 					await db.SaveChangesAsync();
 
@@ -102,57 +117,57 @@ public static class ChatEndpoint
 
 		channels
 			.MapGet(
-				"/{id}",
-				// [Authorize]
-				async (TokenContext tk, KeepGroupedDb db, string id) =>
-				{
-					var channel = await db.Channels.FindAsync(id);
-					return channel is null
-						? Results.NotFound()
-						: Results.Ok(ChannelResponse.FromEntity(channel));
-				}
-			)
-			.WithName("GetChannelById")
-			.WithDescription("Get a channel by Id")
-			.Produces<ChannelResponse>(201)
-			.Produces(404);
+					"/{id}",
+					// [Authorize]
+					async (TokenContext tk, KeepGroupedDb db, string id) =>
+					{
+						var channel = await db.Channels.FindAsync(id);
+						return channel is null
+							? Results.NotFound()
+							: Results.Ok(ChannelResponse.FromEntity(channel));
+					}
+				)
+				.WithName("GetChannelById")
+				.WithDescription("Get a channel by Id")
+				.Produces<ChannelResponse>(201)
+				.Produces(404);
 
 		channels
 			.MapDelete(
-				"/{id}",
-				// [Authorize]
-				async (
-					TokenContext tk,
-					KeepGroupedDb db,
-					IHubContext<ChatHub> hubContext,
-					string id
-				) =>
-				{
-					var sender = tk.User;
-					if (sender is null)
-						return Results.Unauthorized();
+						"/{id}",
+						// [Authorize]
+						async (
+							TokenContext tk,
+							KeepGroupedDb db,
+							IHubContext<ChatHub> hubContext,
+							string id
+						) =>
+						{
+							var sender = tk.User;
+							if (sender is null)
+								return Results.Unauthorized();
 
-					var channel = await db.Channels.FindAsync(id);
-					if (channel is null)
-						return Results.NotFound();
+							var channel = await db.Channels.FindAsync(id);
+							if (channel is null)
+								return Results.NotFound();
 
-					db.Channels.Remove(channel);
-					await db.SaveChangesAsync();
+							db.Channels.Remove(channel);
+							await db.SaveChangesAsync();
 
-					var users = await db
+							var users = await db
 						.Users.Where(user => user.IsOnline)
 						.Select(user => user.Id)
 						.ToListAsync();
-					await hubContext.Clients.Users(users).SendAsync("RemoveChannel", channel.Id);
+							await hubContext.Clients.Users(users).SendAsync("RemoveChannel", channel.Id);
 
-					return Results.NoContent();
-				}
-			)
-			.WithName("RemoveChannel")
-			.WithDescription("Remove a channel by Id")
-			.Produces(401)
-			.Produces(404)
-			.Produces(204);
+							return Results.NoContent();
+						}
+					)
+					.WithName("RemoveChannel")
+					.WithDescription("Remove a channel by Id")
+					.Produces(401)
+					.Produces(404)
+					.Produces(204);
 
 		channels
 			.MapGet(
@@ -226,7 +241,6 @@ public static class ChatEndpoint
 						.Users.Where(user => user.IsOnline && user.Id != sender.Id)
 						.Select(user => user.Id)
 						.ToListAsync();
-					Console.WriteLine("################################################\n{0}", users.Count);
 					await hubContext.Clients.Users(users).SendAsync("NewMessage", id, msg);
 
 					var response = MessageResponse.FromEntity(msg);
@@ -325,4 +339,7 @@ public static class ChatEndpoint
 			.Produces(401)
 			.Produces(404);
 	}
+
+	[GeneratedRegex(@"[\s\p{Lu}$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]
+	private static partial Regex ChannelNameValidation();
 }
