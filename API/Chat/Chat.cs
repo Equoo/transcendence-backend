@@ -18,10 +18,10 @@ public class ChatHub : Hub
 	public override async Task OnConnectedAsync()
 	{
 		var userId = Context.UserIdentifier;
-		Console.WriteLine($"User connected: {userId}");
 
 		var user = await _db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
 		user?.IsOnline = true;
+		await _db.SaveChangesAsync();
 
 		await base.OnConnectedAsync();
 	}
@@ -29,7 +29,6 @@ public class ChatHub : Hub
 	public override async Task OnDisconnectedAsync(Exception? exception)
 	{
 		var userId = Context.UserIdentifier;
-		Console.WriteLine($"Disconnected: {Context.ConnectionId}");
 
 		if (exception != null)
 		{
@@ -38,6 +37,7 @@ public class ChatHub : Hub
 
 		var user = await _db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
 		user?.IsOnline = false;
+		await _db.SaveChangesAsync();
 
 		await base.OnDisconnectedAsync(exception);
 	}
@@ -223,10 +223,11 @@ public static class ChatEndpoint
 					await db.SaveChangesAsync();
 
 					var users = await db
-						.Users.Where(user => user.IsOnline)
+						.Users.Where(user => user.IsOnline && user.Id != sender.Id)
 						.Select(user => user.Id)
 						.ToListAsync();
-					await hubContext.Clients.Users(users).SendAsync("NewMessage", msg);
+					Console.WriteLine("################################################\n{0}", users.Count);
+					await hubContext.Clients.Users(users).SendAsync("NewMessage", id, msg);
 
 					var response = MessageResponse.FromEntity(msg);
 					return Results.Created($"/{id}/messages/{msg.Id}", response);
