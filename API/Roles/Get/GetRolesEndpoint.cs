@@ -11,6 +11,10 @@ public static class GetRoleEndpoint
         roles.MapGet("/", [Authorize] async (GetRoleQuery query) =>
         {
             var result = await query.ExecuteAsync();
+            if (result.IsProblem)
+            {
+                return result.Problem;
+            }
 
             return Results.Ok(result._value);
         });
