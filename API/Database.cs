@@ -5,6 +5,8 @@ using KeepGrouped.API.Users;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Password;
+using KeepGrouped.API.Roles;
+using KeepGrouped.API.Users.Roles;
 using KeepGrouped.API.Users.Invitation;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
@@ -37,7 +39,7 @@ static public class DbBuilder
             {
                 return;
             }
-            User user = new("asventi");
+            User user = new("asventi", new (){Name = "Lautre", Permission = 1});
 
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
             db.Set<User>().Add(user);

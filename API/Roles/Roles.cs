@@ -4,7 +4,7 @@ using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-namespace KeepGrouped.API.Users;
+namespace KeepGrouped.API.Roles;
 
 public enum Perms
 {

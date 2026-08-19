@@ -2,7 +2,7 @@
 using KeepGrouped.API.Roles;
 using Microsoft.EntityFrameworkCore;
 
-namespace KeepGrouped.API.Users;
+namespace KeepGrouped.API.Roles;
 
 public sealed class GetRoleQuery(KeepGroupedDb db): IHandler
 {

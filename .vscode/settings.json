@@ -1,0 +1,18 @@
+{
+    "editor.snippetSuggestions": "none",
+    "github.copilot.chat.completionsFetcher": "node-fetch",
+    "github.copilot.chat.useResponsesApi": false,
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "dotnet.completion.showNameCompletionSuggestions": false,
+    "emmet.showAbbreviationSuggestions": false,
+    "github.copilot.nextEditSuggestions.allowWhitespaceOnlyChanges": false,
+    "github.copilot.nextEditSuggestions.enabled": false,
+    "github.copilot.nextEditSuggestions.fixes": false,
+    "github.copilot.renameSuggestions.triggerAutomatically": false,
+    "javascript.suggestionActions.enabled": false,
+    "typescript.suggestionActions.enabled": false,
+    "editor.inlineSuggest.edits.showLongDistanceHint": false,
+    "editor.inlineSuggest.experimental.emptyResponseInformation": false,
+    "editor.suggest.showFunctions": false,
+    "editor.suggest.showIcons": false
+}

@@ -1,12 +1,13 @@
 using KeepGrouped.API.Events;
-
-namespace KeepGrouped.API.Users;
-
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+
+namespace KeepGrouped.API.Users;
+
 
 
 public class User

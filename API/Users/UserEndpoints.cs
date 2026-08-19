@@ -1,3 +1,5 @@
+using KeepGrouped.API.Users.Roles;
+
 namespace KeepGrouped.API.Users;
 
 public static class UserEndpoint
@@ -8,5 +10,6 @@ public static class UserEndpoint
 
         users.MapListUsers();
         users.MapGetUser();
+        users.MapPatchRole();
     }
 }

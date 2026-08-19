@@ -1,8 +1,10 @@
+using KeepGrouped.API.Roles;
+
 namespace KeepGrouped.API.Users;
 
-public record ListUsersResponse(string Id, string UserName)
+public record ListUsersResponse(string Id, string UserName, Role? Role)
 {
-    public static ListUsersResponse FromEntity(User user) => new(user.Id, user.UserName);
+    public static ListUsersResponse FromEntity(User user) => new(user.Id, user.UserName, user.Role);
 }
 
 public static class ListUsersEndpoint
