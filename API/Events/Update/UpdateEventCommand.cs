@@ -10,6 +10,8 @@ public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
     {
         Event? ev = await db.Events
             .Include(e => e.Registrations)
+            .Include(e => e.EventRoles)
+            .Include(e => e.Files)
             .SingleOrDefaultAsync(e => e.Id == id);
         if (ev is null)
         {
@@ -22,13 +24,13 @@ public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
         }
 
         List<EventRole> roles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync();
-        if (roles.Count != req.EventRoleIds.Distinct().Count())
+        if (roles.Count != req.EventRoleIds.Count)
         {
             return EventProblems.UnknownEventRoles(req.EventRoleIds.Except(roles.Select(er => er.Id)));
         }
 
         List<StorageFile> files = await db.Files.Where(fi => req.FileKeys.Contains(fi.Key)).ToListAsync();
-        if (files.Count != req.FileKeys.Distinct().Count())
+        if (files.Count != req.FileKeys.Count)
         {
             return EventProblems.UnknownFiles(req.FileKeys.Except(files.Select(fi => fi.Key)));
         }
