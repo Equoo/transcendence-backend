@@ -11,5 +11,6 @@ public static class UserEndpoint
         users.MapListUsers();
         users.MapGetUser();
         users.MapPatchRole();
+        users.MapDeleteUser();
     }
 }

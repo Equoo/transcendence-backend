@@ -10,6 +10,7 @@ public static class RefreshEndpoint
 {
     public static void MapRefresh(this IEndpointRouteBuilder auth)
     {
+
         auth.MapGet("/refresh", async (RefreshTokensCommand command, HttpContext http) =>
         {
             var result = await command.ExecuteAsync(TokenCookies.Get(http, "RefreshToken"));
