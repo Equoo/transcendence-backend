@@ -39,7 +39,7 @@ static public class DbBuilder
             {
                 return;
             }
-            User user = new("asventi", new (){Name = "Lautre", Permission = 1});
+            User user = new("asventi", new ("Lautre", 1));
 
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
             db.Set<User>().Add(user);
@@ -49,11 +49,11 @@ static public class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
             db.SaveChanges();
 
-            User user5 = new("a", new (){Name = "Admin", Permission = 1});
-            User user1 = new("devan", new (){Name = "Modo", Permission = 1});
-            User user2 = new("pierre", new (){Name = "Helper", Permission = 1});
-            User user3 = new("tom", new (){Name = "Member", Permission = 1});
-            User user4 = new("david", new (){Name = "Guest", Permission = 1});
+            User user5 = new("a", new ("Admin", 1));
+            User user1 = new("devan", new ("Modo", 1));
+            User user2 = new("pierre", new ("Helper", 1));
+            User user3 = new("tom", new ("Gold", 1));
+            User user4 = new("david", new ("Member", 1));
 
             user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");
             user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");

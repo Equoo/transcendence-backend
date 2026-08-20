@@ -8,5 +8,6 @@ public static class RolesEndpoints
         var roles = app.MapGroup("/roles").WithTags("Roles");
 
         roles.MapGetRoles();
+        roles.MapCreateRole();
     }
 }
