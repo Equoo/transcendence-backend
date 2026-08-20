@@ -18,6 +18,7 @@ public static class AuthenticationEndpoint
         auth.MapLogin();
         auth.MapLogout();
         auth.MapLogoutUser();
+        auth.MapResetPassword();
         auth.MapRefresh();
     }
 }
