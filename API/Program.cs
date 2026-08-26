@@ -69,7 +69,8 @@ class Program
 		app.MapAuthentication();
 		app.MapInvitations();
 
-		app.MapChat();
+		app.MapChannels();
+		app.MapMessages();
 		app.Run();
 	}
 }

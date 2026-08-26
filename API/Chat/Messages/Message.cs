@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Chat;
@@ -47,11 +46,4 @@ public record MessageResponse(
             UserSummary.FromEntity(msg.Sender),
             ChannelResponse.FromEntity(msg.Channel)
         );
-}
-
-public record MessageCreate
-{
-    [Required]
-    public string Content { get; init; } = null!;
-    public string? MessageReference { get; init; } = null;
 }
