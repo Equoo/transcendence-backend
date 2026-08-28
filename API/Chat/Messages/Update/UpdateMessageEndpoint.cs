@@ -20,13 +20,13 @@ public static class UpdateMessageEndpoint
                 [Authorize]
                 async (
                     UpdateMessageCommand command,
-                    string channelId,
+                    string id,
                     string msgId,
                     TokenContext token,
                     UpdateMessageRequest req
                 ) =>
                 {
-                    var result = await command.ExecuteAsync(channelId, msgId, token.User, req);
+                    var result = await command.ExecuteAsync(id, msgId, token.User, req);
                     if (result.IsProblem)
                     {
                         return result.Problem;

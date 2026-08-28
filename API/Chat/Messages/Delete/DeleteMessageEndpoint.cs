@@ -11,14 +11,9 @@ public static class DeleteMessageEndpoint
             .MapDelete(
                 "/{msgId}",
                 [Authorize]
-                async (
-                    DeleteMessageCommand command,
-                    string channelId,
-                    string msgId,
-                    TokenContext token
-                ) =>
+                async (DeleteMessageCommand command, string id, string msgId, TokenContext token) =>
                 {
-                    var result = await command.ExecuteAsync(channelId, msgId, token.User);
+                    var result = await command.ExecuteAsync(id, msgId, token.User);
                     if (result.IsProblem)
                     {
                         return result.Problem;
