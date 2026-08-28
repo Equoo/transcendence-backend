@@ -1,12 +1,18 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Chat;
 
-public sealed class UpdateMessageCommand(KeepGroupedDb db) : IHandler
+public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> hub) : IHandler
 {
-    public async Task<Result> ExecuteAsync(string msgId, User? sender, UpdateMessageRequest req)
+    public async Task<Result> ExecuteAsync(
+        string channelId,
+        string msgId,
+        User? sender,
+        UpdateMessageRequest req
+    )
     {
         if (sender is null)
         {
@@ -27,6 +33,14 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db) : IHandler
         msg.Content = req.Content;
         msg.EditAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        var response = MessageResponse.FromEntity(msg);
+
+        var users = await db
+            .Users.Where(user => user.IsOnline && user.Id != sender.Id)
+            .Select(user => user.Id)
+            .ToListAsync();
+        await hub.Clients.Users(users).SendAsync("UpdateMessage", channelId, msgId, response);
 
         return Result.OK;
     }

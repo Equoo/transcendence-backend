@@ -5,7 +5,11 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 {
-    public async Task<Result<List<MessageResponse>>> ExecuteAsync(string channelId, DateTime? before, int take)
+    public async Task<Result<List<MessageResponse>>> ExecuteAsync(
+        string channelId,
+        DateTime? before,
+        int take
+    )
     {
         var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == channelId);
         if (channel is null)
@@ -13,7 +17,7 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
             return ChannelProblems.NotFound(channelId);
         }
 
-        var query = db.Messages.AsNoTracking().Include(m => m.Sender).Where(m => m.ChannelId == channelId);
+        var query = db.Messages.Include(m => m.Sender).Where(m => m.ChannelId == channelId);
 
         if (before.HasValue)
         {

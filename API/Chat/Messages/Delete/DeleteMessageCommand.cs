@@ -7,7 +7,7 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> hub) : IHandler
 {
-    public async Task<Result> ExecuteAsync(string msgId, User? sender)
+    public async Task<Result> ExecuteAsync(string channelId, string msgId, User? sender)
     {
         if (sender is null)
         {
@@ -28,8 +28,11 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> 
         db.Messages.Remove(msg);
         await db.SaveChangesAsync();
 
-        var users = await db.Users.Where(user => user.IsOnline).Select(user => user.Id).ToListAsync();
-        await hub.Clients.Users(users).SendAsync("RemoveMessage", msgId);
+        var users = await db
+            .Users.Where(user => user.IsOnline && user.Id != sender.Id)
+            .Select(user => user.Id)
+            .ToListAsync();
+        await hub.Clients.Users(users).SendAsync("RemoveMessage", channelId, msgId);
 
         return Result.OK;
     }

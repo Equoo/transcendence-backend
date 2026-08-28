@@ -14,22 +14,35 @@ public static class UpdateMessageEndpoint
 {
     public static void MapUpdateMessage(this IEndpointRouteBuilder messages)
     {
-        messages.MapPut("/{msgId}", [Authorize] async (UpdateMessageCommand command, string msgId, TokenContext token, UpdateMessageRequest req) =>
-        {
-            var result = await command.ExecuteAsync(msgId, token.User, req);
-            if (result.IsProblem)
-            {
-                return result.Problem;
-            }
+        messages
+            .MapPut(
+                "/{msgId}",
+                [Authorize]
+                async (
+                    UpdateMessageCommand command,
+                    string channelId,
+                    string msgId,
+                    TokenContext token,
+                    UpdateMessageRequest req
+                ) =>
+                {
+                    var result = await command.ExecuteAsync(channelId, msgId, token.User, req);
+                    if (result.IsProblem)
+                    {
+                        return result.Problem;
+                    }
 
-            return Results.NoContent();
-        })
-        .WithName("messages.update")
-        .WithSummary("Edit a message")
-        .WithDescription("Replaces the content of a message. Only the message's sender can edit it.")
-        .Produces(StatusCodes.Status204NoContent)
-        .ProducesValidationProblem()
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound);
+                    return Results.NoContent();
+                }
+            )
+            .WithName("messages.update")
+            .WithSummary("Edit a message")
+            .WithDescription(
+                "Replaces the content of a message. Only the message's sender can edit it."
+            )
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }
