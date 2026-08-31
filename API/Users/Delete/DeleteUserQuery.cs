@@ -4,7 +4,7 @@ using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class DeleteUserQuery(KeepGroupedDb db): IHandler
+public sealed class DeleteUserQuery(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecuteAsync(string id)
     {
@@ -15,16 +15,15 @@ public sealed class DeleteUserQuery(KeepGroupedDb db): IHandler
             return UserProblems.NotFound(id);
         }
 
-        // RefreshToken? refresh = await db.RefreshTokens.SingleOrDefaultAsync(r => r.UserId == id);
+        RefreshToken? refresh = await db.RefreshTokens.SingleOrDefaultAsync(r => r.UserId == id);
 
-        // if (refresh is null)
-        // {
-        //     return TokensProblems.NotFound(id);
-        // }
+        if (refresh is not null)
+        {
+            db.RefreshTokens.Remove(refresh);
+        }
 
-        // db.RefreshTokens.Remove(refresh);
         db.Users.Remove(user);
-        
+
         await db.SaveChangesAsync();
 
         return Result.OK;
