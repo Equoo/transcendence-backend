@@ -9,7 +9,9 @@ public sealed class ListUsersQuery(KeepGroupedDb db) : IHandler
         var users = await db.Users
             .AsNoTracking()
             .Include(u => u.Role)
+            .OrderBy(u => u.UserName)
             .ToListAsync();
+
 
         return users.Select(ListUsersResponse.FromEntity).ToList();
     }
