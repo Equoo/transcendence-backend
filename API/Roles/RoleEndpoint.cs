@@ -10,5 +10,6 @@ public static class RolesEndpoints
         roles.MapGetRoles();
         roles.MapCreateRole();
         roles.MapPatchRole();
+        roles.MapDeleteRole();
     }
 }

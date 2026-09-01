@@ -15,7 +15,7 @@ public static class PatchRoleEndpoint
                 return result.Problem;
             }
 
-            return Results.Ok();    
+            return Results.Ok();
         });
     }
 }
