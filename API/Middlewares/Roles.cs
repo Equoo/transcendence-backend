@@ -18,7 +18,7 @@ public class RolesMiddleware
         RolesAttribute? attribute = endpoint?.Metadata.GetMetadata<RolesAttribute>();
         if (attribute is not null)
         {
-           if ((tk.User.Role?.Permission & attribute.Permission) != attribute.Permission)
+            if ((tk.User.Role.Permission & attribute.Permission) != attribute.Permission)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;

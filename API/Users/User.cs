@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace KeepGrouped.API.Users;
 
@@ -15,27 +14,10 @@ namespace KeepGrouped.API.Users;
 
 public class User
 {
-    [Key]
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserName { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
-    public string RoleId { get; set; }
-    [JsonIgnore]
     public Role Role { get; set; } = null!;
-
-    public User() { }
-
-    public User(string username)
-    {
-        UserName = username;
-    }
-
-
-    public User(string username, Role role)
-    {
-        UserName = username;
-        Role = role;
-    }
 
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];

@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
-public record GetMeResponse(string Id, string UserName, Role Role)
+public record GetMeResponse(string Id, string UserName, RoleResponse Role)
 {
-    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName, user.Role);
+    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role));
 }
 
 public static class GetMeEndpoint

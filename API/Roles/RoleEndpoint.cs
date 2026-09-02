@@ -7,7 +7,7 @@ public static class RolesEndpoints
     {
         var roles = app.MapGroup("/roles").WithTags("Roles");
 
-        roles.MapGetRoles();
+        roles.MapListRole();
         roles.MapCreateRole();
         roles.MapPatchPermRole();
         roles.MapPatchNameRole();
