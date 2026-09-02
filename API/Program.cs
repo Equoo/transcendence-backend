@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Invitation;
@@ -24,6 +26,7 @@ class Program
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
+
 
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
@@ -67,6 +70,7 @@ class Program
         app.MapStorageFiles();
         app.MapAuthentication();
         app.MapInvitations();
+        app.MapRoles();
 
         app.Run();
 

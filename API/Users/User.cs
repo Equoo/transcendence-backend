@@ -1,24 +1,23 @@
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace KeepGrouped.API.Users;
 
+
+
 public class User
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserName { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-
-    public User() { }
-
-    public User(string username)
-    {
-        UserName = username;
-    }
-    public User(string username, string id)
-    {
-        UserName = username;
-        Id = id;
-    }
+    public Role Role { get; set; } = null!;
 
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];

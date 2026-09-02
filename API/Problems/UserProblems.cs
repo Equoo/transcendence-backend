@@ -18,4 +18,4 @@ static public class UserProblems
         StatusCodes.Status401Unauthorized, "NOT_AUTHENTICATED",
         "Not authenticated",
         "This operation acts on behalf of the current user, but no user is authenticated.");
-}
+};

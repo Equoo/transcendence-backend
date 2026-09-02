@@ -1,11 +1,12 @@
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
-public record GetMeResponse(string Id, string UserName)
+public record GetMeResponse(string Id, string UserName, RoleResponse Role)
 {
-    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName);
+    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role));
 }
 
 public static class GetMeEndpoint

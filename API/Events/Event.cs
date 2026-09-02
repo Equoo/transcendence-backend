@@ -1,5 +1,10 @@
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Storage;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+
 
 namespace KeepGrouped.API.Events;
 

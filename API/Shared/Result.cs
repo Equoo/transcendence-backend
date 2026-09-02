@@ -4,7 +4,7 @@ namespace KeepGrouped.API;
 
 public sealed record Result<T>
 {
-    public readonly T? _value;
+    private readonly T? _value;
 
     public ProblemHttpResult? Problem { get; init; }
 
