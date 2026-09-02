@@ -11,6 +11,13 @@ public sealed class PatchRoleNameQuery(KeepGroupedDb db) : IHandler
     {
         Role? role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
 
+        Role? check_name = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
+
+        if (check_name is not null)
+        {
+            return RoleProblems.NameAlreadyUsed(name);
+        }
+
         if (role is null)
         {
             return RoleProblems.NotFound(id);
