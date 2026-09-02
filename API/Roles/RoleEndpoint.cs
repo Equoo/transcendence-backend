@@ -9,7 +9,8 @@ public static class RolesEndpoints
 
         roles.MapGetRoles();
         roles.MapCreateRole();
-        roles.MapPatchRole();
+        roles.MapPatchPermRole();
+        roles.MapPatchNameRole();
         roles.MapDeleteRole();
     }
 }
