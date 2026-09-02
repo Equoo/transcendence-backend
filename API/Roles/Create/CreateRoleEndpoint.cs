@@ -1,3 +1,4 @@
+using KeepGrouped.API.Attributes.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
