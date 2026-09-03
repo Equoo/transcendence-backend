@@ -17,10 +17,10 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
         base.OnModelCreating(builder);
         builder.Entity<Event>().HasMany(e => e.Users).WithMany(e => e.Events).UsingEntity<Registration>();
         builder.Entity<Event>().HasOne(e => e.Organizer);
-        builder.Entity<StorageFile>().HasOne(f => f.Creator);
         builder.Entity<EventRole>().HasAlternateKey(er => er.Name);
 
-
+        builder.Entity<StorageFile>().HasOne(f => f.Creator);
+        builder.Entity<User>().HasOne(u => u.Avatar).WithOne().HasForeignKey<User>("AvatarKey");
     }
     public DbSet<User> Users { get; set; }
     public DbSet<Event> Events { get; set; }

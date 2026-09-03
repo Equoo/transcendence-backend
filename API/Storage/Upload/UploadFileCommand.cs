@@ -5,7 +5,7 @@ namespace KeepGrouped.API.Storage;
 
 public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHandler
 {
-    public async Task<Result<UploadFileResponse>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator)
+    public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator)
     {
         if (length <= 0)
         {
@@ -32,6 +32,6 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHan
         db.Files.Add(filedb);
 
         await db.SaveChangesAsync();
-        return UploadFileResponse.FromEntity(filedb);
+        return filedb;
     }
 }

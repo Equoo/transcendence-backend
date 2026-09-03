@@ -18,4 +18,9 @@ static public class UserProblems
         StatusCodes.Status401Unauthorized, "NOT_AUTHENTICATED",
         "Not authenticated",
         "This operation acts on behalf of the current user, but no user is authenticated.");
+
+    static public ProblemHttpResult InvalidAvatarType(string contentType) => ProblemFactory.Create(
+        StatusCodes.Status422UnprocessableEntity, "INVALID_AVATAR_TYPE",
+        "Invalid avatar type",
+        $"'{contentType}' is not an image. The avatar must be an image file.");
 };

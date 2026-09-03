@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Storage;
 
 namespace KeepGrouped.API.Users;
 
@@ -19,6 +20,7 @@ public class User
     public string PasswordHash { get; set; } = null!;
     public Role Role { get; set; } = null!;
 
+    public StorageFile? Avatar { get; set; }
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
 }
@@ -27,7 +29,7 @@ public class User
 /// The public face of a user, embedded wherever another resource points at one (an event organizer,
 /// a registration, a file creator). Shared on purpose: it is one projection, not one per use case.
 /// </summary>
-public record UserSummary(string Id, string UserName)
+public record UserSummary(string Id, string UserName, RoleResponse Role)
 {
-    public static UserSummary FromEntity(User user) => new(user.Id, user.UserName);
+    public static UserSummary FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role));
 }

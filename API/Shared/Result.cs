@@ -6,9 +6,9 @@ public sealed record Result<T>
 {
     private readonly T? _value;
 
-    public ProblemHttpResult? Problem { get; init; }
+    private readonly ProblemHttpResult? _problem;
 
-    public bool IsProblem => Problem is not null;
+    public bool IsProblem => _problem is not null;
 
     public static implicit operator Result<T>(T value)
     {
@@ -21,6 +21,7 @@ public sealed record Result<T>
     }
 
     public T Value => _value is not null ? _value : throw new NullReferenceException("value is null");
+    public ProblemHttpResult Problem => _problem is not null ? _problem : throw new NullReferenceException("problem is null");
 
     public Result(T value)
     {
@@ -28,15 +29,17 @@ public sealed record Result<T>
     }
     public Result(ProblemHttpResult problem)
     {
-        Problem = problem;
+        _problem = problem;
     }
 }
 
 public sealed record Result
 {
-    public ProblemHttpResult? Problem { get; init; }
+    private readonly ProblemHttpResult? _problem;
 
-    public bool IsProblem => Problem is not null;
+    public bool IsProblem => _problem is not null;
+    public ProblemHttpResult Problem => _problem is not null ? _problem : throw new NullReferenceException("problem is null");
+
 
     public static implicit operator Result(ProblemHttpResult problem)
     {
@@ -50,7 +53,7 @@ public sealed record Result
 
     public Result(ProblemHttpResult problem)
     {
-        Problem = problem;
+        _problem = problem;
     }
 
     static public Result OK => new();

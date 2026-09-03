@@ -10,7 +10,7 @@ public sealed class GetEventQuery(KeepGroupedDb db) : IHandler
     {
         var ev = await db.Events
             .AsNoTracking()
-            .Include(e => e.Organizer)
+            .Include(e => e.Organizer).ThenInclude(o => o.Role)
             .Include(e => e.Registrations).ThenInclude(r => r.User)
             .Include(e => e.Registrations).ThenInclude(r => r.Role)
             .Include(e => e.EventRoles.Where(er => er.Name != EventRole.Implicit))
