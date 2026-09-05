@@ -32,6 +32,7 @@ public record MessageResponse(
     string Id,
     string Content,
     DateTime SentAt,
+    DateTime? EditAt,
     string? MessageReference,
     UserSummary Sender,
     ChannelResponse Channel
@@ -42,6 +43,7 @@ public record MessageResponse(
             msg.Id,
             msg.Content,
             msg.SentAt,
+            msg.EditAt,
             msg.MessageReference,
             UserSummary.FromEntity(msg.Sender),
             ChannelResponse.FromEntity(msg.Channel)
