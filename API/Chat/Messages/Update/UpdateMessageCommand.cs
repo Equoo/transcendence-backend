@@ -19,7 +19,9 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> 
             return UserProblems.NotAuthenticated();
         }
 
-        var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
+        var msg = await db
+            .Messages.Include(m => m.Channel)
+            .SingleOrDefaultAsync(m => m.Id == msgId);
         if (msg is null)
         {
             return MessageProblems.NotFound(msgId);
