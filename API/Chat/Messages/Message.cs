@@ -6,13 +6,14 @@ public class Message
 {
     public Message() { }
 
-    public Message(User sender, Channel channel, string content)
+    public Message(User sender, Channel channel, string content, string? messageReference)
     {
         Content = content;
         SenderId = sender.Id;
         Sender = sender;
         ChannelId = channel.Id;
         Channel = channel;
+        MessageReference = messageReference;
     }
 
     public string Id { get; init; } = Guid.NewGuid().ToString();
