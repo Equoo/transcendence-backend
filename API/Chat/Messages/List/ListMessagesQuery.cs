@@ -17,7 +17,12 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
             return ChannelProblems.NotFound(channelId);
         }
 
-        var query = db.Messages.Include(m => m.Sender).Where(m => m.ChannelId == channelId);
+        var query = db
+            .Messages.Include(m => m.Sender)
+            .Include(m => m.MessageRef)
+                .ThenInclude(r => r!.Sender)
+            .Include(m => m.Channel)
+            .Where(m => m.ChannelId == channelId);
 
         if (before.HasValue)
         {

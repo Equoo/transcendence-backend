@@ -21,7 +21,10 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> 
 
         var msg = await db
             .Messages.Include(m => m.Channel)
-            .SingleOrDefaultAsync(m => m.Id == msgId);
+            .Include(m => m.Sender)
+            .Include(m => m.MessageRef)
+                .ThenInclude(r => r!.Sender)
+            .SingleOrDefaultAsync(m => m.ChannelId == channelId && m.Id == msgId);
         if (msg is null)
         {
             return MessageProblems.NotFound(msgId);

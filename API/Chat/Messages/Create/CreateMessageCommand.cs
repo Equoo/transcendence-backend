@@ -24,7 +24,15 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> 
             return ChannelProblems.NotFound(channelId);
         }
 
-        var msg = new Message(sender, channel, req.Content, req.MessageReference);
+        var msgRef = req.MessageReference is null
+            ? null
+            : await db
+                .Messages.Include(m => m.Sender)
+                .SingleOrDefaultAsync(m =>
+                    m.ChannelId == channelId && m.Id == req.MessageReference
+                );
+
+        var msg = new Message(sender, channel, req.Content, msgRef);
         db.Messages.Add(msg);
         await db.SaveChangesAsync();
 
