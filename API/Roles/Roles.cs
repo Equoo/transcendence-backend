@@ -16,18 +16,17 @@ public enum Perms
     HandleEvent = 2,
 
     // User
-    GetUser = 32,
-    CreateUser = 64,
-    ChangeUserName = 128,
-    DeleteUser = 256,
-    ResetUserPassword = 516,
+    HandleUsers = 4,
+    InviteUser = 8,
 
     // Chat
-    HandleChannel = 2048,
+    HandleChannels = 16,
+
+    // Roles
+    HandleRoles = 32,
 
     // Knowledge
-
-    // Calendar
+    HandleKnowledge = 64,
 }
 
 public class Role
