@@ -10,10 +10,6 @@ public static class LogoutUserEndpoint
         auth.MapDelete("/logout/{id}", [Authorize] async (LogoutQuery query, HttpContext http, string id) =>
         {
             var result = await query.ExecAsync(id);
-            if (result.IsProblem)
-            {
-                return result.Problem;
-            }
 
             return Results.NoContent();
         })
