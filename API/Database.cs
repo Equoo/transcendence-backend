@@ -53,7 +53,7 @@ static public class DbBuilder
 
             db.SaveChanges();
 
-            User user5 = new() { UserName = "a", Role = new("Admin", 1) };
+            User user5 = new() { UserName = "a", Role = new("Admin", 111) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
             User user3 = new() { UserName = "tom", Role = new("Gold", 1) };
