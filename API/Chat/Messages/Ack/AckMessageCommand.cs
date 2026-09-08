@@ -6,28 +6,39 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class AckMessageCommand(KeepGroupedDb db) : IHandler
 {
-    public async Task<Result> ExecuteAsync(string channelId, string msgId, User? sender)
-    {
-        if (sender is null)
-        {
-            return UserProblems.NotAuthenticated();
-        }
+	public async Task<Result> ExecuteAsync(string channelId, string msgId, User? sender)
+	{
+		if (sender is null)
+		{
+			return UserProblems.NotAuthenticated();
+		}
 
-        var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == channelId);
-        if (channel is null)
-        {
-            return ChannelProblems.NotFound(channelId);
-        }
+		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == channelId);
+		if (channel is null)
+		{
+			return ChannelProblems.NotFound(channelId);
+		}
 
-        var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
-        if (msg is null)
-        {
-            return MessageProblems.NotFound(msgId);
-        }
+		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
+		if (msg is null)
+		{
+			return MessageProblems.NotFound(msgId);
+		}
 
-        sender.ChannelsAckMsg[channelId] = msgId;
-        await db.SaveChangesAsync();
+		var ack = await db.ChannelAcks.SingleOrDefaultAsync(ack =>
+			ack.ChannelId == channelId && ack.UserId == sender.Id
+		);
 
-        return Result.OK;
-    }
+		if (ack is null)
+		{
+			db.ChannelAcks.Add(new ChannelAck(sender, channel, msg.SentAt));
+		}
+		else
+		{
+			ack.AckAt = msg.SentAt;
+		}
+		await db.SaveChangesAsync();
+
+		return Result.OK;
+	}
 }

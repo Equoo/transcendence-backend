@@ -34,7 +34,7 @@ public class TokenContextMiddleware
 
 		string id = Token.ReadFirstClaim(token_cookie);
 
-		User? db_user = await db.Users.SingleOrDefaultAsync(usr => usr.Id == id);
+		User? db_user = await db.Users.Include(u => u.ChannelsAckMsg).SingleOrDefaultAsync(usr => usr.Id == id);
 
 		if (db_user is null)
 		{

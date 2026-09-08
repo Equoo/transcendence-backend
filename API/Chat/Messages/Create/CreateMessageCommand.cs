@@ -24,6 +24,11 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> 
             return ChannelProblems.NotFound(channelId);
         }
 
+        if (req.Content.Length > 8192)
+        {
+            return MessageProblems.TooLong();
+        }
+
         var msgRef = req.MessageReference is null
             ? null
             : await db
