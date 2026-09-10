@@ -1,10 +1,12 @@
 using KeepGrouped.API.Roles;
+using KeepGrouped.API.Storage;
 
 namespace KeepGrouped.API.Users;
 
-public record ListUsersResponse(string Id, string UserName, RoleResponse Role)
+public record ListUsersResponse(string Id, string UserName, GetFileMetaResponse? Avatar, RoleResponse Role)
 {
-    public static ListUsersResponse FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role));
+    public static ListUsersResponse FromEntity(User user) => new(user.Id, user.UserName,
+    user.Avatar != null ? GetFileMetaResponse.FromEntity(user.Avatar) : null, RoleResponse.FromEntity(user.Role));
 }
 
 public static class ListUsersEndpoint

@@ -35,7 +35,7 @@ public class TokenContextMiddleware
 
         string id = Token.ReadFirstClaim(token_cookie);
 
-        User? db_user = await db.Users.Include(u => u.Role).SingleOrDefaultAsync(usr => usr.Id == id);
+        User? db_user = await db.Users.Include(u => u.Role).Include(u => u.Avatar).SingleOrDefaultAsync(usr => usr.Id == id);
 
         if (db_user is null)
         {
