@@ -9,7 +9,7 @@ public sealed class ListRegistrationsQuery(KeepGroupedDb db) : IHandler
     {
         Event? ev = await db.Events
             .AsNoTracking()
-            .Include(e => e.Registrations).ThenInclude(r => r.User)
+            .Include(e => e.Registrations).ThenInclude(r => r.User).ThenInclude(u => u.Role)
             .Include(e => e.Registrations).ThenInclude(r => r.Role)
             .SingleOrDefaultAsync(e => e.Id == eventId);
         if (ev is null)
