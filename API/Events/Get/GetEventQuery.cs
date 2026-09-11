@@ -11,7 +11,9 @@ public sealed class GetEventQuery(KeepGroupedDb db) : IHandler
         var ev = await db.Events
             .AsNoTracking()
             .Include(e => e.Organizer).ThenInclude(o => o.Role)
+            .Include(e => e.Organizer).ThenInclude(u => u.Avatar)
             .Include(e => e.Registrations).ThenInclude(r => r.User).ThenInclude(u => u.Role)
+            .Include(e => e.Registrations).ThenInclude(r => r.User).ThenInclude(u => u.Avatar)
             .Include(e => e.Registrations).ThenInclude(r => r.Role)
             .Include(e => e.EventRoles.Where(er => er.Name != EventRole.Implicit))
             .Include(e => e.Files)

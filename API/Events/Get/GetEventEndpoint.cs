@@ -11,7 +11,7 @@ public record GetEventResponse(
     int Size,
     string Location,
     string Description,
-    UserSummary Organizer,
+    GetUserResponse Organizer,
     ICollection<string> Tags,
     ICollection<RegistrationSummary> Registrations,
     ICollection<EventRoleSummary> EventRoles,
@@ -22,7 +22,7 @@ public record GetEventResponse(
 {
     public static GetEventResponse FromEntity(Event ev, bool isRegistered) => new(
         ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
-        UserSummary.FromEntity(ev.Organizer), ev.Tags,
+        GetUserResponse.FromEntity(ev.Organizer), ev.Tags,
         [.. ev.Registrations.Select(RegistrationSummary.FromEntity)],
         [.. ev.EventRoles.Select(EventRoleSummary.FromEntity)],
         [.. ev.Files.Select(FileSummary.FromEntity)],
