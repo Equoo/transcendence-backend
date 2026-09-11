@@ -8,6 +8,7 @@ using KeepGrouped.API.Password;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users.Roles;
 using KeepGrouped.API.Users.Invitation;
+using KeepGrouped.API.Users.Auth;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
@@ -36,24 +37,30 @@ static public class DbBuilder
 {
     static public void BuildDb(this WebApplicationBuilder builder)
     {
+        var authOptions = builder.Configuration
+            .GetSection(AuthenticationOptions.SectionName)
+            .Get<AuthenticationOptions>()!;
         builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
         {
-            if (db.Set<User>().FirstOrDefault(u => u.UserName == "asventi") != null)
+            if (db.Set<User>().FirstOrDefault(u => u.UserName == authOptions.DefaultAdminLogin) != null)
             {
                 return;
             }
-            User user = new() { UserName = "asventi", Role = new("Lautre", 1) };
+            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("Admin", 1) };
 
-            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, "1234");
+            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
             db.Set<User>().Add(user);
+            db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
+            db.SaveChanges();
+
+            if (!builder.Environment.IsDevelopment())
+            {
+                return;
+            }
 
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
-
-            db.SaveChanges();
-
             User user5 = new() { UserName = "a", Role = new("Admin", 1) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };

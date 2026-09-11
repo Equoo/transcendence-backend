@@ -43,10 +43,6 @@ class Program
         app.UseStatusCodePages();
         if (app.Environment.IsDevelopment())
         {
-            using var serviceScope = app.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
