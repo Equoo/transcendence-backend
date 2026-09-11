@@ -7,7 +7,6 @@ using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Invitation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
@@ -15,14 +14,21 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 	{
 		base.OnModelCreating(builder);
 
-		builder.Entity<ChannelAck>().HasKey(a => new { a.UserId, a.ChannelId });
+		builder.Entity<Event>(entity =>
+		{
 
-		builder
-			.Entity<Event>()
-			.HasMany(e => e.Users)
-			.WithMany(e => e.Events)
-			.UsingEntity<Registration>();
-		builder.Entity<Event>().HasOne(e => e.Organizer);
+			entity.HasMany(e => e.Users)
+				.WithMany(e => e.Events)
+				.UsingEntity<Registration>();
+
+			entity.HasOne(e => e.Organizer);
+
+			entity.HasOne(e => e.Channel)
+				.WithOne(c => c.Event)
+				.HasForeignKey<Event>(e => e.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
+
 		builder.Entity<StorageFile>().HasOne(f => f.Creator);
 		builder.Entity<EventRole>().HasAlternateKey(er => er.Name);
 
@@ -56,14 +62,12 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity.Property(m => m.Content).HasMaxLength(8192);
 		});
 
-		builder.Entity<ChannelAck>(entity =>
-		{
-			entity
-				.HasOne(m => m.Channel)
-				.WithMany()
-				.HasForeignKey(m => m.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
+		builder.Entity<ChannelAck>().HasKey(a => new { a.UserId, a.ChannelId });
+
+		builder.Entity<ChannelAck>().HasOne(m => m.Channel)
+			.WithMany()
+			.HasForeignKey(m => m.ChannelId)
+			.OnDelete(DeleteBehavior.Cascade);
 	}
 
 	public DbSet<User> Users { get; set; }
@@ -111,22 +115,6 @@ public static class DbBuilder
 						db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
 						db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
 						db.SaveChanges();
-
-						var ev = new Event()
-						{
-							Name = "Default Event",
-							Date = DateTime.UtcNow.AddMinutes(30),
-							Location = "Default Location",
-							Size = 10,
-							Organizer = user,
-							// EventRoles = [.. db.Set<EventRole>()]
-						};
-						ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
-						ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
-						ev.EventRoles.Add(
-							db.Set<EventRole>().First(er => er.Name == EventRole.Implicit)
-						);
-						db.Set<Event>().Add(ev);
 
 						db.SaveChanges();
 					}
