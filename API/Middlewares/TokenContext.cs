@@ -18,7 +18,7 @@ public class TokenContextMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext http, KeepGroupedDb db, TokenContext tcontext)
+    public async Task InvokeAsync(HttpContext http, KeepGroupedDb db, TokenContext tcontext, TokenProvider provider)
     {
         string? token_cookie = TokenCookies.Get(http, "AccessToken");
 
@@ -28,12 +28,12 @@ public class TokenContextMiddleware
             return;
         }
 
-        if (!Token.CanRead(token_cookie))
+        if (!provider.CanRead(token_cookie))
         {
             TokenCookies.Remove(http);
         }
 
-        string id = Token.ReadFirstClaim(token_cookie);
+        string id = provider.ReadFirstClaim(token_cookie);
 
         User? db_user = await db.Users.Include(u => u.Role).Include(u => u.Avatar).SingleOrDefaultAsync(usr => usr.Id == id);
 

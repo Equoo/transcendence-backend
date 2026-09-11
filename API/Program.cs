@@ -3,6 +3,7 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Auth;
 using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -42,10 +43,6 @@ class Program
         app.UseStatusCodePages();
         if (app.Environment.IsDevelopment())
         {
-            using var serviceScope = app.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
             app.UseSwagger();
             app.UseSwaggerUI();
         }

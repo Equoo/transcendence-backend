@@ -9,7 +9,7 @@ namespace KeepGrouped.API.Users;
 /// <summary>Handler-to-endpoint carrier: the endpoint alone turns the tokens into cookies.</summary>
 public sealed record RegisteredUser(RegisterResponse User, IssuedTokens Tokens);
 
-public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> hash) : IHandler
+public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> hash, TokenProvider provider) : IHandler
 {
     public async Task<Result<RegisteredUser>> ExecuteAsync(RegisterRequest req)
     {
@@ -30,24 +30,24 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, IPasswordHasher<User> 
         }
 
 
-			var role_db = await db.Roles.SingleOrDefaultAsync(o => o.Name == "Member");
+        var role_db = await db.Roles.SingleAsync(o => o.Name == "Member");
 
 
-			var user = new User
-			{
-				UserName = req.UserName,
-				Role = role_db
-			};
+        var user = new User
+        {
+            UserName = req.UserName,
+            Role = role_db
+        };
 
 
         user.PasswordHash = hash.HashPassword(user, req.Password);
 
         db.Users.Add(user);
 
-        string acess_token = Token.CreateAccess(user.Id);
+        string acess_token = provider.CreateAccess(user.Id);
 
         string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
-        string refresh_token = Token.CreateRefresh(id);
+        string refresh_token = provider.CreateRefresh(id);
 
         db.RefreshTokens.Add(new RefreshToken
         {
