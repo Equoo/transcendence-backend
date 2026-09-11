@@ -54,6 +54,6 @@ public sealed class CreateEventCommand(KeepGroupedDb db) : IHandler
 		db.Events.Add(ev);
 		await db.SaveChangesAsync();
 
-		return CreateEventResponse.FromEntity(ev);
+		return CreateEventResponse.FromEntity(ev, channelResult.Value);
 	}
 }
