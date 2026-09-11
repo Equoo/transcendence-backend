@@ -8,7 +8,7 @@ namespace KeepGrouped.API.Users;
 /// <summary>Handler-to-endpoint carrier: the endpoint alone turns the tokens into cookies.</summary>
 public sealed record RefreshedSession(RefreshResponse User, IssuedTokens Tokens);
 
-public sealed class 
+public sealed class
 RefreshTokensCommand(KeepGroupedDb db) : IHandler
 {
     public async Task<Result<RefreshedSession>> ExecuteAsync(string? cookieRefresh)

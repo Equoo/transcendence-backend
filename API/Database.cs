@@ -6,7 +6,6 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Password;
 using KeepGrouped.API.Roles;
-using KeepGrouped.API.Users.Roles;
 using KeepGrouped.API.Users.Invitation;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
@@ -53,10 +52,10 @@ static public class DbBuilder
 
             db.SaveChanges();
 
-            User user5 = new() { UserName = "a", Role = new("Admin", 111) };
+            User user5 = new() { UserName = "a", Role = new("Admin", 63) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
-            User user3 = new() { UserName = "tom", Role = new("Gold", 1) };
+            User user3 = new() { UserName = "tom", Role = new("Gold", 63) };
             User user4 = new() { UserName = "david", Role = new("Member", 1) };
 
             user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");

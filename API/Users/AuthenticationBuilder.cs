@@ -2,6 +2,7 @@ using System.Text;
 using KeepGrouped.API.Password;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.IdentityModel.Tokens;
 
 namespace KeepGrouped.API.Users;
