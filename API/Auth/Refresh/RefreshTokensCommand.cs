@@ -8,7 +8,7 @@ namespace KeepGrouped.API.Users;
 /// <summary>Handler-to-endpoint carrier: the endpoint alone turns the tokens into cookies.</summary>
 public sealed record RefreshedSession(RefreshResponse User, IssuedTokens Tokens);
 
-public sealed class RefreshTokensCommand(KeepGroupedDb db) : IHandler
+public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provider) : IHandler
 {
     public async Task<Result<RefreshedSession>> ExecuteAsync(string? cookieRefresh)
     {
@@ -17,12 +17,12 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db) : IHandler
             return AuthProblems.RefreshTokenMissing();
         }
 
-        if (!Token.IsValid(cookieRefresh))
+        if (!provider.IsValid(cookieRefresh))
         {
             return AuthProblems.RefreshTokenInvalid();
         }
 
-        string refresh_id = Hash256.GetHashSha256(Token.ReadFirstClaim(cookieRefresh));
+        string refresh_id = Hash256.GetHashSha256(provider.ReadFirstClaim(cookieRefresh));
 
         // Can have many if your are log in different computer in the same account
         RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == refresh_id);
@@ -37,10 +37,10 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db) : IHandler
             return AuthProblems.RefreshTokenUnknown();
         }
 
-        string new_acess = Token.CreateAccess(refresh_db.UserId);
+        string new_acess = provider.CreateAccess(refresh_db.UserId);
 
         string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
-        string new_refresh = Token.CreateRefresh(id);
+        string new_refresh = provider.CreateRefresh(id);
 
         db.RefreshTokens.Remove(refresh_db);
         db.RefreshTokens.Add(new RefreshToken

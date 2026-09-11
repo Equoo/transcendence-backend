@@ -21,6 +21,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 
         builder.Entity<StorageFile>().HasOne(f => f.Creator);
         builder.Entity<User>().HasOne(u => u.Avatar).WithOne().HasForeignKey<User>("AvatarKey");
+
     }
     public DbSet<User> Users { get; set; }
     public DbSet<Event> Events { get; set; }

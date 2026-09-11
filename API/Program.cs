@@ -3,6 +3,7 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Auth;
 using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
