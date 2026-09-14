@@ -10,6 +10,8 @@ public static class AuthenticationEndpoint
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseMiddleware<TokenContextMiddleware>();
+        app.UseMiddleware<DelayMiddleware>();
+        app.UseMiddleware<RolesMiddleware>();
 
         var auth = app.MapGroup("/auth");
 

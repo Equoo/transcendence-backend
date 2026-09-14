@@ -1,3 +1,5 @@
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users.Invitation;
@@ -6,7 +8,7 @@ public static class DeleteInvitationEndpoint
 {
     public static void MapDeleteInvitation(this RouteGroupBuilder route)
     {
-        route.MapDelete("/{id}", [Authorize] async (DeleteInvitationCommand cmd, string id) =>
+        route.MapDelete("/{id}", [Authorize][Roles((int)Perms.InviteUser)] async (DeleteInvitationCommand cmd, string id) =>
         {
             var result = await cmd.ExecuteAsync(id);
 

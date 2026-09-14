@@ -1,3 +1,4 @@
+using KeepGrouped.API.Attributes.Roles;
 using Npgsql.Replication;
 
 namespace KeepGrouped.API.Roles;
@@ -6,7 +7,7 @@ public static class DeleteRoleEndpoint
 {
     public static void MapDeleteRole(this IEndpointRouteBuilder roles)
     {
-        roles.MapDelete("/{id}", async (string id, DeleteRoleQuery query) =>
+        roles.MapDelete("/{id}", [Roles((int)Perms.HandleRoles)] async (string id, DeleteRoleQuery query) =>
         {
             var result = await query.ExecAsync(id);
             if (result.IsProblem)
