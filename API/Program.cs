@@ -1,3 +1,4 @@
+using KeepGrouped.API.Chat;
 using System.Text.Json.Serialization;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
@@ -12,64 +13,73 @@ namespace KeepGrouped.API;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        // ------------ Buildings Dependances
+	static void Main(string[] args)
+	{
+		// ------------ Buildings Dependances
 
-        var builder = WebApplication.CreateBuilder(args);
+		var builder = WebApplication.CreateBuilder(args);
 
-        builder.BuildStorage();
-        builder.BuildDb();
-        builder.BuildAuthentication();
-        builder.AddHandlers();
+		builder.BuildStorage();
+		builder.BuildDb();
+		builder.BuildAuthentication();
+		builder.AddHandlers();
 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-        });
+		builder.Services.Configure<ForwardedHeadersOptions>(options =>
+		{
+			options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+		});
 
+		builder.Services.AddProblemDetails();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddValidation();
+		builder.Services.AddSignalR();
 
-        builder.Services.AddProblemDetails();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddValidation();
+		builder.Services.AddProblemDetails();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddValidation();
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddSwaggerGen();
-        }
+		if (builder.Environment.IsDevelopment())
+		{
+			builder.Services.AddSwaggerGen();
+		}
 
-        var app = builder.Build();
-        app.UseForwardedHeaders();
-        app.UseStatusCodePages();
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-        else
-        {
-            using var serviceScope = app.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.Migrate();
-        }
-        app.MapGet("/", () => "Hello World from API!")
-            .WithTags("Diagnostics")
-            .WithName("root")
-            .WithSummary("API root")
-            .WithDescription("Returns a constant greeting, used to check that the API is up.")
-            .Produces<string>(StatusCodes.Status200OK);
+		var app = builder.Build();
+		app.UseForwardedHeaders();
+		app.UseStatusCodePages();
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseSwagger();
+			app.UseSwaggerUI();
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+			context.Database.Migrate();
+		}
+		else
+		{
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+			context.Database.Migrate();
+		}
+		app.MapGet("/", () => "Hello World from API!")
+			.WithTags("Diagnostics")
+			.WithName("root")
+			.WithSummary("API root")
+			.WithDescription("Returns a constant greeting, used to check that the API is up.")
+			.Produces<string>(StatusCodes.Status200OK);
 
-        app.MapEvents();
-        app.MapRegistrations();
-        app.MapUsers();
-        app.MapMe();
-        app.MapEventRoles();
-        app.MapStorageFiles();
-        app.MapAuthentication();
-        app.MapInvitations();
-        app.MapRoles();
+		app.MapEvents();
+		app.MapRegistrations();
+		app.MapUsers();
+		app.MapMe();
+		app.MapEventRoles();
+		app.MapStorageFiles();
+		app.MapAuthentication();
+		app.MapInvitations();
+		app.MapRoles();
+		app.MapHub<ChatHub>("/chat");
 
-        app.Run();
-
-    }
+		app.MapChannels();
+		app.MapMessages();
+		app.Run();
+	}
 }

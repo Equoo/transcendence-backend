@@ -1,3 +1,4 @@
+using KeepGrouped.API.Chat;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,14 @@ using KeepGrouped.API.Storage;
 
 namespace KeepGrouped.API.Users;
 
-
+public enum Activity
+{
+    Online,
+    Afk,
+    Busy,
+    Invisible,
+    Offline,
+}
 
 public class User
 {
@@ -23,13 +31,17 @@ public class User
     public StorageFile? Avatar { get; set; }
     public ICollection<Event> Events { get; } = [];
     public ICollection<Registration> Registrations { get; } = [];
+    public Activity Activity { get; set; } = Activity.Offline;
+
+    public ICollection<ChannelAck> ChannelsAckMsg { get; } = [];
+    public bool IsOnline { get; set; } = false;
 }
 
 /// <summary>
 /// The public face of a user, embedded wherever another resource points at one (an event organizer,
 /// a registration, a file creator). Shared on purpose: it is one projection, not one per use case.
 /// </summary>
-public record UserSummary(string Id, string UserName, RoleResponse Role)
+public record UserSummary(string Id, string UserName, RoleResponse Role, Activity Activity)
 {
-    public static UserSummary FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role));
+    public static UserSummary FromEntity(User user) => new(user.Id, user.UserName, RoleResponse.FromEntity(user.Role), user.Activity);
 }
