@@ -9,7 +9,6 @@ public sealed class GetFileMetaQuery(KeepGroupedDb db) : IHandler
     {
         var filedb = await db.Files
             .AsNoTracking()
-            .Include(f => f.Creator)
             .SingleOrDefaultAsync(f => f.Key == key);
 
         return filedb is null ? StorageProblems.FileNotFound(key) : GetFileMetaResponse.FromEntity(filedb);

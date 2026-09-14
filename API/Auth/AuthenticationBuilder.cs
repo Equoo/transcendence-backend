@@ -1,18 +1,27 @@
 using System.Text;
 using KeepGrouped.API.Password;
+using KeepGrouped.API.Users.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace KeepGrouped.API.Users;
+namespace KeepGrouped.API.Users.Auth;
 
 static public class AuthenticationBuilder
 {
     static public void BuildAuthentication(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthorization();
+        builder.Services.AddOptions<AuthenticationOptions>().Bind(builder.Configuration.GetSection(
+            AuthenticationOptions.SectionName
+        )).ValidateDataAnnotations().ValidateOnStart();
         builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
-        builder.Services.AddScoped<KeepGrouped.API.Middlewares.TokenContext>();
+        builder.Services.AddScoped<Middlewares.TokenContext>();
+        builder.Services.AddSingleton<TokenProvider>();
+
+        var authOptions = builder.Configuration
+            .GetSection(AuthenticationOptions.SectionName)
+            .Get<AuthenticationOptions>()!;
 
         builder.Services.AddAuthentication(options =>
         {
@@ -30,7 +39,7 @@ static public class AuthenticationBuilder
                 ValidateLifetime = true,
                 ValidIssuer = "KeepGrouped",
                 ValidAudience = "KeepGrouped",
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CLE-DUR-COMME-DE-LA-PIERRE-MAINTENANT-BIEN-PLUS-RESISTANTE-PARCEQUECAMARCHAITPASAVANT"))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authOptions.JWTKey))
             };
             options.Events = new JwtBearerEvents
             {

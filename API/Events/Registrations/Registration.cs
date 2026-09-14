@@ -12,10 +12,10 @@ public class Registration
     public EventRole Role { get; set; } = null!;
 }
 
-public record RegistrationSummary(UserSummary User, DateTime RegisteredAt, string? Role)
+public record RegistrationSummary(GetUserResponse User, DateTime RegisteredAt, string? Role)
 {
     public static RegistrationSummary FromEntity(Registration reg) => new(
-        UserSummary.FromEntity(reg.User),
+        GetUserResponse.FromEntity(reg.User),
         reg.RegisteredAt,
         reg.Role.Name);
 }

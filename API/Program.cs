@@ -1,7 +1,10 @@
 using KeepGrouped.API.Chat;
+using System.Text.Json.Serialization;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Auth;
 using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +34,10 @@ class Program
 		builder.Services.AddValidation();
 		builder.Services.AddSignalR();
 
+		builder.Services.AddProblemDetails();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddValidation();
+
 		if (builder.Environment.IsDevelopment())
 		{
 			builder.Services.AddSwaggerGen();
@@ -39,17 +46,18 @@ class Program
 		var app = builder.Build();
 		app.UseForwardedHeaders();
 		app.UseStatusCodePages();
-		using var serviceScope = app.Services.CreateScope();
-		var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
 		if (app.Environment.IsDevelopment())
 		{
-			context.Database.EnsureDeleted();
-			context.Database.EnsureCreated();
 			app.UseSwagger();
 			app.UseSwaggerUI();
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+			context.Database.Migrate();
 		}
 		else
 		{
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
 			context.Database.Migrate();
 		}
 		app.MapGet("/", () => "Hello World from API!")
@@ -59,7 +67,6 @@ class Program
 			.WithDescription("Returns a constant greeting, used to check that the API is up.")
 			.Produces<string>(StatusCodes.Status200OK);
 
-		app.MapHub<ChatHub>("/chat");
 		app.MapEvents();
 		app.MapRegistrations();
 		app.MapUsers();
@@ -68,6 +75,8 @@ class Program
 		app.MapStorageFiles();
 		app.MapAuthentication();
 		app.MapInvitations();
+		app.MapRoles();
+		app.MapHub<ChatHub>("/chat");
 
 		app.MapChannels();
 		app.MapMessages();

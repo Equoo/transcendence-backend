@@ -9,13 +9,12 @@ public record GetFileMetaResponse(
     long Length,
     string ETag,
     string ContentType,
-    DateTime LastUpdated,
-    UserSummary Creator
+    DateTime LastUpdated
 )
 {
     public static GetFileMetaResponse FromEntity(StorageFile file) => new(
         file.Key, file.Name, file.Length, file.ETag, file.ContentType,
-        file.LastUpdated, UserSummary.FromEntity(file.Creator));
+        file.LastUpdated);
 }
 
 public static class GetFileMetaEndpoint

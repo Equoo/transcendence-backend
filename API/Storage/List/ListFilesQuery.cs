@@ -8,7 +8,7 @@ public sealed class ListFilesQuery(KeepGroupedDb db) : IHandler
     {
         var files = await db.Files
             .AsNoTracking()
-            .Include(f => f.Creator)
+            .Include(f => f.Creator).ThenInclude(u => u.Role)
             .ToListAsync();
 
         return files.Select(ListFilesResponse.FromEntity).ToList();

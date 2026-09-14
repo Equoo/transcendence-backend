@@ -12,7 +12,7 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
 
     async Task<UploadResponse> IStorage.UploadAsync(Stream stream, string contentType, CancellationToken ct)
     {
-        var key = Guid.CreateVersion7().ToString();
+        var key = Guid.NewGuid().ToString();
 
         var req = new PutObjectRequest
         {

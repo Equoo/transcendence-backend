@@ -17,8 +17,10 @@ public record UpdateEventRequest
     [Length(1, 255)]
     public string Location { get; init; } = null!;
 
-    public string Description { get; init; } = string.Empty;
     public ICollection<string> Tags { get; init; } = [];
+    public ICollection<string> EventRoleIds { get; init; } = [];
+    public string Description { get; init; } = string.Empty;
+    public ICollection<string> FileKeys { get; init; } = [];
 }
 
 public static class UpdateEventEndpoint

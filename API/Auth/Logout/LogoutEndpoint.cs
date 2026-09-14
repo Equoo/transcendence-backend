@@ -1,14 +1,21 @@
+using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
 public static class LogoutEndpoint
 {
-    // No handler: logging out only clears cookies, it touches no store.
     public static void MapLogout(this IEndpointRouteBuilder auth)
     {
-        auth.MapPost("/logout", [Authorize] (HttpContext http) =>
+        auth.MapGet("/logout", [Authorize] async (LogoutQuery query, HttpContext http, TokenContext tk) =>
         {
+            var result = await query.ExecAsync(tk.User.Id);
+            
+            if (result.IsProblem)
+            {
+                return result.Problem;
+            }
+
             TokenCookies.Remove(http);
             return Results.NoContent();
         })

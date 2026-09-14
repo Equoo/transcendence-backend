@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class CreateEventCommand(KeepGroupedDb db) : IHandler
+public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand createChannelCmd) : IHandler
 {
 	public async Task<Result<CreateEventResponse>> ExecuteAsync(CreateEventRequest req, User organizer)
 	{
@@ -42,7 +42,7 @@ public sealed class CreateEventCommand(KeepGroupedDb db) : IHandler
 		};
 
 		var channelReq = new CreateChannelRequest { Name = ChannelSlug.Sanitize(req.Name), EventId = ev.Id };
-		var channelResult = await new CreateChannelCommand(db, null).ExecuteAsync(channelReq, organizer);
+		var channelResult = await createChannelCmd.ExecuteAsync(channelReq, organizer);
 		if (channelResult.IsProblem)
 		{
 			return channelResult.Problem!;

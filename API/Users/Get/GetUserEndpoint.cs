@@ -1,8 +1,14 @@
+using KeepGrouped.API.Roles;
+using KeepGrouped.API.Storage;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
-public record GetUserResponse(string Id, string UserName);
+public record GetUserResponse(string Id, string UserName, GetFileMetaResponse? Avatar, RoleResponse Role)
+{
+    public static GetUserResponse FromEntity(User user) => new(user.Id, user.UserName,
+    user.Avatar != null ? GetFileMetaResponse.FromEntity(user.Avatar) : null, RoleResponse.FromEntity(user.Role));
+}
 
 public static class GetUserEndpoint
 {

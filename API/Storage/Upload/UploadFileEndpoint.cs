@@ -45,7 +45,7 @@ public static class UploadFileEndpoint
                 return result.Problem;
             }
 
-            return Results.CreatedAtRoute("files.get", new { key = result.Value.Key }, result.Value);
+            return Results.CreatedAtRoute("files.get", new { key = result.Value.Key }, UploadFileResponse.FromEntity(result.Value));
         })
         .DisableAntiforgery()
         .WithName("files.upload")

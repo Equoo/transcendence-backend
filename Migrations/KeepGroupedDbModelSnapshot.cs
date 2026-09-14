@@ -52,9 +52,98 @@ namespace KeepGrouped.Migrations
                     b.ToTable("EventStorageFile");
                 });
 
+            modelBuilder.Entity("KeepGrouped.API.Chat.Channel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EventId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Order")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Channels");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelAck", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("AckAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "ChannelId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("ChannelAcks");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.Message", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
+                    b.Property<string>("ChannelId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(8192)
+                        .HasColumnType("character varying(8192)");
+
+                    b.Property<DateTime?>("EditAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MessageRefId")
+                        .HasColumnType("character varying(36)");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageRefId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ChannelId", "SentAt")
+                        .HasDatabaseName("IX_Messages_ChannelId_SentAt");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChannelId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
@@ -84,6 +173,9 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("text[]");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChannelId")
+                        .IsUnique();
 
                     b.HasIndex("OrganizerId");
 
@@ -128,6 +220,23 @@ namespace KeepGrouped.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Registration");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Roles.Role", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Permission")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Storage.StorageFile", b =>
@@ -201,7 +310,20 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<int>("Activity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AvatarKey")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -210,6 +332,11 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AvatarKey")
+                        .IsUnique();
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -244,13 +371,66 @@ namespace KeepGrouped.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelAck", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Chat.Channel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KeepGrouped.API.Users.User", "User")
+                        .WithMany("ChannelsAckMsg")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.Message", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Chat.Channel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KeepGrouped.API.Chat.Message", "MessageRef")
+                        .WithMany()
+                        .HasForeignKey("MessageRefId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("KeepGrouped.API.Users.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("MessageRef");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
                 {
+                    b.HasOne("KeepGrouped.API.Chat.Channel", "Channel")
+                        .WithOne("Event")
+                        .HasForeignKey("KeepGrouped.API.Events.Event", "ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KeepGrouped.API.Users.User", "Organizer")
                         .WithMany()
                         .HasForeignKey("OrganizerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Channel");
 
                     b.Navigation("Organizer");
                 });
@@ -291,13 +471,42 @@ namespace KeepGrouped.Migrations
                     b.Navigation("Creator");
                 });
 
+            modelBuilder.Entity("KeepGrouped.API.Users.User", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Storage.StorageFile", "Avatar")
+                        .WithOne()
+                        .HasForeignKey("KeepGrouped.API.Users.User", "AvatarKey");
+
+                    b.HasOne("KeepGrouped.API.Roles.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Avatar");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.Channel", b =>
+                {
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
                 {
                     b.Navigation("Registrations");
                 });
 
+            modelBuilder.Entity("KeepGrouped.API.Roles.Role", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("KeepGrouped.API.Users.User", b =>
                 {
+                    b.Navigation("ChannelsAckMsg");
+
                     b.Navigation("Registrations");
                 });
 #pragma warning restore 612, 618

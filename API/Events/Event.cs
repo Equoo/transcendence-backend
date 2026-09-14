@@ -1,6 +1,11 @@
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Chat;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+
 
 namespace KeepGrouped.API.Events;
 
@@ -19,8 +24,8 @@ public class Event
 	public User Organizer { get; set; } = null!;
 	public ICollection<User> Users { get; } = [];
 	public ICollection<Registration> Registrations { get; } = [];
-	public ICollection<EventRole> EventRoles { get; init; } = [];
-	public ICollection<StorageFile> Files { get; init; } = [];
+	public ICollection<EventRole> EventRoles { get; set; } = [];
+	public ICollection<StorageFile> Files { get; set; } = [];
 }
 
 public record EventSummary(string Id,
@@ -38,6 +43,5 @@ public record EventSummary(string Id,
 		ev.Date, ev.Size, ev.Location, ev.Tags,
 		[.. ev.EventRoles.Select(EventRoleSummary.FromEntity)],
 		ev.Registrations.Count,
-		isRegistered
-	);
+		isRegistered);
 }

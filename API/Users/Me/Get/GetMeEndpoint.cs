@@ -1,21 +1,17 @@
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Roles;
+using KeepGrouped.API.Storage;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
-public record GetMeResponse(string Id, string UserName, Dictionary<string, DateTime> ChannelsAckMsg)
+
+public record GetMeResponse(string Id, string UserName, GetFileMetaResponse? Avatar, RoleResponse Role,
+	Dictionary<string, DateTime> ChannelsAckMsg)
 {
-	public static GetMeResponse FromEntity(User user)
-	{
-		var ChannelsAckMsg = new Dictionary<string, DateTime>();
-
-		foreach (var ack in user.ChannelsAckMsg)
-		{
-			ChannelsAckMsg.Add(ack.ChannelId, ack.AckAt);
-		}
-
-		return new(user.Id, user.UserName, ChannelsAckMsg);
-	}
+	public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName,
+	user.Avatar != null ? GetFileMetaResponse.FromEntity(user.Avatar) : null, RoleResponse.FromEntity(user.Role),
+	user.ChannelsAckMsg.ToDictionary(ack => ack.ChannelId, ack => ack.AckAt));
 }
 
 public static class GetMeEndpoint

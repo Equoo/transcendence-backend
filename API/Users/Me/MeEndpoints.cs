@@ -10,5 +10,6 @@ public static class MeEndpoints
         me.MapUpdateMe();
         me.MapDeleteMe();
         me.MapListMyTokens();
+        me.MapPatchAvatar();
     }
 }
