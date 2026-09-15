@@ -102,7 +102,7 @@ public static class DbBuilder
             {
                 return;
             }
-            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("Admin", 1) };
+            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("SuperAdmin", 64) };
 
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
             db.Set<User>().Add(user);
@@ -118,14 +118,10 @@ public static class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
-
-            db.SaveChanges();
-
-            User user5 = new() { UserName = "a", Role = new("Admin", 63) };
+            User user5 = new() { UserName = "a", Role = new("Admin", 64) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
-            User user3 = new() { UserName = "tom", Role = new("Gold", 63) };
+            User user3 = new() { UserName = "tom", Role = new("Gold", 64) };
             User user4 = new() { UserName = "david", Role = new("Member", 1) };
 
             user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");
@@ -156,10 +152,6 @@ public static class DbBuilder
             ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
             ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == EventRole.Implicit));
             db.Set<Event>().Add(ev);
-
-            var chan = new Channel("default", "This is a default channel, say everything in ur mind", null);
-            db.Set<Channel>().Add(chan);
-
 
             db.SaveChanges();
         }));
