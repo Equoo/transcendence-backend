@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Chat;
 
-public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<ChatHub> hub) : IHandler
+public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
     public async Task<Result<MessageResponse>> ExecuteAsync(
         string channelId,
