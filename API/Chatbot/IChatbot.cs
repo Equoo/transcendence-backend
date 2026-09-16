@@ -1,5 +1,3 @@
-using KeepGrouped.API.Users;
-using Microsoft.Extensions.Options;
 
 namespace KeepGrouped.API.Chatbot;
 
