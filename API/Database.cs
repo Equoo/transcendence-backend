@@ -108,6 +108,7 @@ public static class DbBuilder
 			user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
 			db.Set<User>().Add(user);
 			db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
+			db.Set<Role>().Add(new Role("Member"));
 			db.SaveChanges();
 
 			if (!builder.Environment.IsDevelopment())
@@ -122,8 +123,8 @@ public static class DbBuilder
 			User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
 			User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
 			User user3 = new() { UserName = "tom", Role = new("Gold", 1) };
-			User user4 = new() { UserName = "david", Role = new("Member", 1) };
 
+			User user4 = new() { UserName = "david", Role = new("Member", 1) };
 			user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");
 			user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");
 			user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user2, "a");
