@@ -40,13 +40,9 @@ public class ApiClient : IApiClient
 			{
 				var data = line.Substring(6);
 				if (current == "error")
-				{
 					throw new InvalidOperationException(data);
-				}
 				else
-				{
 					yield return data;
-				}
 
 			}
 			else if (line.StartsWith("event: "))
@@ -58,26 +54,4 @@ public class ApiClient : IApiClient
 		}
 	}
 
-	// public async IAsyncEnumerable<TResponse> StreamJsonAsync<TResponse>(string endpoint, object request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-	// {
-	// 	var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Post, endpoint)
-	// 	{
-	// 		Content = JsonContent.Create(request)
-	// 	}, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
-	// 	using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-	// 	using var reader = new StreamReader(stream);
-	// 	string? line;
-	// 	while ((line = await reader.ReadLineAsync()) is not null)
-	// 	{
-	// 		if (line != null)
-	// 		{
-	// 			var jsonResponse = JsonSerializer.Deserialize<TResponse>(line);
-	// 			if (jsonResponse != null)
-	// 			{
-	// 				yield return jsonResponse;
-	// 			}
-	// 		}
-	// 	}
-	// }
 }
