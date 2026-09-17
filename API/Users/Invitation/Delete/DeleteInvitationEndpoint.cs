@@ -10,9 +10,9 @@ public static class DeleteInvitationEndpoint
         {
             var result = await cmd.ExecuteAsync(id);
 
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
             return Results.NoContent();
         })

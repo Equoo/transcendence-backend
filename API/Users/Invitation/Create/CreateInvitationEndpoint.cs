@@ -22,9 +22,9 @@ public static class CreateInvitationEndpoint
         {
             var result = await cmd.ExecuteAsync(req);
 
-            if (result.Problem is { } problem)
+            if (result.IsProblem)
             {
-                return problem;
+                return result.Problem;
             }
             return Results.Ok(result.Value);
         })
