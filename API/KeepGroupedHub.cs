@@ -28,9 +28,14 @@ public class KeepGroupedHub(KeepGroupedDb db) : Hub
         await Clients.Others.SendAsync("OtherActivityUpdated", userId, activity);
     }
 
+    public async Task ReportActivityTo(string userId, ActivityEnum activity)
+    {
+        await Clients.User(userId).SendAsync("OtherActivityUpdated", Context.UserIdentifier, activity);
+    }
+
     public async Task AskOthersActivity()
     {
-        await Clients.Others.SendAsync("ReportActivity");
+        await Clients.Others.SendAsync("ReportActivityTo", Context.UserIdentifier);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
