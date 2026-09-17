@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Chat;
 
-public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<ChatHub> hub) : IHandler
+public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
 	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req, User? sender)
 	{
@@ -31,8 +31,7 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<C
 
 		var response = ChannelResponse.FromEntity(channel);
 
-		var users = await db.Users.Where(user => user.IsOnline).Select(user => user.Id).ToListAsync();
-		await hub.Clients.Users(users).SendAsync("NewChannel", response);
+		await hub.Clients.All.SendAsync("NewChannel", response);
 
 		return response;
 	}

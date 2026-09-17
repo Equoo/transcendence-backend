@@ -310,9 +310,6 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("Activity")
-                        .HasColumnType("integer");
-
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text");
 
