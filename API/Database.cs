@@ -102,7 +102,7 @@ public static class DbBuilder
             {
                 return;
             }
-            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("SuperAdmin", 64) };
+            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("SuperAdmin", int.MaxValue) };
 
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
             db.Set<User>().Add(user);
@@ -118,10 +118,10 @@ public static class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            User user5 = new() { UserName = "a", Role = new("Admin", 64) };
+            User user5 = new() { UserName = "a", Role = new("Admin", int.MaxValue) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
-            User user3 = new() { UserName = "tom", Role = new("Gold", 64) };
+            User user3 = new() { UserName = "tom", Role = new("Gold", int.MaxValue) };
             User user4 = new() { UserName = "david", Role = new("Member", 1) };
 
             user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");
