@@ -10,24 +10,22 @@ namespace KeepGrouped.API.Roles;
 
 public enum Perms
 {
-    isAdmin = 1,
 
     // Event
-    HandleEvent = 2,
+    HandleEvent = 1,
 
     // User
-    GetUser = 32,
-    CreateUser = 64,
-    ChangeUserName = 128,
-    DeleteUser = 256,
-    ResetUserPassword = 516,
+    HandleUsers = 2,
+    InviteUser = 4,
 
     // Chat
-    HandleChannel = 2048,
+    HandleChannels = 8,
+
+    // Roles
+    HandleRoles = 16,
 
     // Knowledge
-
-    // Calendar
+    HandleKnowledge = 32,
 }
 
 public class Role

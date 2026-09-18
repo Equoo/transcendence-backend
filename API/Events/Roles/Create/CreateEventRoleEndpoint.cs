@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
@@ -19,7 +21,7 @@ public static class CreateEventRoleEndpoint
 {
     public static void MapCreateEventRole(this IEndpointRouteBuilder group)
     {
-        group.MapPost("/", [Authorize] async (CreateEventRoleCommand command, CreateEventRoleRequest req) =>
+        group.MapPost("/", [Authorize][Roles((int)Perms.HandleEvent)] async (CreateEventRoleCommand command, CreateEventRoleRequest req) =>
         {
             var result = await command.ExecuteAsync(req);
             if (result.IsProblem)

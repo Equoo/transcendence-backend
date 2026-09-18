@@ -1,4 +1,5 @@
 
+using KeepGrouped.API.Attributes.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ public static class PatchRolePermEndpoint
 {
     public static void MapPatchPermRole(this IEndpointRouteBuilder roles)
     {
-        roles.MapPatch("/{id}/permission", [Authorize] async (PatchRolePermQuery query, string id, [FromBody] int permission) =>
+        roles.MapPatch("/{id}/permission", [Authorize][Roles((int)Perms.HandleRoles)] async (PatchRolePermQuery query, string id, [FromBody] int permission) =>
         {
             var res = await query.ExecAsync(id, permission);
             if (res.IsProblem)

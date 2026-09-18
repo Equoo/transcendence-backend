@@ -1,4 +1,6 @@
 
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +10,7 @@ public static class ResetPasswordEndpoint
 {
     public static void MapResetPassword(this IEndpointRouteBuilder auth)
     {
-        auth.MapPatch("{id}/password", [Authorize] async (ResetPasswordQuery pass, LogoutQuery logout,  string id, [FromBody] string password) =>
+        auth.MapPatch("{id}/password", [Authorize][Roles((int)Perms.HandleUsers)] async (ResetPasswordQuery pass, LogoutQuery logout, string id, [FromBody] string password) =>
         {
             var result = await pass.ExecAsync(id, password);
             if (result.IsProblem)
@@ -25,4 +27,4 @@ public static class ResetPasswordEndpoint
             return Results.Ok();
         });
     }
-} 
+}

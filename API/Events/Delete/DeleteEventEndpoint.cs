@@ -1,3 +1,5 @@
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
@@ -6,7 +8,7 @@ public static class DeleteEventEndpoint
 {
     public static void MapDeleteEvent(this IEndpointRouteBuilder events)
     {
-        events.MapDelete("/{id}", [Authorize] async (DeleteEventCommand command, string id) =>
+        events.MapDelete("/{id}", [Authorize][Roles((int)Perms.HandleEvent)] async (DeleteEventCommand command, string id) =>
         {
             var result = await command.ExecuteAsync(id);
             if (result.IsProblem)

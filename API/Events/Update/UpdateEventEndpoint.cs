@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Events;
@@ -27,7 +29,7 @@ public static class UpdateEventEndpoint
 {
     public static void MapUpdateEvent(this IEndpointRouteBuilder events)
     {
-        events.MapPut("/{id}", [Authorize] async (UpdateEventCommand command, string id, UpdateEventRequest req) =>
+        events.MapPut("/{id}", [Authorize][Roles((int)Perms.HandleEvent)] async (UpdateEventCommand command, string id, UpdateEventRequest req) =>
         {
             var result = await command.ExecuteAsync(id, req);
             if (result.IsProblem)

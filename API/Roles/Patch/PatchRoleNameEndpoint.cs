@@ -1,4 +1,5 @@
 
+using KeepGrouped.API.Attributes.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ public static class PatchRoleNameEndpoint
 {
     public static void MapPatchNameRole(this IEndpointRouteBuilder roles)
     {
-        roles.MapPatch("/{id}/name", [Authorize] async (PatchRoleNameQuery query, string id, [FromBody] string name) =>
+        roles.MapPatch("/{id}/name", [Authorize][Roles((int)Perms.HandleRoles)] async (PatchRoleNameQuery query, string id, [FromBody] string name) =>
         {
             var res = await query.ExecAsync(id, name);
             if (res.IsProblem)

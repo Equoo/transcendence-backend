@@ -17,19 +17,25 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provide
             return AuthProblems.RefreshTokenMissing();
         }
 
-        if (!provider.IsValid(cookieRefresh))
-        {
-            return AuthProblems.RefreshTokenInvalid();
-        }
-
         string refresh_id = Hash256.GetHashSha256(provider.ReadFirstClaim(cookieRefresh));
-
-        // Can have many if your are log in different computer in the same account
         RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == refresh_id);
         if (refresh_db is null)
         {
             return AuthProblems.RefreshTokenUnknown();
         }
+
+        if (!provider.IsValid(cookieRefresh))
+        {
+            db.RefreshTokens.Remove(refresh_db);
+            Console.WriteLine("\n\n\n\n\n" + " Refresh token est INvalide et doit etre supprimer dans la db" + "\n\n\n\n\n\n");
+            await db.SaveChangesAsync();
+            return AuthProblems.RefreshTokenInvalid();
+        }
+
+        Console.WriteLine("\n\n\n\n\n" + " Refresh token est valide " + "\n\n\n\n\n\n");
+
+
+        // Can have many if your are log in different computer in the same account
 
         User? user = await db.Users.SingleOrDefaultAsync(u => u.Id == refresh_db.UserId);
         if (user is null)

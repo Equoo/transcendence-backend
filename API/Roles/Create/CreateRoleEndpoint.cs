@@ -8,7 +8,7 @@ public static class CreateRoleEndpoint
 {
     public static void MapCreateRole(this IEndpointRouteBuilder roles)
     {
-        roles.MapPost("/", [Authorize] async (CreateRoleQuery query, [FromBody] string name) =>
+        roles.MapPost("/", [Authorize][Roles((int)Perms.HandleRoles)]async (CreateRoleQuery query, [FromBody] string name) =>
         {
             var res = await query.ExecAsync(name);
 

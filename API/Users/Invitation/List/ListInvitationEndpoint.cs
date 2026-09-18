@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users.Invitation;
@@ -8,7 +10,7 @@ public static class ListInvitationEndpoint
 {
     public static void MapListInvitation(this RouteGroupBuilder route)
     {
-        route.MapGet("/", [Authorize] async (ListInvitationQuery query) =>
+        route.MapGet("/", [Authorize][Roles((int)Perms.InviteUser)] async (ListInvitationQuery query) =>
         {
             var result = await query.ExecuteAsync();
 
