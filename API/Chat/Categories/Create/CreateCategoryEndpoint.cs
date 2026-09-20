@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Chat;
@@ -16,7 +18,7 @@ public static class CreateCategoryEndpoint
 {
 	public static void MapCreateCategory(this IEndpointRouteBuilder categories)
 	{
-		categories.MapPost("/", [Authorize] async (CreateCategoryCommand command, CreateCategoryRequest req, TokenContext token) =>
+		categories.MapPost("/", [Authorize][Roles((int)Perms.HandleChannels)] async (CreateCategoryCommand command, CreateCategoryRequest req, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(req, token.User);
 			if (result.IsProblem)
