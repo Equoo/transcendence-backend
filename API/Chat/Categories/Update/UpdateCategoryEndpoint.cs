@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Chat;
@@ -16,7 +18,7 @@ public static class UpdateCategoryEndpoint
 {
 	public static void MapUpdateCategory(this IEndpointRouteBuilder categories)
 	{
-		categories.MapPut("/{id}", [Authorize] async (UpdateCategoryCommand command, string id, UpdateCategoryRequest req, TokenContext token) =>
+		categories.MapPut("/{id}", [Authorize][Roles((int)Perms.HandleChannels)] async (UpdateCategoryCommand command, string id, UpdateCategoryRequest req, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(id, req, token.User);
 			if (result.IsProblem)

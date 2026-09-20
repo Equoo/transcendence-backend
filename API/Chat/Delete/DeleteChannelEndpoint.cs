@@ -1,4 +1,6 @@
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Chat;
@@ -7,7 +9,7 @@ public static class DeleteChannelEndpoint
 {
     public static void MapDeleteChannel(this IEndpointRouteBuilder channels)
     {
-        channels.MapDelete("/{id}", [Authorize] async (DeleteChannelCommand command, string id, TokenContext token) =>
+        channels.MapDelete("/{id}", [Authorize][Roles((int)Perms.HandleChannels)] async (DeleteChannelCommand command, string id, TokenContext token) =>
         {
             var result = await command.ExecuteAsync(id, token.User);
             if (result.IsProblem)

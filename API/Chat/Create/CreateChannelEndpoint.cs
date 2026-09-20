@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Chat;
@@ -19,7 +21,7 @@ public static class CreateChannelEndpoint
 {
 	public static void MapCreateChannel(this IEndpointRouteBuilder channels)
 	{
-		channels.MapPost("/", [Authorize] async (CreateChannelCommand command, CreateChannelRequest req, TokenContext token) =>
+		channels.MapPost("/", [Authorize][Roles((int)Perms.HandleChannels)] async (CreateChannelCommand command, CreateChannelRequest req, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(req, token.User);
 			if (result.IsProblem)
