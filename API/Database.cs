@@ -69,6 +69,17 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
             entity.Property(m => m.Content).HasMaxLength(8192);
         });
 
+        builder.Entity<Channel>(entity =>
+        {
+            entity
+                .HasOne<ChannelCategory>()
+                .WithMany()
+                .HasForeignKey(c => c.Category)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<ChannelCategory>().HasAlternateKey(c => c.Name);
+
         builder.Entity<ChannelAck>().HasKey(a => new { a.UserId, a.ChannelId });
 
         builder.Entity<ChannelAck>().HasOne(m => m.Channel)
@@ -85,6 +96,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
     public DbSet<Invitation> Invitations { get; set; } = null!;
     public DbSet<Role> Roles { get; set; } = null!;
     public DbSet<Channel> Channels { get; set; } = null!;
+    public DbSet<ChannelCategory> ChannelCategories { get; set; } = null!;
     public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
 }

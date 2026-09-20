@@ -9,6 +9,7 @@ public static class ChannelEndpoints
         channels.MapCreateChannel();
         channels.MapListChannels();
         channels.MapGetChannel();
+        channels.MapUpdateChannel();
         channels.MapDeleteChannel();
     }
 }
