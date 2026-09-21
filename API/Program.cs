@@ -10,6 +10,7 @@ using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
+using KeepGrouped.API.Middlewares;
 using System.Threading.RateLimiting;
 
 namespace KeepGrouped.API;
@@ -22,20 +23,27 @@ class Program
 
 		var builder = WebApplication.CreateBuilder(args);
 
-		var tokenPolicy = "token";
 		var myOptions = new RateLimitOptions();
 		builder.Configuration.GetSection(RateLimitOptions.RateLimit).Bind(myOptions);
 
-		builder.Services.AddRateLimiter(_ => _
-		.AddTokenBucketLimiter(policyName: tokenPolicy, options =>
+		builder.Services.AddRateLimiter(options =>
 		{
-			options.TokenLimit = myOptions.TokenLimit;
-			options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-			options.QueueLimit = myOptions.QueueLimit;
-			options.ReplenishmentPeriod = TimeSpan.FromSeconds(myOptions.ReplenishmentPeriod);
-			options.TokensPerPeriod = myOptions.TokensPerPeriod;
-			options.AutoReplenishment = myOptions.AutoReplenishment;
-		}));
+			options.AddPolicy<string>("ai-chat", httpContext =>
+			{
+				var tokenContext = httpContext.RequestServices.GetRequiredService<TokenContext>();
+				var userId = tokenContext.User.Id;
+
+				return RateLimitPartition.GetTokenBucketLimiter(userId, _ => new TokenBucketRateLimiterOptions
+				{
+					TokenLimit = myOptions.TokenLimit,
+					QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+					QueueLimit = myOptions.QueueLimit,
+					ReplenishmentPeriod = TimeSpan.FromSeconds(myOptions.ReplenishmentPeriod),
+					TokensPerPeriod = myOptions.TokensPerPeriod,
+					AutoReplenishment = myOptions.AutoReplenishment
+				});
+			});
+		});
 		builder.BuildStorage();
 		builder.BuildDb();
 		builder.BuildAuthentication();

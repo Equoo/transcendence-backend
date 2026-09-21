@@ -24,7 +24,8 @@ public static class ChatBotEndpoints
 				await http.Response.Body.FlushAsync(cancellationToken);
 			}
 			return Results.Empty;
-		});
+		})
+		.RequireRateLimiting("ai-chat");
 
 	}
 }
