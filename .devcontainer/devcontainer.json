@@ -1,31 +1,31 @@
 {
-    "name": "TS",
-    "remoteUser": "root",
-    "updateRemoteUserUID": true,
-    "dockerComposeFile": "compose.yaml",
-    "service": "keepgrouped-back-dev",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    "features": {},
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "editor.formatOnSave": true,
-                "terminal.integrated.defaultProfile.linux": "zsh",
-                "terminal.integrated.profiles.linux": {
-                    "zsh": {
-                        "path": "/bin/zsh"
-                    }
-                },
-                "remote.autoForwardPorts": false,
-                "dotnetAcquisitionExtension.enableTelemetry": false,
-            },
-            "extensions": [
-                "ms-dotnettools.csdevkit",
-                "ms-dotnettools.vscode-dotnet-runtime",
-                "cweijan.vscode-database-client2"
-            ]
-        }
-    },
-    "postCreateCommand": "chmod 744 hooks/install-hook.sh && hooks/install-hook.sh; dotnet tool install --global dotnet-ef",
-    "initializeCommand": "docker network create -d bridge keepgrouped-net || true"
+	"name": "TS",
+	"remoteUser": "root",
+	"updateRemoteUserUID": true,
+	"dockerComposeFile": "compose.yaml",
+	"service": "keepgrouped-back-dev",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"editor.formatOnSave": true,
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/bin/zsh"
+					}
+				},
+				"remote.autoForwardPorts": false,
+				"dotnetAcquisitionExtension.enableTelemetry": false,
+			},
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"cweijan.vscode-database-client2"
+			]
+		}
+	},
+	"postCreateCommand": "chmod 744 hooks/install-hook.sh && hooks/install-hook.sh; dotnet tool install --global dotnet-ef",
+	"initializeCommand": "docker network inspect keepgrouped-net >nul 2>&1 || docker network create -d bridge keepgrouped-net"
 }

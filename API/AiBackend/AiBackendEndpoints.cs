@@ -4,7 +4,7 @@ public static class AiBackendEndpoints
 {
 	public static void MapAiBackend(this IEndpointRouteBuilder app)
 	{
-		var aibackend = app.MapGroup("/aibackend").WithTags("AiBackend");
+		var aibackend = app.MapGroup("/ai").WithTags("AiBackend");
 
 		aibackend.MapChatBot();
 	}
