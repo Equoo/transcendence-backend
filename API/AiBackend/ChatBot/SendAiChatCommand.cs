@@ -8,7 +8,7 @@ public sealed partial class SendAiChatCommand(IAiBackendClient aiBackendClient, 
 {
 	public Result<IAsyncEnumerable<string>> ExecuteAsync(ChatRequest req, User sender, CancellationToken cancellationToken)
 	{
-		var stream = aiBackendClient.StreamChatAsync(sender.Id, req.Message, cancellationToken);
+		var stream = aiBackendClient.StreamChatAsync(tk.User.Id, req.Message, cancellationToken);
 
 		return new Result<IAsyncEnumerable<string>>(stream);
 	}
