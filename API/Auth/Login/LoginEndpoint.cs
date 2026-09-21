@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Problems;
 
 namespace KeepGrouped.API.Users;
 
 public record LoginRequest
 {
     [Required]
+
+    [Length(3, 25)]
     public string UserName { get; init; } = null!;
     [Required]
     public string Password { get; init; } = null!;
@@ -24,6 +27,7 @@ public static class LoginEndpoint
     {
         auth.MapPost("/login", async (LoginUserCommand command, LoginRequest req, HttpContext http) =>
         {
+
             var result = await command.ExecuteAsync(req);
             if (result.IsProblem)
             {

@@ -24,7 +24,7 @@ public static class UpdateMeEndpoint
 {
     public static void MapUpdateMe(this IEndpointRouteBuilder me)
     {
-        me.MapPut("/", [Authorize] async (UpdateMeCommand command, UpdateMeRequest req, TokenContext tk) =>
+        me.MapPatch("/", [Authorize] async (UpdateMeCommand command, UpdateMeRequest req, TokenContext tk) =>
         {
             var result = await command.ExecuteAsync(tk.User, req);
             if (result.IsProblem)

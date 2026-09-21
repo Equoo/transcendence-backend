@@ -9,7 +9,7 @@ namespace KeepGrouped.API.Users;
 /// <summary>Handler-to-endpoint carrier: the endpoint alone turns the tokens into cookies.</summary>
 public sealed record AuthenticatedUser(LoginResponse User, IssuedTokens Tokens);
 
-public sealed class LoginUserCommand(KeepGroupedDb db, IPasswordHasher<User> pass, TokenProvider provider) : IHandler
+public sealed class LoginUserCommand(KeepGroupedDb db, KeepGroupedPasswordHasher pass, TokenProvider provider) : IHandler
 {
     public async Task<Result<AuthenticatedUser>> ExecuteAsync(LoginRequest req)
     {

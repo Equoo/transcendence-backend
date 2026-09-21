@@ -15,7 +15,7 @@ static public class AuthenticationBuilder
         builder.Services.AddOptions<AuthenticationOptions>().Bind(builder.Configuration.GetSection(
             AuthenticationOptions.SectionName
         )).ValidateDataAnnotations().ValidateOnStart();
-        builder.Services.AddScoped<IPasswordHasher<User>, KeepGroupedPasswordHasher>();
+        builder.Services.AddSingleton<KeepGroupedPasswordHasher>();
         builder.Services.AddScoped<Middlewares.TokenContext>();
         builder.Services.AddSingleton<TokenProvider>();
 
