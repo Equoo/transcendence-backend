@@ -9,20 +9,6 @@ public class ApiClient : IApiClient
 		_httpClient = httpClient;
 	}
 
-	public async Task<TResponse> PostAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default)
-	{
-		var response = await _httpClient.PostAsJsonAsync(endpoint, request, cancellationToken);
-		response.EnsureSuccessStatusCode();
-		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException("Response content is null");
-	}
-
-	public async Task<TResponse> GetAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default)
-	{
-		var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-		response.EnsureSuccessStatusCode();
-		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException("Response content is null");
-	}
-
 	public async IAsyncEnumerable<string> StreamAsync(string endpoint, object request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Post, endpoint)

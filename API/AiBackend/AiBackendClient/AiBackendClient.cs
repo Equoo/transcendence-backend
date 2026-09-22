@@ -17,7 +17,7 @@ public class AiBackendClient : IAiBackendClient
 	{
 		var request = new ChatRequest
 		{
-			UserId = userId,
+			// UserId = userId,
 			Message = message
 		};
 

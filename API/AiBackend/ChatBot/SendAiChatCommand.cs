@@ -1,6 +1,4 @@
 using KeepGrouped.API.Middlewares;
-using KeepGrouped.API.Problems;
-using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.AiBackend;
 

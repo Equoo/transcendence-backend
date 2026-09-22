@@ -65,7 +65,7 @@ class Program
 
 		builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
 		{
-			client.BaseAddress = new Uri("http://localhost:3000");
+			client.BaseAddress = new Uri("http://ai-back-dev:7070");
 		});
 		builder.Services.AddScoped<IAiBackendClient, AiBackendClient>();
 		if (builder.Environment.IsDevelopment())
@@ -91,7 +91,6 @@ class Program
 			context.Database.Migrate();
 		}
 
-		app.UseRateLimiter();
 		app.MapGet("/", () => "Hello World from API!")
 			.WithTags("Diagnostics")
 			.WithName("root")
@@ -106,6 +105,7 @@ class Program
 		app.MapEventRoles();
 		app.MapStorageFiles();
 		app.MapAuthentication();
+		app.UseRateLimiter();
 		app.MapInvitations();
 		app.MapRoles();
 		app.MapHub<KeepGroupedHub>("");
