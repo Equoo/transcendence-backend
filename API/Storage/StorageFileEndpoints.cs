@@ -11,5 +11,6 @@ public static class StorageFileEndpoints
         group.MapGetFileMeta();
         group.MapListFiles();
         group.MapDeleteFile();
+        group.MapUpdateFileName();
     }
 }
