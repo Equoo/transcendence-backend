@@ -24,6 +24,7 @@ public class Hash256
 
 public class KeepGroupedPasswordHasher : IPasswordHasher<User>
 {
+    public KeepGroupedPasswordHasher() { }
     public string HashPassword(User user, string password)
     {
         string password_hashed = BC.HashPassword(password);
