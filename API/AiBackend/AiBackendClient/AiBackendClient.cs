@@ -15,9 +15,9 @@ public class AiBackendClient : IAiBackendClient
 		string message,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var request = new ChatRequest
+		var request = new AiChatRequest
 		{
-			// UserId = userId,
+			UserId = userId,
 			Message = message
 		};
 
@@ -26,4 +26,7 @@ public class AiBackendClient : IAiBackendClient
 			yield return response;
 		}
 	}
+
+	public Task<IngestResponse> IngestFileAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+	=> _apiClient.PostFileAsync<IngestResponse>("/ingest", fileStream, fileName, cancellationToken);
 }

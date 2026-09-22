@@ -40,4 +40,16 @@ public class ApiClient : IApiClient
 		}
 	}
 
+	public async Task<TResponse> PostFileAsync<TResponse>(string endpoint, Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+	{
+		using var content = new MultipartFormDataContent();
+		using var streamContent = new StreamContent(fileStream);
+		content.Add(streamContent, "file", fileName);
+
+		var response = await _httpClient.PostAsync(endpoint, content, cancellationToken);
+		response.EnsureSuccessStatusCode();
+
+		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)
+			?? throw new InvalidOperationException("Réponse vide du backend IA");
+	}
 }
