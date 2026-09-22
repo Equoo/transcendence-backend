@@ -5,16 +5,16 @@ namespace KeepGrouped.API.Roles;
 
 public static class DeleteRoleEndpoint
 {
-    public static void MapDeleteRole(this IEndpointRouteBuilder roles)
-    {
-        roles.MapDelete("/{id}", [Roles((int)Perms.HandleRoles)] async (string id, DeleteRoleQuery query) =>
-        {
-            var result = await query.ExecAsync(id);
-            if (result.IsProblem)
-            {
-                return result.Problem;
-            }
-            return Results.Ok();
-        });
-    }
+	public static void MapDeleteRole(this IEndpointRouteBuilder roles)
+	{
+		roles.MapDelete("/{id}", [Roles(Perms.HandleRoles)] async (string id, DeleteRoleQuery query) =>
+		{
+			var result = await query.ExecAsync(id);
+			if (result.IsProblem)
+			{
+				return result.Problem;
+			}
+			return Results.Ok();
+		});
+	}
 }

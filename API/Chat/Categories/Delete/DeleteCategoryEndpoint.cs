@@ -9,7 +9,7 @@ public static class DeleteCategoryEndpoint
 {
 	public static void MapDeleteCategory(this IEndpointRouteBuilder categories)
 	{
-		categories.MapDelete("/{id}", [Authorize][Roles((int)Perms.HandleChannels)] async (DeleteCategoryCommand command, string id, TokenContext token) =>
+		categories.MapDelete("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (DeleteCategoryCommand command, string id, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(id, token.User);
 			if (result.IsProblem)

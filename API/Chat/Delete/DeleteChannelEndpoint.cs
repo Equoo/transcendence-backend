@@ -9,7 +9,7 @@ public static class DeleteChannelEndpoint
 {
     public static void MapDeleteChannel(this IEndpointRouteBuilder channels)
     {
-        channels.MapDelete("/{id}", [Authorize][Roles((int)Perms.HandleChannels)] async (DeleteChannelCommand command, string id, TokenContext token) =>
+        channels.MapDelete("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (DeleteChannelCommand command, string id, TokenContext token) =>
         {
             var result = await command.ExecuteAsync(id, token.User);
             if (result.IsProblem)

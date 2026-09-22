@@ -7,18 +7,18 @@ namespace KeepGrouped.API.Users;
 
 public static class DeleteUserEndpoint
 {
-    public static void MapDeleteUser(this IEndpointRouteBuilder users)
-    {
+	public static void MapDeleteUser(this IEndpointRouteBuilder users)
+	{
 
-        users.MapDelete("/{id}", [Authorize][Roles((int)Perms.HandleUsers)] async (DeleteUserQuery query, string id) =>
-        {
-            var result = await query.ExecuteAsync(id);
-            if (result.IsProblem)
-            {
-                return result.Problem;
-            }
-            
-            return Results.Ok();
-        });
-    }
+		users.MapDelete("/{id}", [Authorize][Roles(Perms.HandleUsers)] async (DeleteUserQuery query, string id) =>
+		{
+			var result = await query.ExecuteAsync(id);
+			if (result.IsProblem)
+			{
+				return result.Problem;
+			}
+
+			return Results.Ok();
+		});
+	}
 }

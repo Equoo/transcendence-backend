@@ -7,19 +7,19 @@ namespace KeepGrouped.API.Roles;
 
 public sealed class PatchRolePermQuery(KeepGroupedDb db) : IHandler
 {
-    public async Task<Result> ExecAsync(string id, int perm)
-    {
-        Role? role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
+	public async Task<Result> ExecAsync(string id, Perms perm)
+	{
+		Role? role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
 
-        if (role is null)
-        {
-            return RoleProblems.NotFound(id);
-        }
+		if (role is null)
+		{
+			return RoleProblems.NotFound(id);
+		}
 
-        role.Permission = perm;
+		role.Permission = perm;
 
-        await db.SaveChangesAsync();
+		await db.SaveChangesAsync();
 
-        return Result.OK;
-    }
+		return Result.OK;
+	}
 }
