@@ -21,7 +21,7 @@ public static class CreateChannelEndpoint
 {
 	public static void MapCreateChannel(this IEndpointRouteBuilder channels)
 	{
-		channels.MapPost("/", [Authorize][Roles((int)Perms.HandleChannels)] async (CreateChannelCommand command, CreateChannelRequest req, TokenContext token) =>
+		channels.MapPost("/", [Authorize][Roles(Perms.HandleChannels)] async (CreateChannelCommand command, CreateChannelRequest req, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(req, token.User);
 			if (result.IsProblem)

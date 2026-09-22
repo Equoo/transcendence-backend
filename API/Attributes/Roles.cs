@@ -1,12 +1,12 @@
-using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Roles;
 
 namespace KeepGrouped.API.Attributes.Roles;
 
-public class RolesAttribute: Attribute
+public class RolesAttribute : Attribute
 {
-    public int Permission {get; set;}
-    public RolesAttribute(int permission)
-    {
-        Permission = permission;
-    }
+	public Perms Permission { get; set; }
+	public RolesAttribute(Perms permission)
+	{
+		Permission = permission;
+	}
 }

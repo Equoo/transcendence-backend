@@ -18,7 +18,7 @@ public static class CreateCategoryEndpoint
 {
 	public static void MapCreateCategory(this IEndpointRouteBuilder categories)
 	{
-		categories.MapPost("/", [Authorize][Roles((int)Perms.HandleChannels)] async (CreateCategoryCommand command, CreateCategoryRequest req, TokenContext token) =>
+		categories.MapPost("/", [Authorize][Roles(Perms.HandleChannels)] async (CreateCategoryCommand command, CreateCategoryRequest req, TokenContext token) =>
 		{
 			var result = await command.ExecuteAsync(req, token.User);
 			if (result.IsProblem)

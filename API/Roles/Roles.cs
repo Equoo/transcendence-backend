@@ -2,32 +2,32 @@ using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Roles;
 
+[Flags]
 public enum Perms
 {
-
 	// Event
-	HandleEvent = 2 ^ 1,
+	HandleEvent = 1 << 0,
 
 	// User
-	HandleUsers = 2 ^ 2,
-	InviteUser = 2 ^ 3,
+	HandleUsers = 1 << 1,
+	InviteUser = 1 << 2,
 
 	// Chat
-	HandleChannels = 2 ^ 4,
-	ManageMessages = 2 ^ 5,
+	HandleChannels = 1 << 3,
+	ManageMessages = 1 << 4,
 
 	// Roles
-	HandleRoles = 2 ^ 6,
+	HandleRoles = 1 << 5,
 
 	// Knowledge
-	HandleKnowledge = 2 ^ 7,
+	HandleKnowledge = 1 << 6,
 }
 
 public class Role
 {
 	public string Id { get; set; } = Guid.NewGuid().ToString();
 	public string Name { get; set; } = null!;
-	public int Permission { get; set; } = 0;
+	public Perms Permission { get; set; } = 0;
 
 	public ICollection<User> Users { get; } = new List<User>();
 
@@ -36,7 +36,7 @@ public class Role
 		Name = name;
 	}
 
-	public Role(string name, int perm)
+	public Role(string name, Perms perm)
 	{
 		Name = name;
 		Permission = perm;
