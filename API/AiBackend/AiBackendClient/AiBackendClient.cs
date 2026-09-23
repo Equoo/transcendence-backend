@@ -1,6 +1,8 @@
 
 using System.Runtime.CompilerServices;
 
+namespace KeepGrouped.API.AiBackend;
+
 public class AiBackendClient : IAiBackendClient
 {
 	private readonly IApiClient _apiClient;

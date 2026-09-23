@@ -32,6 +32,7 @@ public static class Ingestpoints
 		.ProducesValidationProblem()
 		.ProducesProblem(StatusCodes.Status401Unauthorized)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
-		.ProducesProblem(StatusCodes.Status502BadGateway);
+		.ProducesProblem(StatusCodes.Status502BadGateway)
+		.RequireRateLimiting("ai-chat");
 	}
 }
