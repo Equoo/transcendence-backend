@@ -1,5 +1,5 @@
 using KeepGrouped.API.Chat;
-using System.Text.Json.Serialization;
+using KeepGrouped.API.AiBackend;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
@@ -23,6 +23,7 @@ class Program
 		builder.BuildDb();
 		builder.BuildAuthentication();
 		builder.AddHandlers();
+		builder.BuildAiBackend();
 
 		builder.Services.Configure<ForwardedHeadersOptions>(options =>
 		{
@@ -42,7 +43,6 @@ class Program
 		{
 			builder.Services.AddSwaggerGen();
 		}
-
 		var app = builder.Build();
 		app.UseForwardedHeaders();
 		app.UseStatusCodePages();
@@ -68,10 +68,11 @@ class Program
 		app.MapEventRoles();
 		app.MapStorageFiles();
 		app.MapAuthentication();
+		app.UseRateLimiter();
 		app.MapInvitations();
 		app.MapRoles();
 		app.MapHub<KeepGroupedHub>("");
-
+		app.MapAiBackend();
 		app.MapChannels();
 		app.MapMessages();
 		app.Run();
