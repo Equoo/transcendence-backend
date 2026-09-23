@@ -20,7 +20,7 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return ChannelProblems.NameInvalid();
 		}
 
-		if (await db.Channels.AnyAsync(c => c.Name == req.Name))
+		if (await db.Channels.AnyAsync(c => c.EventId == null && c.Name == req.Name))
 		{
 			return ChannelProblems.NameAlreadyUsed(req.Name);
 		}
