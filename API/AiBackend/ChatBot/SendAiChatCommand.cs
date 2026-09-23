@@ -1,6 +1,7 @@
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.AiBackend.AiClient;
 
-namespace KeepGrouped.API.AiBackend;
+namespace KeepGrouped.API.AiBackend.Chatbot;
 
 public sealed partial class SendAiChatCommand(IAiBackendClient aiBackendClient, TokenContext tk) : IHandler
 {

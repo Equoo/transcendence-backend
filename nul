@@ -1,2 +1,70 @@
-[]
-Error response from daemon: network keepgrouped-net not found
+[
+    {
+        "Name": "keepgrouped-net",
+        "Id": "381902f1b1a88d644bd72cd6c4b9c4fc082bff2db58e68b140665b7ba2549c43",
+        "Created": "2026-09-23T12:41:36.485944897+02:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Options": {},
+        "Labels": {},
+        "Containers": {
+            "81621b9119069d73b69a66964498a2e3b61fc3cfdf59d921e9797db03fb9212e": {
+                "Name": "default-ba-96e86-garage-1",
+                "EndpointID": "f382ecda2ccb53d4baf55e602429fbc012228381a4b1f39feca4a0042c161e97",
+                "MacAddress": "4a:ce:f4:7f:e0:50",
+                "IPv4Address": "172.18.0.5/16",
+                "IPv6Address": ""
+            },
+            "a24bed5ad43ccafa076a5ac11e2d6b7def30e7d8e47118ac815f187e221bd264": {
+                "Name": "default-ba-96e86-keepgrouped-back-dev-1",
+                "EndpointID": "c4c39c3da51eee74657dce280ae92416d9923bbb30d7496ccd347f937ad5ef99",
+                "MacAddress": "9a:8f:e1:2a:36:b5",
+                "IPv4Address": "172.18.0.4/16",
+                "IPv6Address": ""
+            },
+            "c797c97ca7ad406149f39a07439faee942b64bdfe67ad0a72d29f9f8ab77d905": {
+                "Name": "garage-webui",
+                "EndpointID": "bd405896500f60234b01483e02759de9397f77fc46087077afede866b8f49ab1",
+                "MacAddress": "02:7f:9e:7e:b1:3b",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            },
+            "fefbecd9a7bf4485a4f39ece2e5d97ce8d6d837dab92a878225d9d54eaa6183e": {
+                "Name": "default-ba-96e86-db-1",
+                "EndpointID": "96cb5a010efc4794c4e43ec6979ac6940f92e81da7169fd3f9db71bd63f7fc8c",
+                "MacAddress": "12:d1:33:7c:79:4a",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            }
+        },
+        "Status": {
+            "IPAM": {
+                "Subnets": {
+                    "172.18.0.0/16": {
+                        "IPsInUse": 7,
+                        "DynamicIPsAvailable": 65529
+                    }
+                }
+            }
+        }
+    }
+]

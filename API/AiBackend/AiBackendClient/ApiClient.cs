@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
-namespace KeepGrouped.API.AiBackend;
+
+namespace KeepGrouped.API.AiBackend.AiClient;
 
 public class ApiClient : IApiClient
 {

@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+namespace KeepGrouped.API.AiBackend.Ingest;
+
 public class IngestResponse
 {
 	public string Status { get; set; } = null!;

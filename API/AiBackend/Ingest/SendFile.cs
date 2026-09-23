@@ -1,6 +1,7 @@
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.AiBackend.AiClient;
 
-namespace KeepGrouped.API.AiBackend;
+namespace KeepGrouped.API.AiBackend.Ingest;
 
 public sealed class SendFile(IAiBackendClient aiBackendClient) : IHandler
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace KeepGrouped.API.AiBackend;
+namespace KeepGrouped.API.AiBackend.Ingest;
 
 public record IngestRequest
 {

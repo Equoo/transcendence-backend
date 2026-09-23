@@ -1,8 +1,7 @@
-using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KeepGrouped.API.AiBackend;
+namespace KeepGrouped.API.AiBackend.Ingest;
 
 public static class Ingestpoints
 {

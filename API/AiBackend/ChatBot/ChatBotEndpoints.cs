@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using KeepGrouped.API.Middlewares;
-using KeepGrouped.API.AiBackend;
 
+namespace KeepGrouped.API.AiBackend.Chatbot;
 
 public static class ChatBotEndpoints
 {

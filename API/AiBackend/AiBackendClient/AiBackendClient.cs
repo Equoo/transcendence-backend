@@ -1,7 +1,8 @@
-
+using KeepGrouped.API.AiBackend.Chatbot;
+using KeepGrouped.API.AiBackend.Ingest;
 using System.Runtime.CompilerServices;
 
-namespace KeepGrouped.API.AiBackend;
+namespace KeepGrouped.API.AiBackend.AiClient;
 
 public class AiBackendClient : IAiBackendClient
 {
