@@ -2,18 +2,12 @@ using System.Runtime.CompilerServices;
 
 namespace KeepGrouped.API.AiBackend.AiClient;
 
-public class ApiClient : IApiClient
+public class ApiClient(HttpClient httpClient) : IApiClient
 {
-	private readonly HttpClient _httpClient;
-
-	public ApiClient(HttpClient httpClient)
-	{
-		_httpClient = httpClient;
-	}
 
 	public async IAsyncEnumerable<string> StreamAsync(string endpoint, object request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Post, endpoint)
+		var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Post, endpoint)
 		{
 			Content = JsonContent.Create(request)
 		}, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -48,7 +42,7 @@ public class ApiClient : IApiClient
 		using var streamContent = new StreamContent(fileStream);
 		content.Add(streamContent, "file", fileName);
 
-		var response = await _httpClient.PostAsync(endpoint, content, cancellationToken);
+		var response = await httpClient.PostAsync(endpoint, content, cancellationToken);
 		response.EnsureSuccessStatusCode();
 
 		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)

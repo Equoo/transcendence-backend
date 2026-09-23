@@ -61,13 +61,6 @@ class Program
 			context.Database.Migrate();
 		}
 
-		app.MapGet("/", () => "Hello World from API!")
-			.WithTags("Diagnostics")
-			.WithName("root")
-			.WithSummary("API root")
-			.WithDescription("Returns a constant greeting, used to check that the API is up.")
-			.Produces<string>(StatusCodes.Status200OK);
-
 		app.MapEvents();
 		app.MapRegistrations();
 		app.MapUsers();
