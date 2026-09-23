@@ -8,7 +8,7 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result> ExecuteAsync(string id, UpdateChannelRequest req, User? sender)
+	public async Task<Result<ChannelResponse>> ExecuteAsync(string id, UpdateChannelRequest req, User? sender)
 	{
 		if (sender is null)
 		{
@@ -43,7 +43,9 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 
 		await hub.Clients.All.SendAsync("UpdateChannel", ChannelResponse.FromEntity(channel));
 
-		return Result.OK;
+		var response = ChannelResponse.FromEntity(channel);
+
+		return response;
 	}
 
 	[GeneratedRegex(@"[\s\p{Lu}$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]

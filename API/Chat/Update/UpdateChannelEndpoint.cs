@@ -28,7 +28,7 @@ public static class UpdateChannelEndpoint
 				return result.Problem;
 			}
 
-			return Results.NoContent();
+			return Results.CreatedAtRoute("channels.get", new { id = result.Value.Id }, result.Value);
 		})
 		.WithName("channels.update")
 		.WithSummary("Update a channel")
