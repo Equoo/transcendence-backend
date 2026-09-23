@@ -80,12 +80,35 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 
 		builder.Entity<ChannelCategory>().HasAlternateKey(c => c.Name);
 
-		builder.Entity<ChannelAck>().HasKey(a => new { a.UserId, a.ChannelId });
+		builder.Entity<ChannelAck>(entity =>
+		{
+			entity.HasKey(a => new { a.UserId, a.ChannelId });
 
-		builder.Entity<ChannelAck>().HasOne(m => m.Channel)
-			.WithMany()
-			.HasForeignKey(m => m.ChannelId)
-			.OnDelete(DeleteBehavior.Cascade);
+			entity.HasOne(m => m.Channel)
+				.WithMany()
+				.HasForeignKey(m => m.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// entity.HasOne(m => m.User)
+			// 	.WithMany()
+			// 	.HasForeignKey(m => m.UserId)
+			// 	.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		builder.Entity<ChannelRole>(entity =>
+		{
+			entity.HasKey(a => new { a.RoleId, a.ChannelId });
+
+			entity.HasOne(m => m.Channel)
+				.WithMany(c => c.RolesWhitelist)
+				.HasForeignKey(m => m.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(m => m.Role)
+				.WithMany()
+				.HasForeignKey(m => m.RoleId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
 	}
 
 	public DbSet<User> Users { get; set; } = null!;
@@ -98,6 +121,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 	public DbSet<Channel> Channels { get; set; } = null!;
 	public DbSet<ChannelCategory> ChannelCategories { get; set; } = null!;
 	public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
+	public DbSet<ChannelRole> ChannelRoles { get; set; } = null!;
 	public DbSet<Message> Messages { get; set; } = null!;
 }
 

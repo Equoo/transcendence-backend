@@ -5,10 +5,14 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class GetChannelQuery(KeepGroupedDb db) : IHandler
 {
-    public async Task<Result<ChannelResponse>> ExecuteAsync(string id)
-    {
-        var channel = await db.Channels.AsNoTracking().SingleOrDefaultAsync(c => c.Id == id);
+	public async Task<Result<ChannelResponse>> ExecuteAsync(string id)
+	{
+		var channel = await db.Channels
+			.Where(c => c.Id == id)
+			.Select(c => ChannelResponse.FromEntity(c))
+			.AsNoTracking()
+			.SingleOrDefaultAsync(c => c.Id == id);
 
-        return channel is null ? ChannelProblems.NotFound(id) : ChannelResponse.FromEntity(channel);
-    }
+		return channel is null ? ChannelProblems.NotFound(id) : channel;
+	}
 }

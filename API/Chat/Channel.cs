@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
 
 namespace KeepGrouped.API.Chat;
 
@@ -22,6 +23,9 @@ public class Channel
 	public string? Category { get; set; } = null;
 	public string? EventId { get; set; } = null;
 	public Event? Event { get; set; } = null;
+
+	public ICollection<ChannelRole> RolesWhitelist { get; set; } = [];
+	public bool CategorySync { get; set; } = true;
 }
 
 public record ChannelResponse(
@@ -30,11 +34,22 @@ public record ChannelResponse(
 	string Topic,
 	DateTime CreateAt,
 	string? Category,
-	string? EventId
+	string? EventId,
+	IReadOnlyList<ChannelRoleResponse> RolesWhitelist,
+	bool CategorySync
 )
 {
 	public static ChannelResponse FromEntity(Channel c) =>
-		new(c.Id, c.Name, c.Topic, c.CreateAt, c.Category, c.EventId);
+		new(
+				c.Id,
+				c.Name,
+				c.Topic,
+				c.CreateAt,
+				c.Category,
+				c.EventId,
+				c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name)).ToList(),
+				c.CategorySync
+		);
 }
 
 public static partial class ChannelSlug
