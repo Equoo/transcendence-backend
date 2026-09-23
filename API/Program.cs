@@ -37,7 +37,6 @@ class Program
 
 		builder.Services.AddProblemDetails();
 		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddValidation();
 
 		if (builder.Environment.IsDevelopment())
 		{
