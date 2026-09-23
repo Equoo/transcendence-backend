@@ -1,5 +1,4 @@
 using KeepGrouped.API.Chat;
-using System.Text.Json.Serialization;
 using KeepGrouped.API.AiBackend;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
@@ -9,9 +8,6 @@ using KeepGrouped.API.Users.Auth;
 using KeepGrouped.API.Users.Invitation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.RateLimiting;
-using KeepGrouped.API.Middlewares;
-using System.Threading.RateLimiting;
 
 namespace KeepGrouped.API;
 
@@ -23,31 +19,11 @@ class Program
 
 		var builder = WebApplication.CreateBuilder(args);
 
-		var myOptions = new RateLimitOptions();
-		builder.Configuration.GetSection(RateLimitOptions.RateLimit).Bind(myOptions);
-
-		builder.Services.AddRateLimiter(options =>
-		{
-			options.AddPolicy<string>("ai-chat", httpContext =>
-			{
-				var tokenContext = httpContext.RequestServices.GetRequiredService<TokenContext>();
-				var userId = tokenContext.User.Id;
-
-				return RateLimitPartition.GetTokenBucketLimiter(userId, _ => new TokenBucketRateLimiterOptions
-				{
-					TokenLimit = myOptions.TokenLimit,
-					QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-					QueueLimit = myOptions.QueueLimit,
-					ReplenishmentPeriod = TimeSpan.FromSeconds(myOptions.ReplenishmentPeriod),
-					TokensPerPeriod = myOptions.TokensPerPeriod,
-					AutoReplenishment = myOptions.AutoReplenishment
-				});
-			});
-		});
 		builder.BuildStorage();
 		builder.BuildDb();
 		builder.BuildAuthentication();
 		builder.AddHandlers();
+		builder.BuildAiBackend();
 
 		builder.Services.Configure<ForwardedHeadersOptions>(options =>
 		{
@@ -63,16 +39,10 @@ class Program
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddValidation();
 
-		builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
-		{
-			client.BaseAddress = new Uri("http://ai-back-dev:7070");
-		});
-		builder.Services.AddScoped<IAiBackendClient, AiBackendClient>();
 		if (builder.Environment.IsDevelopment())
 		{
 			builder.Services.AddSwaggerGen();
 		}
-
 		var app = builder.Build();
 		app.UseForwardedHeaders();
 		app.UseStatusCodePages();
