@@ -31,7 +31,7 @@ public class TokenProvider
             issuer: "KeepGrouped",
             audience: "KeepGrouped",
             claims: claims,
-            expires: DateTime.Now.AddSeconds(20),
+            expires: DateTime.Now.AddMinutes(15),
             signingCredentials: _creds
         );
 
@@ -49,7 +49,7 @@ public class TokenProvider
             issuer: "KeepGrouped",
             audience: "KeepGrouped",
             claims: claims,
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.Now.AddDays(7),
             signingCredentials: _creds
         );
 
