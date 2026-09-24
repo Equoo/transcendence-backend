@@ -19,7 +19,7 @@ public static class ChatBotEndpoints
 			http.Response.ContentType = "text/event-stream";
 			await foreach (var chunk in result.Value.WithCancellation(cancellationToken))
 			{
-				await http.Response.WriteAsync($"chunk", cancellationToken);
+				await http.Response.WriteAsync(chunk, cancellationToken);
 				await http.Response.Body.FlushAsync(cancellationToken);
 			}
 			return Results.Empty;
