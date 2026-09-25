@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
-public sealed class LogoutQuery(KeepGroupedDb db): IHandler
+public sealed class LogoutQuery(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecAsync(string id)
     {
+
+
         RefreshToken? refresh = await db.RefreshTokens.SingleOrDefaultAsync(r => r.UserId == id);
 
         if (refresh is null)
