@@ -98,10 +98,16 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 		builder.Entity<ChannelRole>(entity =>
 		{
 			entity.HasKey(a => new { a.RoleId, a.ChannelId });
+			entity.HasKey(a => new { a.RoleId, a.CategoryId });
 
 			entity.HasOne(m => m.Channel)
 				.WithMany(c => c.RolesWhitelist)
 				.HasForeignKey(m => m.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(m => m.Category)
+				.WithMany(c => c.RolesWhitelist)
+				.HasForeignKey(m => m.CategoryId)
 				.OnDelete(DeleteBehavior.Cascade);
 
 			entity.HasOne(m => m.Role)
