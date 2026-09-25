@@ -32,6 +32,7 @@ public static class UpdateMeEndpoint
                 return result.Problem;
             }
 
+         
             return Results.Ok(result.Value);
         })
         .WithName("me.update")

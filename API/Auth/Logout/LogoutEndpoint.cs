@@ -10,7 +10,7 @@ public static class LogoutEndpoint
         auth.MapGet("/logout", [Authorize] async (LogoutQuery query, HttpContext http, TokenContext tk) =>
         {
             var result = await query.ExecAsync(tk.User.Id);
-            
+
             if (result.IsProblem)
             {
                 return result.Problem;
