@@ -7,11 +7,6 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHan
 {
     public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator)
     {
-        if (length <= 0)
-        {
-            return StorageProblems.EmptyFile();
-        }
-
         var res = await storage.UploadAsync(content, contentType);
         if ((int)res.Code >= 400)
         {
