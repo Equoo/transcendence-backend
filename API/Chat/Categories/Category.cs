@@ -13,6 +13,7 @@ public class ChannelCategory
 	public string Id { get; init; } = Guid.NewGuid().ToString();
 	public string Name { get; set; } = null!;
 	public uint Order { get; set; } = 0;
+	public ICollection<ChannelRole> RolesWhitelist { get; set; } = [];
 }
 
 public record ChannelCategoryResponse(string Id, string Name, uint Order)
