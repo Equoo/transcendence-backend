@@ -18,21 +18,7 @@ public class ApiClient(HttpClient httpClient) : IApiClient
 		string? current = null;
 		while ((line = await reader.ReadLineAsync()) is not null)
 		{
-			if (line.StartsWith("data: "))
-			{
-				var data = line.Substring(6);
-				if (current == "error")
-					throw new InvalidOperationException(data);
-				else
-					yield return data;
-
-			}
-			else if (line.StartsWith("event: "))
-			{
-				current = line.Substring(7);
-			}
-			else if (line == string.Empty)
-				current = null;
+			yield return line;
 		}
 	}
 
