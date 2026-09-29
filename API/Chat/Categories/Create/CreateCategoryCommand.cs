@@ -26,6 +26,16 @@ public sealed partial class CreateCategoryCommand(KeepGroupedDb db, IHubContext<
 		}
 
 		var category = new ChannelCategory(req.Name, req.Order);
+
+		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, category, (c, role) => new ChannelRole
+		{
+			CategoryId = c.Id,
+			RoleId = role.Id,
+			Role = role
+		});
+		if (res.IsProblem)
+			return res.Problem;
+
 		db.ChannelCategories.Add(category);
 		await db.SaveChangesAsync();
 

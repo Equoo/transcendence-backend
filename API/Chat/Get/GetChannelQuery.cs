@@ -9,6 +9,8 @@ public sealed class GetChannelQuery(KeepGroupedDb db) : IHandler
 	{
 		var channel = await db.Channels
 			.Where(c => c.Id == id)
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
 			.Select(c => ChannelResponse.FromEntity(c))
 			.AsNoTracking()
 			.SingleOrDefaultAsync(c => c.Id == id);

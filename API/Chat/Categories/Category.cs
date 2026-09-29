@@ -1,6 +1,6 @@
 namespace KeepGrouped.API.Chat;
 
-public class ChannelCategory
+public class ChannelCategory : IRoleWhitelist
 {
 	public ChannelCategory() { }
 

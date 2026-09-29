@@ -1,10 +1,9 @@
 using System.Text.RegularExpressions;
 using KeepGrouped.API.Events;
-using KeepGrouped.API.Roles;
 
 namespace KeepGrouped.API.Chat;
 
-public class Channel
+public class Channel : IRoleWhitelist
 {
 	public Channel() { }
 

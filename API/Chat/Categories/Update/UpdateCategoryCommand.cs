@@ -8,14 +8,17 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result> ExecuteAsync(string id, UpdateCategoryRequest req, User? sender)
+	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(string id, UpdateCategoryRequest req, User? sender)
 	{
 		if (sender is null)
 		{
 			return UserProblems.NotAuthenticated();
 		}
 
-		var category = await db.ChannelCategories.SingleOrDefaultAsync(c => c.Id == id);
+		var category = await db.ChannelCategories
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.SingleOrDefaultAsync(c => c.Id == id);
 		if (category is null)
 		{
 			return CategoryProblems.NotFound(id);
@@ -31,13 +34,23 @@ public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<
 			return CategoryProblems.NameAlreadyUsed(req.Name);
 		}
 
+		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, category, (c, role) => new ChannelRole
+		{
+			CategoryId = c.Id,
+			RoleId = role.Id,
+			Role = role
+		});
+		if (res.IsProblem)
+			return res.Problem;
+
 		category.Name = req.Name;
 		category.Order = req.Order;
 		await db.SaveChangesAsync();
 
-		await hub.Clients.All.SendAsync("UpdateCategory", ChannelCategoryResponse.FromEntity(category));
+		var response = ChannelCategoryResponse.FromEntity(category);
+		await hub.Clients.All.SendAsync("UpdateCategory", response);
 
-		return Result.OK;
+		return response;
 	}
 
 	[GeneratedRegex(@"[$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]

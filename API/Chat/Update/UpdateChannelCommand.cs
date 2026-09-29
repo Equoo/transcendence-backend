@@ -15,7 +15,10 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return UserProblems.NotAuthenticated();
 		}
 
-		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == id);
+		var channel = await db.Channels
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.SingleOrDefaultAsync(c => c.Id == id);
 		if (channel is null)
 		{
 			return ChannelProblems.NotFound(id);
@@ -35,6 +38,15 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 		{
 			return CategoryProblems.NotFound(req.Category);
 		}
+
+		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, channel, (c, role) => new ChannelRole
+		{
+			ChannelId = c.Id,
+			RoleId = role.Id,
+			Role = role
+		});
+		if (res.IsProblem)
+			return res.Problem;
 
 		channel.Name = req.Name;
 		channel.Topic = req.Topic;

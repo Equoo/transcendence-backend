@@ -3,6 +3,7 @@ using System;
 using KeepGrouped.API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations
 {
     [DbContext(typeof(KeepGroupedDb))]
-    partial class KeepGroupedDbModelSnapshot : ModelSnapshot
+    [Migration("20260929140653_ChannelRolesNewKey2")]
+    partial class ChannelRolesNewKey2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,6 +126,9 @@ namespace KeepGrouped.Migrations
 
             modelBuilder.Entity("KeepGrouped.API.Chat.ChannelRole", b =>
                 {
+                    b.Property<string>("RoleId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
@@ -132,17 +138,11 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("ChannelId")
                         .HasColumnType("text");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
+                    b.HasKey("RoleId", "Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ChannelId");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("ChannelRoles");
                 });

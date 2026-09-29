@@ -14,6 +14,7 @@ public record UpdateChannelRequest
 	[Length(0, 255)]
 	public string Topic { get; init; } = string.Empty;
 	public string? Category { get; init; } = null;
+	public List<string> WhitelistRoles { get; init; } = [];
 }
 
 public static class UpdateChannelEndpoint

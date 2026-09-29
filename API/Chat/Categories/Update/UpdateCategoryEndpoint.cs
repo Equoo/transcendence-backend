@@ -12,6 +12,7 @@ public record UpdateCategoryRequest
 	[Length(1, 25)]
 	public string Name { get; init; } = null!;
 	public uint Order { get; init; } = 0;
+	public List<string> WhitelistRoles { get; init; } = [];
 }
 
 public static class UpdateCategoryEndpoint
@@ -26,7 +27,7 @@ public static class UpdateCategoryEndpoint
 				return result.Problem;
 			}
 
-			return Results.NoContent();
+			return Results.CreatedAtRoute("categories.get", new { id = result.Value.Id }, result.Value);
 		})
 		.WithName("categories.update")
 		.WithSummary("Update a channel category")
