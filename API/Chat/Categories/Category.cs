@@ -16,8 +16,18 @@ public class ChannelCategory
 	public ICollection<ChannelRole> RolesWhitelist { get; set; } = [];
 }
 
-public record ChannelCategoryResponse(string Id, string Name, uint Order)
+public record ChannelCategoryResponse(
+		string Id,
+		string Name,
+		uint Order,
+		IReadOnlyList<ChannelRoleResponse> RolesWhitelist
+)
 {
 	public static ChannelCategoryResponse FromEntity(ChannelCategory c) =>
-		new(c.Id, c.Name, c.Order);
+		new(
+				c.Id,
+				c.Name,
+				c.Order,
+				[.. c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name))]
+			);
 }

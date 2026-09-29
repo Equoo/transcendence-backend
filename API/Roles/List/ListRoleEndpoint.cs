@@ -1,5 +1,4 @@
 
-using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Roles;

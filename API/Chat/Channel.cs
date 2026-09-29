@@ -47,7 +47,7 @@ public record ChannelResponse(
 				c.CreateAt,
 				c.Category,
 				c.EventId,
-				c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name)).ToList(),
+				[.. c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name))],
 				c.CategorySync
 		);
 }
