@@ -8,7 +8,7 @@ public static class ChatBotEndpoints
 	{
 		var chatBot = aibackend.MapGroup("/chatbot").WithTags("ChatBot");
 
-		chatBot.MapPost("/stream", [Authorize] async (SendAiChatCommand command, ChatRequest req, CancellationToken cancellationToken, HttpContext http) =>
+		chatBot.MapPost("/stream", [Authorize] async (SendAiChatCommand command, ChatRequest req, CancellationToken cancellationToken) =>
 		{
 			var result = command.ExecuteAsync(req, cancellationToken);
 			if (result.IsProblem)
@@ -16,13 +16,7 @@ public static class ChatBotEndpoints
 				return (IResult)result.Problem;
 			}
 
-			http.Response.ContentType = "text/event-stream";
-			await foreach (var chunk in result.Value.WithCancellation(cancellationToken))
-			{
-				await http.Response.WriteAsync(chunk, cancellationToken);
-				await http.Response.Body.FlushAsync(cancellationToken);
-			}
-			return Results.Empty;
+			return Results.ServerSentEvents(result.Value);
 		})
 		.RequireRateLimiting("ai-chat");
 
