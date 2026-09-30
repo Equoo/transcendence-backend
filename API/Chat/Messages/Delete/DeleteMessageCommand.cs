@@ -8,12 +8,17 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result> ExecuteAsync(string channelId, string msgId, User? sender)
+	public async Task<Result> ExecuteAsync(string channelId, string msgId, User sender)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
+		var channel = await db.Channels
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.SingleOrDefaultAsync(c => c.Id == channelId);
+		if (channel is null)
+			return ChannelProblems.NotFound(channelId);
+
+		if (!channel.IsWhitelisted(sender))
+			return MessageProblems.AccessNotAuthorized();
 
 		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
 		if (msg is null)
@@ -31,10 +36,13 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		await db.SaveChangesAsync();
 
 		var users = await db
-			.Users.Where(user => user.IsOnline && user.Id != sender.Id)
-			.Select(user => user.Id)
+			.Users.Include(u => u.Role)
+			.Where(user => user.IsOnline && user.Id != sender.Id)
 			.ToListAsync();
-		await hub.Clients.Users(users).SendAsync("RemoveMessage", channelId, msgId);
+		var whitelisted = users
+			.Where(channel.IsWhitelisted)
+			.Select(user => user.Id);
+		await hub.Clients.Users(whitelisted).SendAsync("RemoveMessage", channelId, msgId);
 
 		return Result.OK;
 	}

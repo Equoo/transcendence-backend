@@ -20,6 +20,14 @@ public static class MessageProblems
 			"This operation can only be performed by the message's sender."
 		);
 
+	public static ProblemHttpResult AccessNotAuthorized() =>
+		ProblemFactory.Create(
+			StatusCodes.Status401Unauthorized,
+			"MESSAGE_ACCESS_NOT_AUTHORIZED",
+			"Access not authorized",
+			"This operation can only be performed by allowed roles."
+		);
+
 	public static ProblemHttpResult NotAuthorized() =>
 		ProblemFactory.Create(
 			StatusCodes.Status401Unauthorized,

@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Roles;
+using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Chat;
 
@@ -25,6 +27,19 @@ public class Channel : IRoleWhitelist
 
 	public ICollection<ChannelRole> RolesWhitelist { get; set; } = [];
 	public bool CategorySync { get; set; } = true;
+
+	public bool IsWhitelisted(User sender)
+	{
+		if (sender.Role.Permission.HasFlag(Perms.HandleChannels))
+			return true;
+		if (RolesWhitelist.Count > 0)
+		{
+			var isWhitelisted = RolesWhitelist.Any(r => r.Role.Id == sender?.Role.Id);
+			if (!isWhitelisted)
+				return false;
+		}
+		return true;
+	}
 }
 
 public record ChannelResponse(
