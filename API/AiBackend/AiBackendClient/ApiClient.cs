@@ -17,4 +17,11 @@ public class ApiClient(HttpClient httpClient) : IApiClient
 		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Réponse vide du backend IA");
 	}
+
+	public async Task<TResponse> DeleteFileAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default)
+	{
+		var response = await httpClient.GetAsync(endpoint, cancellationToken);
+		response.EnsureSuccessStatusCode();
+		return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException("Response content is null");
+	}
 }

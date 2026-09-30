@@ -5,6 +5,6 @@ public static class DeleteEndpoint
 {
 	public static void DeleteFileEndpoint(this IEndpointRouteBuilder aibackend)
 	{
-		var DeleteFile = aibackend.MapGroup("/delete");
+		var DeleteFile = aibackend.MapGroup("/delete/{id}");
 	}
 }
