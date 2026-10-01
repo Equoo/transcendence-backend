@@ -102,12 +102,13 @@ public static class DbBuilder
             {
                 return;
             }
-            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("SuperAdmin", int.MaxValue) };
+            User user = new() { UserName = authOptions.DefaultAdminLogin, Role = new("\\(*-*)/", int.MaxValue) };
 
             user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
             db.Set<User>().Add(user);
             db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
             db.Set<Role>().Add(new Role("Member"));
+
             db.SaveChanges();
 
             if (!builder.Environment.IsDevelopment())
@@ -118,19 +119,16 @@ public static class DbBuilder
             db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
             db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-            User user5 = new() { UserName = "a", Role = new("Admin", int.MaxValue) };
             User user1 = new() { UserName = "devan", Role = new("Modo", 1) };
             User user2 = new() { UserName = "pierre", Role = new("Helper", 1) };
             User user3 = new() { UserName = "tom", Role = new("Gold", int.MaxValue) };
-            User user4 = new() { UserName = "david", Role = new("Member", 1) };
+            User user4 = new() { UserName = "david", Role = new("Admin", int.MaxValue) };
 
-            user5.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user5, "a");
             user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");
             user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user2, "a");
             user3.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user3, "a");
             user4.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user4, "a");
 
-            db.Set<User>().Add(user5);
             db.Set<User>().Add(user1);
             db.Set<User>().Add(user2);
             db.Set<User>().Add(user3);

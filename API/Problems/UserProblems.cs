@@ -23,4 +23,10 @@ static public class UserProblems
         StatusCodes.Status422UnprocessableEntity, "INVALID_AVATAR_TYPE",
         "Invalid avatar type",
         $"'{contentType}' is not an image. The avatar must be an image file.");
+
+     static public ProblemHttpResult UserCannotBeDelete() => ProblemFactory.Create(
+    StatusCodes.Status401Unauthorized, "USER_CANNOT_BE_DELETED",
+    "User cannot be deleted",
+    "This user cannot be deleted");
+
 };
