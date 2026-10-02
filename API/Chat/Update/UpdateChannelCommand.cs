@@ -6,13 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Chat;
 
-public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
+public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req, User? sender)
+	public async Task<Result> ExecuteAsync(string id, UpdateChannelRequest req, User? sender)
 	{
 		if (sender is null)
 		{
 			return UserProblems.NotAuthenticated();
+		}
+
+		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == id);
+		if (channel is null)
+		{
+			return ChannelProblems.NotFound(id);
 		}
 
 		if (ChannelNameValidation().IsMatch(req.Name))
@@ -20,7 +26,7 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return ChannelProblems.NameInvalid();
 		}
 
-		if (await db.Channels.AnyAsync(c => c.Name == req.Name))
+		if (await db.Channels.AnyAsync(c => c.Name == req.Name && c.Id != id))
 		{
 			return ChannelProblems.NameAlreadyUsed(req.Name);
 		}
@@ -30,15 +36,14 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return CategoryProblems.NotFound(req.Category);
 		}
 
-		var channel = new Channel(req.Name, req.Topic, req.EventId) { Category = req.Category };
-		db.Channels.Add(channel);
+		channel.Name = req.Name;
+		channel.Topic = req.Topic;
+		channel.Category = req.Category;
 		await db.SaveChangesAsync();
 
-		var response = ChannelResponse.FromEntity(channel);
+		await hub.Clients.All.SendAsync("UpdateChannel", ChannelResponse.FromEntity(channel));
 
-		await hub.Clients.All.SendAsync("NewChannel", response);
-
-		return response;
+		return Result.OK;
 	}
 
 	[GeneratedRegex(@"[\s\p{Lu}$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]

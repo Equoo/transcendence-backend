@@ -35,9 +35,6 @@ class Program
 		builder.Services.AddValidation();
 		builder.Services.AddSignalR();
 
-		builder.Services.AddProblemDetails();
-		builder.Services.AddEndpointsApiExplorer();
-
 		if (builder.Environment.IsDevelopment())
 		{
 			builder.Services.AddSwaggerGen();
@@ -72,6 +69,7 @@ class Program
 		app.MapRoles();
 		app.MapHub<KeepGroupedHub>("");
 		app.MapAiBackend();
+		app.MapCategories();
 		app.MapChannels();
 		app.MapMessages();
 		app.Run();
