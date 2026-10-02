@@ -21,7 +21,8 @@ public class Channel : IRoleWhitelist
 	public string Topic { get; set; } = null!;
 	public uint Order { get; init; } = 0;
 	public DateTime CreateAt { get; } = DateTime.UtcNow;
-	public string? Category { get; set; } = null;
+	public string? CategoryId { get; set; } = null;
+	public ChannelCategory? Category { get; set; } = null;
 	public string? EventId { get; set; } = null;
 	public Event? Event { get; set; } = null;
 
@@ -32,6 +33,18 @@ public class Channel : IRoleWhitelist
 	{
 		if (sender.Role.Permission.HasFlag(Perms.HandleChannels))
 			return true;
+
+		if (CategorySync && Category is not null)
+		{
+			if (Category.RolesWhitelist.Count > 0)
+			{
+				var isWhitelisted = Category.RolesWhitelist.Any(r => r.Role.Id == sender?.Role.Id);
+				if (!isWhitelisted)
+					return false;
+			}
+			return true;
+		}
+
 		if (RolesWhitelist.Count > 0)
 		{
 			var isWhitelisted = RolesWhitelist.Any(r => r.Role.Id == sender?.Role.Id);
@@ -47,7 +60,7 @@ public record ChannelResponse(
 	string Name,
 	string Topic,
 	DateTime CreateAt,
-	string? Category,
+	string? CategoryId,
 	string? EventId,
 	IReadOnlyList<ChannelRoleResponse> RolesWhitelist,
 	bool CategorySync
@@ -59,7 +72,7 @@ public record ChannelResponse(
 				c.Name,
 				c.Topic,
 				c.CreateAt,
-				c.Category,
+				c.CategoryId,
 				c.EventId,
 				[.. c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name))],
 				c.CategorySync

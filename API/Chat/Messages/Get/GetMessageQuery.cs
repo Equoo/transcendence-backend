@@ -9,8 +9,10 @@ public sealed class GetMessageQuery(KeepGroupedDb db) : IHandler
 	public async Task<Result<MessageResponse>> ExecuteAsync(string channelId, string msgId, User sender)
 	{
 		var channel = await db.Channels
+			.AsNoTracking()
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
+			.Include(c => c.Category)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);

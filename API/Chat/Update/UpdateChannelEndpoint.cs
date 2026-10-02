@@ -13,6 +13,7 @@ public record UpdateChannelRequest
 	public string Name { get; init; } = null!;
 	[Length(0, 255)]
 	public string Topic { get; init; } = string.Empty;
+	public bool CategorySync { get; init; } = true;
 	public string? Category { get; init; } = null;
 	public List<string> WhitelistRoles { get; init; } = [];
 }

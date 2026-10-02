@@ -30,10 +30,10 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return CategoryProblems.NotFound(req.Category);
 		}
 
-
 		var channel = new Channel(req.Name, req.Topic, req.EventId)
 		{
-			Category = req.Category
+			CategorySync = req.CategorySync,
+			CategoryId = req.Category
 		};
 
 		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, channel, (c, role) => new ChannelRole

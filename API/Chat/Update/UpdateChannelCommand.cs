@@ -50,7 +50,8 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 
 		channel.Name = req.Name;
 		channel.Topic = req.Topic;
-		channel.Category = req.Category;
+		channel.CategoryId = req.Category;
+		channel.CategorySync = req.CategorySync;
 		await db.SaveChangesAsync();
 
 		await hub.Clients.All.SendAsync("UpdateChannel", ChannelResponse.FromEntity(channel));

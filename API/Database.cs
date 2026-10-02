@@ -72,9 +72,9 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 		builder.Entity<Channel>(entity =>
 		{
 			entity
-				.HasOne<ChannelCategory>()
+				.HasOne(c => c.Category)
 				.WithMany()
-				.HasForeignKey(c => c.Category)
+				.HasForeignKey(c => c.CategoryId)
 				.OnDelete(DeleteBehavior.SetNull);
 		});
 
@@ -199,7 +199,7 @@ public static class DbBuilder
 					"This is a default channel, say everything in ur mind",
 					null
 				)
-			{ Category = chanCat.Id };
+			{ CategoryId = chanCat.Id };
 			db.Set<Channel>().Add(chan);
 
 			db.SaveChanges();

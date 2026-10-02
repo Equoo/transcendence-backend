@@ -11,8 +11,10 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 	public async Task<Result> ExecuteAsync(string channelId, string msgId, User sender)
 	{
 		var channel = await db.Channels
+			.AsNoTracking()
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
+			.Include(c => c.Category)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);
