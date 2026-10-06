@@ -1,5 +1,6 @@
 using KeepGrouped.API.AiBackend.Chatbot;
 using KeepGrouped.API.AiBackend.Ingest;
+using System.Net.ServerSentEvents;
 using System.Runtime.CompilerServices;
 
 namespace KeepGrouped.API.AiBackend.AiClient;
@@ -11,23 +12,6 @@ public class AiBackendClient : IAiBackendClient
 	public AiBackendClient(IApiClient apiClient)
 	{
 		_apiClient = apiClient;
-	}
-
-	public async IAsyncEnumerable<string> StreamChatAsync(
-		string userId,
-		string message,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		var request = new AiChatRequest
-		{
-			UserId = userId,
-			Message = message
-		};
-
-		await foreach (var response in _apiClient.StreamAsync("/chat/stream", request, cancellationToken))
-		{
-			yield return response;
-		}
 	}
 
 	public Task<IngestResponse> IngestFileAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
