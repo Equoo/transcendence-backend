@@ -42,7 +42,7 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
 		};
 
 		var channelReq = new CreateChannelRequest { Name = ChannelSlug.Sanitize(req.Name), EventId = ev.Id };
-		var channelResult = await createChannelCmd.ExecuteAsync(channelReq, organizer);
+		var channelResult = await createChannelCmd.ExecuteAsync(channelReq);
 		if (channelResult.IsProblem)
 		{
 			return channelResult.Problem!;
