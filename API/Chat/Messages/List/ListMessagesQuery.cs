@@ -1,4 +1,5 @@
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Chat;
@@ -8,14 +9,23 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 	public async Task<Result<List<MessageResponse>>> ExecuteAsync(
 		string channelId,
 		DateTime? before,
-		int take
+		int take,
+		User sender
 	)
 	{
-		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == channelId);
+		var channel = await db.Channels
+			.AsNoTracking()
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.Include(c => c.Category)
+			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 		{
 			return ChannelProblems.NotFound(channelId);
 		}
+
+		if (!channel.IsWhitelisted(sender))
+			return MessageProblems.AccessNotAuthorized();
 
 		var query = db
 			.Messages.Include(m => m.Sender)

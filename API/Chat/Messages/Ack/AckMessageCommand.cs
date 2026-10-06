@@ -6,18 +6,17 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class AckMessageCommand(KeepGroupedDb db) : IHandler
 {
-	public async Task<Result> ExecuteAsync(string channelId, string msgId, User? sender)
+	public async Task<Result> ExecuteAsync(string channelId, string msgId, User sender)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
-		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == channelId);
+		var channel = await db.Channels
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
-		{
 			return ChannelProblems.NotFound(channelId);
-		}
+
+		if (!channel.IsWhitelisted(sender))
+			return MessageProblems.AccessNotAuthorized();
 
 		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
 		if (msg is null)

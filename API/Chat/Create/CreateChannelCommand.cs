@@ -8,24 +8,38 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req, User? sender)
+	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
 		if (ChannelNameValidation().IsMatch(req.Name))
 		{
 			return ChannelProblems.NameInvalid();
 		}
 
-		if (await db.Channels.AnyAsync(c => c.Name == req.Name))
+		if (await db.Channels.AnyAsync(c => c.EventId == null && c.Name == req.Name))
 		{
 			return ChannelProblems.NameAlreadyUsed(req.Name);
 		}
 
-		var channel = new Channel(req.Name, req.Topic, req.EventId);
+		if (req.Category is not null && !await db.ChannelCategories.AnyAsync(c => c.Id == req.Category))
+		{
+			return CategoryProblems.NotFound(req.Category);
+		}
+
+		var channel = new Channel(req.Name, req.Topic, req.EventId)
+		{
+			CategorySync = req.CategorySync,
+			CategoryId = req.Category
+		};
+
+		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, channel, (c, role) => new ChannelRole
+		{
+			ChannelId = c.Id,
+			RoleId = role.Id,
+			Role = role
+		});
+		if (res.IsProblem)
+			return res.Problem;
+
 		db.Channels.Add(channel);
 		await db.SaveChangesAsync();
 

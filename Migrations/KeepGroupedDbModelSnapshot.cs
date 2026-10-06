@@ -57,8 +57,11 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("Category")
+                    b.Property<string>("CategoryId")
                         .HasColumnType("text");
+
+                    b.Property<bool>("CategorySync")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("EventId")
                         .HasColumnType("text");
@@ -75,6 +78,8 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Channels");
                 });
@@ -95,6 +100,51 @@ namespace KeepGrouped.Migrations
                     b.HasIndex("ChannelId");
 
                     b.ToTable("ChannelAcks");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelCategory", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Order")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("Name");
+
+                    b.ToTable("ChannelCategories");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CategoryId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("ChannelRoles");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Chat.Message", b =>
@@ -192,8 +242,6 @@ namespace KeepGrouped.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasAlternateKey("Name");
 
                     b.ToTable("EventRoles");
                 });
@@ -368,6 +416,16 @@ namespace KeepGrouped.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KeepGrouped.API.Chat.Channel", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Chat.ChannelCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("KeepGrouped.API.Chat.ChannelAck", b =>
                 {
                     b.HasOne("KeepGrouped.API.Chat.Channel", "Channel")
@@ -385,6 +443,31 @@ namespace KeepGrouped.Migrations
                     b.Navigation("Channel");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelRole", b =>
+                {
+                    b.HasOne("KeepGrouped.API.Chat.ChannelCategory", "Category")
+                        .WithMany("RolesWhitelist")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("KeepGrouped.API.Chat.Channel", "Channel")
+                        .WithMany("RolesWhitelist")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("KeepGrouped.API.Roles.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Chat.Message", b =>
@@ -488,6 +571,13 @@ namespace KeepGrouped.Migrations
             modelBuilder.Entity("KeepGrouped.API.Chat.Channel", b =>
                 {
                     b.Navigation("Event");
+
+                    b.Navigation("RolesWhitelist");
+                });
+
+            modelBuilder.Entity("KeepGrouped.API.Chat.ChannelCategory", b =>
+                {
+                    b.Navigation("RolesWhitelist");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
