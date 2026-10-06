@@ -37,7 +37,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity.Navigation(u => u.Avatar).AutoInclude();
 			entity.Navigation(u => u.Role).AutoInclude();
 		});
-		builder.Entity<EventRole>().HasAlternateKey(er => er.Name);
 
 		builder.Entity<Message>(entity =>
 		{
