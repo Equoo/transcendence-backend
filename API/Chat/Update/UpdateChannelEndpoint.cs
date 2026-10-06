@@ -22,9 +22,9 @@ public static class UpdateChannelEndpoint
 {
 	public static void MapUpdateChannel(this IEndpointRouteBuilder channels)
 	{
-		channels.MapPut("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (UpdateChannelCommand command, string id, UpdateChannelRequest req, TokenContext token) =>
+		channels.MapPut("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (UpdateChannelCommand command, string id, UpdateChannelRequest req) =>
 		{
-			var result = await command.ExecuteAsync(id, req, token.User);
+			var result = await command.ExecuteAsync(id, req);
 			if (result.IsProblem)
 			{
 				return result.Problem;

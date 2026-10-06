@@ -19,9 +19,9 @@ public static class UpdateCategoryEndpoint
 {
 	public static void MapUpdateCategory(this IEndpointRouteBuilder categories)
 	{
-		categories.MapPut("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (UpdateCategoryCommand command, string id, UpdateCategoryRequest req, TokenContext token) =>
+		categories.MapPut("/{id}", [Authorize][Roles(Perms.HandleChannels)] async (UpdateCategoryCommand command, string id, UpdateCategoryRequest req) =>
 		{
-			var result = await command.ExecuteAsync(id, req, token.User);
+			var result = await command.ExecuteAsync(id, req);
 			if (result.IsProblem)
 			{
 				return result.Problem;

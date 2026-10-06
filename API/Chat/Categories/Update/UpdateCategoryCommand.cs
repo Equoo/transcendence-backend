@@ -8,13 +8,8 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(string id, UpdateCategoryRequest req, User? sender)
+	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(string id, UpdateCategoryRequest req)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
 		var category = await db.ChannelCategories
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)

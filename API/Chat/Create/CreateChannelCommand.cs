@@ -8,13 +8,8 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req, User? sender)
+	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
 		if (ChannelNameValidation().IsMatch(req.Name))
 		{
 			return ChannelProblems.NameInvalid();

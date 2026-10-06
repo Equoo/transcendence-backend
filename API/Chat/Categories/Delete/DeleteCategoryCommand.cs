@@ -7,13 +7,8 @@ namespace KeepGrouped.API.Chat;
 
 public sealed class DeleteCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result> ExecuteAsync(string id, User? sender)
+	public async Task<Result> ExecuteAsync(string id)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
 		var category = await db.ChannelCategories.SingleOrDefaultAsync(c => c.Id == id);
 		if (category is null)
 		{

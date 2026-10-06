@@ -8,13 +8,8 @@ namespace KeepGrouped.API.Chat;
 
 public sealed partial class CreateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
-	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(CreateCategoryRequest req, User? sender)
+	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(CreateCategoryRequest req)
 	{
-		if (sender is null)
-		{
-			return UserProblems.NotAuthenticated();
-		}
-
 		if (CategoryNameValidation().IsMatch(req.Name))
 		{
 			return CategoryProblems.NameInvalid();
