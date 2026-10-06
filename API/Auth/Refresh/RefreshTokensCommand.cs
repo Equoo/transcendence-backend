@@ -27,15 +27,10 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provide
         if (!provider.IsValid(cookieRefresh))
         {
             db.RefreshTokens.Remove(refresh_db);
-            Console.WriteLine("\n\n\n\n\n" + " Refresh token est INvalide et doit etre supprimer dans la db" + "\n\n\n\n\n\n");
             await db.SaveChangesAsync();
             return AuthProblems.RefreshTokenInvalid();
         }
 
-        Console.WriteLine("\n\n\n\n\n" + " Refresh token est valide " + "\n\n\n\n\n\n");
-
-
-        // Can have many if your are log in different computer in the same account
 
         User? user = await db.Users.SingleOrDefaultAsync(u => u.Id == refresh_db.UserId);
         if (user is null)
