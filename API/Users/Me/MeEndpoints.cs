@@ -7,10 +7,11 @@ public static class MeEndpoints
         var me = app.MapGroup("/me");
 
         me.MapGetMe();
-        me.MapUpdateMe();
         me.MapDeleteMe();
-        me.MapListMyTokens();
+        me.MapDeleteAvatar();
         me.MapPatchAvatar();
+        me.MapUpdateMe();
         me.MapUpdateMePass();
+        me.MapListMyTokens();
     }
 }
