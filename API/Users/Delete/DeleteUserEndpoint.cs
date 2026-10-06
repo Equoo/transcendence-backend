@@ -9,7 +9,6 @@ public static class DeleteUserEndpoint
 {
 	public static void MapDeleteUser(this IEndpointRouteBuilder users)
 	{
-
 		users.MapDelete("/{id}", [Authorize][Roles(Perms.HandleUsers)] async (DeleteUserQuery query, string id) =>
 		{
 			var result = await query.ExecuteAsync(id);
@@ -22,3 +21,4 @@ public static class DeleteUserEndpoint
 		});
 	}
 }
+
