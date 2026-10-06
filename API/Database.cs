@@ -145,7 +145,6 @@ public static class DbBuilder
 			user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
 			db.Set<User>().Add(user);
 			db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
-			db.Set<Role>().Add(new Role("Member"));
 
 			db.SaveChanges();
 
