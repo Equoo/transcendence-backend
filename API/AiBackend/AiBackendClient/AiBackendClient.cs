@@ -15,8 +15,8 @@ public class AiBackendClient : IAiBackendClient
 		_apiClient = apiClient;
 	}
 
-	public Task<IngestResponse> IngestFileAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
-	=> _apiClient.PostFileAsync<IngestResponse>("/ingest", fileStream, fileName, cancellationToken);
+	public Task<IngestResponse> IngestFileAsync(Stream fileStream, string documentId, string fileName, CancellationToken cancellationToken = default)
+	=> _apiClient.PostFileAsync<IngestResponse>($"documents/{documentId}", fileStream, fileName, cancellationToken);
 
 	public Task<DeleteResponse> DeleteDocumentAsync(string documentId, CancellationToken cancellationToken = default)
 	=> _apiClient.DeleteFileAsync<DeleteResponse>($"documents/{documentId}", cancellationToken);

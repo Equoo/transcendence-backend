@@ -11,6 +11,5 @@ public static class AiBackendEndpoints
 		var aibackend = app.MapGroup("/ai").WithTags("AiBackend");
 
 		aibackend.MapChatBot();
-		aibackend.MapIngest();
 	}
 }

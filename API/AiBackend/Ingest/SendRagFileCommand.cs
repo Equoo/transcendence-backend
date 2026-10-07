@@ -3,11 +3,11 @@ using KeepGrouped.API.AiBackend.AiClient;
 
 namespace KeepGrouped.API.AiBackend.Ingest;
 
-public sealed class SendFile(IAiBackendClient aiBackendClient) : IHandler
+public sealed class SendRagFileCommand(IAiBackendClient aiBackendClient) : IHandler
 {
 	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf"];
 
-	public async Task<Result<IngestResponse>> ExecuteAsync(Stream content, string fileName, long length, CancellationToken cancellationToken)
+	public async Task<Result<IngestResponse>> ExecuteAsync(Stream content, string fileName, string documentId, long length, CancellationToken cancellationToken = default)
 	{
 		if (length <= 0)
 		{
@@ -22,7 +22,7 @@ public sealed class SendFile(IAiBackendClient aiBackendClient) : IHandler
 
 		try
 		{
-			var response = await aiBackendClient.IngestFileAsync(content, fileName, cancellationToken);
+			var response = await aiBackendClient.IngestFileAsync(content, documentId, fileName, cancellationToken);
 			return response;
 		}
 		catch (HttpRequestException)
