@@ -9,6 +9,7 @@ using KeepGrouped.API.Users.Auth;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
@@ -77,6 +78,21 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.OnDelete(DeleteBehavior.SetNull);
 		});
 
+		builder.Entity<Relationship>(entity =>
+		{
+			entity.HasOne(r => r.Me)
+				.WithMany()
+				.HasForeignKey(r => r.MeId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(r => r.User)
+				.WithMany()
+				.HasForeignKey(r => r.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasIndex(r => new { r.MeId, r.UserId }).IsUnique();
+		});
+
 		builder.Entity<ChannelCategory>().HasAlternateKey(c => c.Name);
 
 		builder.Entity<ChannelAck>(entity =>
@@ -125,6 +141,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 	public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
 	public DbSet<ChannelRole> ChannelRoles { get; set; } = null!;
 	public DbSet<Message> Messages { get; set; } = null!;
+	public DbSet<Relationship> Relationships { get; set; } = null!;
 }
 
 public static class DbBuilder
