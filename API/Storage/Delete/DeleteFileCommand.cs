@@ -8,12 +8,12 @@ public sealed class DeleteFileCommand(IStorage storage, DeleteDocumentCommand co
 {
 	public async Task<Result> ExecuteAsync(string key, CancellationToken cancellationToken = default)
 	{
-		await command.ExecuteAsync(key, cancellationToken);
 		var filedb = await db.Files.SingleOrDefaultAsync(f => f.Key == key);
 		if (filedb is null)
 		{
 			return StorageProblems.FileNotFound(key);
 		}
+		await command.ExecuteAsync(key, cancellationToken);
 
 		var res = await storage.DeleteAsync(key);
 		if ((int)res.Code >= 400)
