@@ -1,3 +1,5 @@
+using KeepGrouped.API.Problems;
+
 namespace KeepGrouped.API.Users.Invitation;
 
 public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
@@ -11,6 +13,11 @@ public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
             ExpiresAt = req.ExpiresAt.ToUniversalTime(),
             Usages = req.Usages
         };
+
+        if (invitation.ExpiresAt <= DateTime.UtcNow)
+        {
+            return InvitationProblems.ExpiredInvitation(invitation.ExpiresAt);
+        }
 
         _db.Invitations.Add(invitation);
         await _db.SaveChangesAsync();

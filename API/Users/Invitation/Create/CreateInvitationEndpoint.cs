@@ -12,7 +12,7 @@ public record CreateInvitationRequest
 	public DateTime ExpiresAt { get; init; }
 
 	[Required]
-	[Range(1, int.MaxValue)]
+	[Range(-1, int.MaxValue)]
 	public int Usages { get; init; }
 }
 

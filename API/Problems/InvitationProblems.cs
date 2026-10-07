@@ -9,6 +9,12 @@ static public class InvitationProblems
         "Invalid Invitation",
         "You need a valid invitation with enough remaining uses to register.");
 
+    static public ProblemHttpResult ExpiredInvitation(DateTime date) => ProblemFactory.Create(
+        StatusCodes.Status406NotAcceptable, "EXPIRED_INVITATION",
+        "Invitation Expired",
+        $"Invitation expired on {date}."
+    );
+
     static public ProblemHttpResult NotFound(string id) => ProblemFactory.Create(
         StatusCodes.Status404NotFound, "INVITATION_NOT_FOUND",
         "Invitation not found",
