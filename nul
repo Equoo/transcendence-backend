@@ -1,8 +1,8 @@
 [
     {
         "Name": "keepgrouped-net",
-        "Id": "d075c5ce8fac9a07a65901d1141a983a36e0283d936c1ab9c7cae5fc8216dadc",
-        "Created": "2026-09-22T13:13:27.691950729+02:00",
+        "Id": "19eefc520743051e49b856656ce394ea8fd05756e64d6536eef77d15ed37ac2a",
+        "Created": "2026-10-06T10:22:38.114262682+02:00",
         "Scope": "local",
         "Driver": "bridge",
         "EnableIPv4": true,
@@ -27,39 +27,25 @@
         "Options": {},
         "Labels": {},
         "Containers": {
-            "2fa3237526ef2396b28cb8081130cc307b35de92de81228a8166bbc34e8fd085": {
-                "Name": "garage-webui",
-                "EndpointID": "1c318a1fdc2fa91abb8f2273d54aac5c1360921066fedfbec68a34710cbfa093",
-                "MacAddress": "62:e7:6e:55:12:5a",
+            "092accd0ea8f0ec337e089aa9bafdfb7824af430b8c9be11bcbf6f23cf86811d": {
+                "Name": "default-ba-b25a1-chromadb-1",
+                "EndpointID": "4551064e39c05298ca19a5bfd00299872aef7da5fefedf62da2e679ed71d85f6",
+                "MacAddress": "ae:4d:56:4c:d4:74",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            },
+            "8ee87037491193be7aa5e056ba898d178b785df1dbe45a2bcad000c57bf0045d": {
+                "Name": "default-ba-b25a1-ollama-1",
+                "EndpointID": "983b675e03788a88efd6f9895fc181580e2a2f8fe522ac4fd120116b93721da4",
+                "MacAddress": "c2:48:3e:7a:7d:19",
                 "IPv4Address": "172.18.0.2/16",
                 "IPv6Address": ""
             },
-            "4cc0bb05537cf844d424f2d8dc07304d696c1d20bfbb45e1844c033b604b57a5": {
-                "Name": "default-ba-b25a1-ollama-1",
-                "EndpointID": "803a0fa876fe9edad21f44ed040680515a118421bfa657b3520f2407d620adcc",
-                "MacAddress": "da:a1:f8:9c:ce:b1",
-                "IPv4Address": "172.18.0.4/16",
-                "IPv6Address": ""
-            },
-            "6fb08b317d1e75dc71118c5baac0908275bbf99a540f87ec2cacbe58ee86ff9f": {
-                "Name": "default-ba-b25a1-chromadb-1",
-                "EndpointID": "39a30b017275a51ce1a9e915de24396b8db4c4478f4e493226f8d87c42954410",
-                "MacAddress": "e2:9d:f7:35:a7:89",
-                "IPv4Address": "172.18.0.5/16",
-                "IPv6Address": ""
-            },
-            "90a7e98bf44c0b7442135bf77ee593a23305e911d37af7f09e6b97db0ae83c7d": {
+            "c26e7b984e035b2368592954b76bdf6d08703f00b9823eee4ea657304e77933a": {
                 "Name": "default-ba-b25a1-keepgrouped-back-ai-1",
-                "EndpointID": "10a49c93be84567bcfddca89b0d8ccf580301bf451d94ead89df2dd957dd1f7e",
-                "MacAddress": "aa:a8:b2:fd:e1:35",
-                "IPv4Address": "172.18.0.6/16",
-                "IPv6Address": ""
-            },
-            "9e1f0faee1c1854826ca7852aaf9b77306f3cf620afdf179875bff02bb4dcc01": {
-                "Name": "default-ba-96e86-db-1",
-                "EndpointID": "bd8bcf1ea4d29f19024f95121b0fd89f73cbeaa087a9967ee0f94dbc3c14d2ac",
-                "MacAddress": "3a:6e:b5:3d:ef:c8",
-                "IPv4Address": "172.18.0.3/16",
+                "EndpointID": "ccbd652f785f89518cbd663cc4433e5ab91a810aec08ea686e88412f92ddcb2b",
+                "MacAddress": "5a:28:97:d9:a9:22",
+                "IPv4Address": "172.18.0.4/16",
                 "IPv6Address": ""
             }
         },
@@ -67,8 +53,8 @@
             "IPAM": {
                 "Subnets": {
                     "172.18.0.0/16": {
-                        "IPsInUse": 8,
-                        "DynamicIPsAvailable": 65528
+                        "IPsInUse": 6,
+                        "DynamicIPsAvailable": 65530
                     }
                 }
             }

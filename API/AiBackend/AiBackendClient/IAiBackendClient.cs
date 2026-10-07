@@ -1,10 +1,13 @@
 using System.Net.ServerSentEvents;
+// using KeepGrouped.API.AiBackend.Delete;
 using KeepGrouped.API.AiBackend.Ingest;
+using KeepGrouped.API.Storage;
 
 namespace KeepGrouped.API.AiBackend.AiClient;
 
 public interface IAiBackendClient
 {
 	Task<IngestResponse> IngestFileAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default);
+	Task<KeepGrouped.API.AiBackend.Delete.DeleteResponse> DeleteDocumentAsync(string documentId, CancellationToken cancellationToken = default);
 }
 
