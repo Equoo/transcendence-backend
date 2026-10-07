@@ -1,6 +1,5 @@
 using KeepGrouped.API.AiBackend.Chatbot;
 using KeepGrouped.API.AiBackend.Ingest;
-using KeepGrouped.API.AiBackend.Delete;
 
 
 namespace KeepGrouped.API.AiBackend;
@@ -13,6 +12,5 @@ public static class AiBackendEndpoints
 
 		aibackend.MapChatBot();
 		aibackend.MapIngest();
-		aibackend.MapDeleteFileEndpoint();
 	}
 }
