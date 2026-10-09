@@ -6,11 +6,20 @@ using KeepGrouped.API.Activities;
 
 namespace KeepGrouped.API.Users;
 
+public enum LanguageEnum
+{
+    Francais,
+    English,
+    TradChinese,
+}
+
 public class User
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserName { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
+
+    public LanguageEnum Language { get; set; } = LanguageEnum.English;
     public Role Role { get; set; } = null!;
 
     public StorageFile? Avatar { get; set; }
