@@ -1,32 +1,33 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.AiBackend.Ingest;
 
 namespace KeepGrouped.API.Storage;
 
-public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHandler
+public sealed class UploadFileCommand(IStorage storage, SendRagFileCommand command, KeepGroupedDb db) : IHandler
 {
-    public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator)
-    {
-        var res = await storage.UploadAsync(content, contentType);
-        if ((int)res.Code >= 400)
-        {
-            return StorageProblems.UploadFailed((int)res.Code);
-        }
+	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken cancellationToken = default)
+	{
+		var res = await storage.UploadAsync(content, contentType);
+		if ((int)res.Code >= 400)
+		{
+			return StorageProblems.UploadFailed((int)res.Code);
+		}
+		await command.ExecuteAsync(content, name, res.Key, length, cancellationToken);
+		var filedb = new StorageFile()
+		{
+			Key = res.Key,
+			Name = name,
+			ETag = res.ETag,
+			ContentType = contentType,
+			Length = length,
+			LastUpdated = DateTime.UtcNow,
+			Creator = creator
+		};
 
-        var filedb = new StorageFile()
-        {
-            Key = res.Key,
-            Name = name,
-            ETag = res.ETag,
-            ContentType = contentType,
-            Length = length,
-            LastUpdated = DateTime.UtcNow,
-            Creator = creator
-        };
+		db.Files.Add(filedb);
 
-        db.Files.Add(filedb);
-
-        await db.SaveChangesAsync();
-        return filedb;
-    }
+		await db.SaveChangesAsync();
+		return filedb;
+	}
 }
