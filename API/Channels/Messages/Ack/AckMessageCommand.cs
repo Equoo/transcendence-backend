@@ -1,0 +1,43 @@
+using KeepGrouped.API.Problems;
+using KeepGrouped.API.Users;
+using Microsoft.EntityFrameworkCore;
+
+namespace KeepGrouped.API.Channels;
+
+public sealed class AckMessageCommand(KeepGroupedDb db) : IHandler
+{
+	public async Task<Result> ExecuteAsync(string channelId, string msgId, User sender)
+	{
+		var channel = await db.Channels
+			.Include(c => c.RolesWhitelist)
+				.ThenInclude(cr => cr.Role)
+			.SingleOrDefaultAsync(c => c.Id == channelId);
+		if (channel is null)
+			return ChannelProblems.NotFound(channelId);
+
+		if (!channel.IsWhitelisted(sender))
+			return MessageProblems.AccessNotAuthorized();
+
+		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
+		if (msg is null)
+		{
+			return MessageProblems.NotFound(msgId);
+		}
+
+		var ack = await db.ChannelAcks.SingleOrDefaultAsync(ack =>
+			ack.ChannelId == channelId && ack.UserId == sender.Id
+		);
+
+		if (ack is null)
+		{
+			db.ChannelAcks.Add(new ChannelAck(sender, channel, msg.SentAt));
+		}
+		else
+		{
+			ack.AckAt = msg.SentAt;
+		}
+		await db.SaveChangesAsync();
+
+		return Result.OK;
+	}
+}

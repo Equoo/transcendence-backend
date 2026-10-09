@@ -1,3 +1,4 @@
+using KeepGrouped.API.Users.Me.Conversations;
 using KeepGrouped.API.Users.Me.Relationships;
 
 namespace KeepGrouped.API.Users;
@@ -16,5 +17,6 @@ public static class MeEndpoints
         me.MapUpdateMePass();
         me.MapListMyTokens();
         me.MapRelationships();
+        me.MapConversations();
     }
 }

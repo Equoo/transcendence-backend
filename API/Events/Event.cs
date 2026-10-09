@@ -1,6 +1,6 @@
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Storage;
-using KeepGrouped.API.Chat;
+using KeepGrouped.API.Channels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;

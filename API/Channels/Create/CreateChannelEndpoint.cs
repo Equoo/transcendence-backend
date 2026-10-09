@@ -1,0 +1,46 @@
+using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
+using Microsoft.AspNetCore.Authorization;
+
+namespace KeepGrouped.API.Channels;
+
+public record CreateChannelRequest
+{
+	[Required]
+	[Length(1, 25)]
+	public string Name { get; init; } = null!;
+	[Length(0, 255)]
+	public string Topic { get; init; } = string.Empty;
+	public bool CategorySync { get; init; } = true;
+	public List<string> WhitelistRoles { get; init; } = [];
+	public string? Category { get; init; } = null;
+	public string? EventId { get; init; } = null;
+}
+
+public static class CreateChannelEndpoint
+{
+	public static void MapCreateChannel(this IEndpointRouteBuilder channels)
+	{
+		channels.MapPost("/", [Authorize][Roles(Perms.HandleChannels)] async (CreateChannelCommand command, CreateChannelRequest req) =>
+		{
+			var result = await command.ExecuteAsync(req);
+			if (result.IsProblem)
+			{
+				return result.Problem;
+			}
+
+			return Results.CreatedAtRoute("channels.get", new { id = result.Value.Id }, result.Value);
+		})
+		.WithName("channels.create")
+		.WithSummary("Create a channel")
+		.WithDescription("Creates a new channel. The name must be unique, lowercase, and free of spaces or special characters. The category, when given, must reference an existing category. Online users are notified of the new channel.")
+		.Produces<ChannelResponse>(StatusCodes.Status201Created)
+		.ProducesValidationProblem()
+		.ProducesProblem(StatusCodes.Status401Unauthorized)
+		.ProducesProblem(StatusCodes.Status404NotFound)
+		.ProducesProblem(StatusCodes.Status409Conflict)
+		.ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+	}
+}

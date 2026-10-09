@@ -1,0 +1,15 @@
+namespace KeepGrouped.API.Channels;
+
+public static class ChannelEndpoints
+{
+    public static void MapChannels(this IEndpointRouteBuilder app)
+    {
+        var channels = app.MapGroup("/channels").WithTags("Channels");
+
+        channels.MapCreateChannel();
+        channels.MapListChannels();
+        channels.MapGetChannel();
+        channels.MapUpdateChannel();
+        channels.MapDeleteChannel();
+    }
+}
