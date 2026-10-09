@@ -7,5 +7,6 @@ public static class RagBuilder
         builder.Services.AddHostedService<RagService>();
         builder.Services.AddSingleton<RagQueue>();
         builder.Services.AddScoped<RagHandler, RagEvent>();
+        builder.Services.AddScoped<RagHandler, RagFile>();
     }
 }

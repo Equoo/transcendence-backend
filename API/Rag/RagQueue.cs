@@ -35,7 +35,7 @@ public sealed class RagQueue(ILogger<RagQueue> logger)
             {
                 if (_channel.Writer.TryWrite(item))
                 {
-                    logger.LogDebug("Enqueued {Item}: {Operation}", item, op);
+                    logger.LogInformation("Enqueued {Item}: {Operation}", item, op);
                 }
                 else
                 {
@@ -43,7 +43,7 @@ public sealed class RagQueue(ILogger<RagQueue> logger)
                 }
                 return;
             }
-            logger.LogDebug("Replaced operation of {Item}: {Operation}", item, op);
+            logger.LogInformation("Replaced operation of {Item}: {Operation}", item, op);
         }
     }
 

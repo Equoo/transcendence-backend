@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Rag;
 
-public sealed class RagFile(KeepGroupedDb db, ApiClient client, IStorage storage) : RagHandler
+public sealed class RagFile(KeepGroupedDb db, IApiClient client, IStorage storage) : RagHandler
 {
     public override string Kind => RagItem.FileKey;
 

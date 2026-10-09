@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using KeepGrouped.API.AiBackend.AiClient;
 using KeepGrouped.API.AiBackend.Delete;
 using KeepGrouped.API.AiBackend.Ingest;
 using KeepGrouped.API.Events;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Rag;
 
-public sealed class RagEvent(KeepGroupedDb db, DeleteRagCommand deleteCmd, CreateRagCommand createCmd) : RagHandler
+public sealed class RagEvent(KeepGroupedDb db, IApiClient client) : RagHandler
 {
     public override string Kind => RagItem.EventKey;
 
@@ -29,12 +30,12 @@ public sealed class RagEvent(KeepGroupedDb db, DeleteRagCommand deleteCmd, Creat
         }
         var bytes = Encoding.UTF8.GetBytes(ToText(ev));
         using var stream = new MemoryStream(bytes);
-        await createCmd.ExecuteAsync(stream, $"Event_{ev.Name}.txt", ev.Id, stream.Length, ct);
+        await client.PostFileAsync<CreateRagResponse>($"documents/{id}", stream, $"Event_{ev.Name}.txt", ct);
     }
 
     public override async ValueTask Delete(string id, CancellationToken ct = default)
     {
-        await deleteCmd.ExecuteAsync(id, ct);
+        await client.DeleteFileAsync<DeleteRagResponse>($"documents/{id}", ct);
     }
 
     private static string ToText(Event ev)

@@ -30,6 +30,7 @@ public sealed class RagService(RagQueue queue, IServiceScopeFactory scopes, ILog
             {
                 await using var scope = scopes.CreateAsyncScope();
                 RagHandler handler = scope.ServiceProvider.GetServices<RagHandler>().Single((ha) => ha.Kind == item.Kind);
+                logger.LogInformation("Beggining to process {Item}: {Operation}", item, op);
                 await handler.ProcessOperation(item.Id, op, ct);
             }
             catch (Exception ex)
