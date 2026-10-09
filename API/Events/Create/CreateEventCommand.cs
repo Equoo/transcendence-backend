@@ -1,12 +1,15 @@
+using System.Text.Json;
+using KeepGrouped.API.AiBackend.Ingest;
 using KeepGrouped.API.Chat;
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand createChannelCmd) : IHandler
+public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand createChannelCmd, RagQueue rag) : IHandler
 {
 	public async Task<Result<CreateEventResponse>> ExecuteAsync(CreateEventRequest req, User organizer)
 	{
@@ -54,6 +57,7 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
 		db.Events.Add(ev);
 		await db.SaveChangesAsync();
 
+		rag.Upsert(RagItem.Event(ev.Id));
 		return CreateEventResponse.FromEntity(ev, channelResult.Value);
 	}
 }

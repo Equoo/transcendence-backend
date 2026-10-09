@@ -22,6 +22,7 @@ class Program
 		builder.BuildStorage();
 		builder.BuildDb();
 		builder.BuildAuthentication();
+		builder.BuildRag();
 		builder.AddHandlers();
 		builder.BuildAiBackend();
 

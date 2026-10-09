@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.AiBackend.Ingest;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ public static class UploadFileEndpoint
 {
     public static void MapUploadFile(this IEndpointRouteBuilder group)
     {
-        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, CreateRagCommand ragCmd, TokenContext token,
+        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, RagQueue rag, TokenContext token,
             [FromForm] UploadFileRequest req, CancellationToken ct) =>
         {
             using var fileStream = req.File.OpenReadStream();
@@ -51,8 +52,7 @@ public static class UploadFileEndpoint
                 return uploadResult.Problem;
             }
             memoryStream.Seek(0, SeekOrigin.Begin);
-            var ragResult = await ragCmd.ExecuteAsync(memoryStream, req.Name, uploadResult.Value.Key, req.File.Length, ct);
-
+            rag.Upsert(RagItem.File(uploadResult.Value.Key));
             return Results.CreatedAtRoute("files.get", new { key = uploadResult.Value.Key }, UploadFileResponse.FromEntity(uploadResult.Value));
         })
         .DisableAntiforgery()

@@ -1,10 +1,11 @@
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
+public sealed class UpdateEventCommand(KeepGroupedDb db, RagQueue rag) : IHandler
 {
     public async Task<Result> ExecuteAsync(string id, UpdateEventRequest req)
     {
@@ -13,6 +14,7 @@ public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
             .Include(e => e.EventRoles)
             .Include(e => e.Files)
             .SingleOrDefaultAsync(e => e.Id == id);
+
         if (ev is null)
         {
             return EventProblems.NotFound(id);
@@ -45,6 +47,7 @@ public sealed class UpdateEventCommand(KeepGroupedDb db) : IHandler
         ev.EventRoles = roles;
 
         await db.SaveChangesAsync();
+        rag.Upsert(RagItem.Event(ev.Id));
         return Result.OK;
     }
 }

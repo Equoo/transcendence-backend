@@ -1,9 +1,11 @@
+using KeepGrouped.API.AiBackend.Delete;
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Rag;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class DeleteEventCommand(KeepGroupedDb db) : IHandler
+public sealed class DeleteEventCommand(KeepGroupedDb db, RagQueue rag) : IHandler
 {
     public async Task<Result> ExecuteAsync(string id)
     {
@@ -15,6 +17,8 @@ public sealed class DeleteEventCommand(KeepGroupedDb db) : IHandler
 
         db.Events.Remove(ev);
         await db.SaveChangesAsync();
+
+        rag.Delete(RagItem.Event(ev.Id));
         return Result.OK;
     }
 }
