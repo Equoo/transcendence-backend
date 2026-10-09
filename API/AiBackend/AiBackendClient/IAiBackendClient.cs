@@ -6,7 +6,7 @@ namespace KeepGrouped.API.AiBackend.AiClient;
 
 public interface IAiBackendClient
 {
-	Task<IngestResponse> IngestFileAsync(Stream fileStream, string documentId, string fileName, CancellationToken cancellationToken = default);
-	Task<KeepGrouped.API.AiBackend.Delete.DeleteResponse> DeleteDocumentAsync(string documentId, CancellationToken cancellationToken = default);
+	Task<CreateRagResponse> IngestFileAsync(Stream fileStream, string documentId, string fileName, CancellationToken cancellationToken = default);
+	Task<KeepGrouped.API.AiBackend.Delete.DeleteRagResponse> DeleteDocumentAsync(string documentId, CancellationToken cancellationToken = default);
 }
 

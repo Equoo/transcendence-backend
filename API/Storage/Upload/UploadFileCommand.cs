@@ -4,16 +4,16 @@ using KeepGrouped.API.AiBackend.Ingest;
 
 namespace KeepGrouped.API.Storage;
 
-public sealed class UploadFileCommand(IStorage storage, SendRagFileCommand command, KeepGroupedDb db) : IHandler
+public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHandler
 {
-	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken cancellationToken = default)
+	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken ct = default)
 	{
-		var res = await storage.UploadAsync(content, contentType);
+		var res = await storage.UploadAsync(content, contentType, ct);
 		if ((int)res.Code >= 400)
 		{
 			return StorageProblems.UploadFailed((int)res.Code);
 		}
-		await command.ExecuteAsync(content, name, res.Key, length, cancellationToken);
+
 		var filedb = new StorageFile()
 		{
 			Key = res.Key,

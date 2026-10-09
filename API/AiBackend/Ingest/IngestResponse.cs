@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace KeepGrouped.API.AiBackend.Ingest;
 
-public class IngestResponse
+public class CreateRagResponse
 {
 	public string Status { get; set; } = null!;
 

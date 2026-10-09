@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace KeepGrouped.API.AiBackend.Delete;
 
-public class DeleteResponse
+public class DeleteRagResponse
 {
 	[JsonPropertyName("status")]
 	public string Status { get; set; } = null!;

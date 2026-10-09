@@ -3,11 +3,11 @@ using KeepGrouped.API.AiBackend.AiClient;
 
 namespace KeepGrouped.API.AiBackend.Ingest;
 
-public sealed class SendRagFileCommand(IAiBackendClient aiBackendClient) : IHandler
+public sealed class CreateRagCommand(IAiBackendClient aiBackendClient) : IHandler
 {
 	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf"];
 
-	public async Task<Result<IngestResponse>> ExecuteAsync(Stream content, string fileName, string documentId, long length, CancellationToken cancellationToken = default)
+	public async Task<Result<CreateRagResponse>> ExecuteAsync(Stream content, string fileName, string documentId, long length, CancellationToken cancellationToken = default)
 	{
 		if (length <= 0)
 		{
