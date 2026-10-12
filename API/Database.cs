@@ -4,7 +4,7 @@ using KeepGrouped.API.Chat;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Password;
 using KeepGrouped.API.Roles;
-using KeepGrouped.API.Users.Invitation;
+using KeepGrouped.API.Users.Invitations;
 using KeepGrouped.API.Users.Auth;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Storage;

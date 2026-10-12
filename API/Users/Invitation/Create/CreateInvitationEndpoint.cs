@@ -4,7 +4,7 @@ using KeepGrouped.API.Attributes.Roles;
 using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 
-namespace KeepGrouped.API.Users.Invitation;
+namespace KeepGrouped.API.Users.Invitations;
 
 public record CreateInvitationRequest
 {
@@ -12,7 +12,7 @@ public record CreateInvitationRequest
 	public DateTime ExpiresAt { get; init; }
 
 	[Required]
-	[Range(1, int.MaxValue)]
+	[Range(-1, int.MaxValue)]
 	public int Usages { get; init; }
 }
 
