@@ -2,7 +2,7 @@ using KeepGrouped.API.AiBackend.AiClient;
 
 namespace KeepGrouped.API.AiBackend.Delete;
 
-public sealed class DeleteRagCommand(IAiBackendClient aiBackendClient) : IHandler
+public sealed class DeleteRagCommand(IAiBackendClient aiBackendClient)
 {
 	public async Task<Result<DeleteRagResponse>> ExecuteAsync(string documentId, CancellationToken cancellationToken = default)
 	{

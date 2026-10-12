@@ -1,10 +1,11 @@
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class DeleteRegistrationCommand(KeepGroupedDb db) : IHandler
+public sealed class DeleteRegistrationCommand(KeepGroupedDb db, RagQueue rag) : IHandler
 {
     public async Task<Result> ExecuteAsync(string eventId, User? user)
     {
@@ -29,6 +30,7 @@ public sealed class DeleteRegistrationCommand(KeepGroupedDb db) : IHandler
 
         ev.Registrations.Remove(registration);
         await db.SaveChangesAsync();
+        rag.Delete(RagItem.Event(ev.Id));
         return Result.OK;
     }
 }

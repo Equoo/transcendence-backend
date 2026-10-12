@@ -1,10 +1,11 @@
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class CreateRegistrationCommand(KeepGroupedDb db) : IHandler
+public sealed class CreateRegistrationCommand(KeepGroupedDb db, RagQueue rag) : IHandler
 {
     public async Task<Result> ExecuteAsync(string eventId, User? user, CreateRegistrationRequest req)
     {
@@ -52,7 +53,7 @@ public sealed class CreateRegistrationCommand(KeepGroupedDb db) : IHandler
         ev.Registrations.Add(registration);
 
         await db.SaveChangesAsync();
-
+        rag.Upsert(RagItem.Event(ev.Id));
         return Result.OK;
     }
 }

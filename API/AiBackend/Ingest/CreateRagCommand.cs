@@ -3,7 +3,7 @@ using KeepGrouped.API.AiBackend.AiClient;
 
 namespace KeepGrouped.API.AiBackend.Ingest;
 
-public sealed class CreateRagCommand(IAiBackendClient aiBackendClient) : IHandler
+public sealed class CreateRagCommand(IAiBackendClient aiBackendClient)
 {
 	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf"];
 

@@ -22,8 +22,9 @@ class Program
 		builder.BuildStorage();
 		builder.BuildDb();
 		builder.BuildAuthentication();
-		builder.AddHandlers();
 		builder.BuildAiBackend();
+		builder.BuildRag();
+		builder.AddHandlers();
 
 		builder.Services.Configure<ForwardedHeadersOptions>(options =>
 		{

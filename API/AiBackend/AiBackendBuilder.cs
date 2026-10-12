@@ -30,7 +30,6 @@ static class AiBackendBuilder
 				});
 			});
 		});
-		builder.Services.AddScoped<IAiBackendClient, AiBackendClient>();
 		builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
 		{
 			client.BaseAddress = new Uri("http://ai-back-dev:7070");

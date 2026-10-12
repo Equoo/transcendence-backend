@@ -1,4 +1,5 @@
 using KeepGrouped.API.AiBackend.Delete;
+using KeepGrouped.API.Rag;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Storage;
@@ -7,14 +8,14 @@ public static class DeleteFileEndpoint
 {
     public static void MapDeleteFile(this IEndpointRouteBuilder group)
     {
-        group.MapDelete("/{key}", [Authorize] async (DeleteFileCommand fileCmd, DeleteRagCommand ragCmd, string key) =>
+        group.MapDelete("/{key}", [Authorize] async (DeleteFileCommand fileCmd, RagQueue rag, string key) =>
         {
             var fileResult = await fileCmd.ExecuteAsync(key);
             if (fileResult.IsProblem)
             {
                 return fileResult.Problem;
             }
-            var ragResult = await ragCmd.ExecuteAsync(key);
+            rag.Delete(RagItem.File(key));
             return Results.NoContent();
         })
         .WithName("files.delete")
