@@ -364,6 +364,9 @@ namespace KeepGrouped.Migrations
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("Language")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");

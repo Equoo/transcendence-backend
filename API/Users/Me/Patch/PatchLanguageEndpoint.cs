@@ -1,13 +1,14 @@
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 public static class PatchLanguageEndpoint
 {
-    public async static void MapPatchLanguage(IEndpointRouteBuilder me)
+    public async static void MapPatchLanguage(this IEndpointRouteBuilder me)
     {
-        me.MapPatch("/language", [Authorize] async (PatchLanguageCommand command, LanguageEnum language) =>
+        me.MapPatch("/language", [Authorize] async (PatchLanguageCommand command, [FromBody] LanguageEnum Language) =>
         {
-            var res = await command.ExecuteAsync(language);
+            var res = await command.ExecuteAsync(Language);
 
             if (res.IsProblem)
             {
