@@ -1,7 +1,7 @@
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 
-namespace KeepGrouped.API.Users.Invitation;
+namespace KeepGrouped.API.Users.Invitations;
 
 public sealed class DeleteInvitationCommand(KeepGroupedDb db) : IHandler
 {
