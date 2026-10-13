@@ -1,9 +1,10 @@
 using KeepGrouped.API.Problems;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users.Me.Relationships;
 
-public sealed class CreateRelationshipCommand(KeepGroupedDb db) : IHandler
+public sealed class CreateRelationshipCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
     public async Task<Result<RelationshipResponse>> ExecuteAsync(User me, string userId)
     {
@@ -39,11 +40,17 @@ public sealed class CreateRelationshipCommand(KeepGroupedDb db) : IHandler
         else
         {
             mine = new() { MeId = me.Id, Me = me, UserId = user.Id, User = user, Type = RelationshipState.PendingRequest };
+            theirs = new() { MeId = user.Id, Me = user, UserId = me.Id, User = me, Type = RelationshipState.PendingResponse };
             db.Relationships.Add(mine);
-            db.Relationships.Add(new() { MeId = user.Id, Me = user, UserId = me.Id, User = me, Type = RelationshipState.PendingResponse });
+            db.Relationships.Add(theirs);
         }
 
         await db.SaveChangesAsync();
-        return RelationshipResponse.FromEntity(mine);
+
+        var response = RelationshipResponse.FromEntity(mine);
+        await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", response);
+        await hub.Clients.User(user.Id).SendAsync("UpsertRelationship", RelationshipResponse.FromEntity(theirs));
+
+        return response;
     }
 }

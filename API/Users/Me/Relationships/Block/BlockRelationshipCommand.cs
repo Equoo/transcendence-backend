@@ -1,9 +1,10 @@
 using KeepGrouped.API.Problems;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users.Me.Relationships;
 
-public sealed class BlockRelationshipCommand(KeepGroupedDb db) : IHandler
+public sealed class BlockRelationshipCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
     public async Task<Result<RelationshipResponse>> ExecuteAsync(User me, string userId)
     {
@@ -29,12 +30,21 @@ public sealed class BlockRelationshipCommand(KeepGroupedDb db) : IHandler
         mine.Type = RelationshipState.Blocked;
 
         // Their own block stays: blocks are one-sided.
-        if (theirs is not null && theirs.Type != RelationshipState.Blocked)
+        bool removeTheirs = theirs is not null && theirs.Type != RelationshipState.Blocked;
+        if (removeTheirs)
         {
-            db.Relationships.Remove(theirs);
+            db.Relationships.Remove(theirs!);
         }
 
         await db.SaveChangesAsync();
-        return RelationshipResponse.FromEntity(mine);
+
+        var response = RelationshipResponse.FromEntity(mine);
+        await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", response);
+        if (removeTheirs)
+        {
+            await hub.Clients.User(userId).SendAsync("RemoveRelationship", me.Id);
+        }
+
+        return response;
     }
 }

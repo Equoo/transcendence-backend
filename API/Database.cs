@@ -86,6 +86,9 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity
 				.Property(c => c.Type)
 				.HasConversion<string>();
+
+			// Get-only, so EF only maps it when told to
+			entity.Property(c => c.CreateAt);
 		});
 
 		builder.Entity<ChannelMember>(entity =>

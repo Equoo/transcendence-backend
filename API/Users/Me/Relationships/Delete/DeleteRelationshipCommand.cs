@@ -1,9 +1,10 @@
 using KeepGrouped.API.Problems;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users.Me.Relationships;
 
-public sealed class DeleteRelationshipCommand(KeepGroupedDb db) : IHandler
+public sealed class DeleteRelationshipCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
     public async Task<Result> ExecuteAsync(User me, string userId)
     {
@@ -16,12 +17,20 @@ public sealed class DeleteRelationshipCommand(KeepGroupedDb db) : IHandler
         db.Relationships.Remove(mine);
 
         Relationship? theirs = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == userId && r.UserId == me.Id);
-        if (theirs is not null && theirs.Type != RelationshipState.Blocked)
+        bool removeTheirs = theirs is not null && theirs.Type != RelationshipState.Blocked;
+        if (removeTheirs)
         {
-            db.Relationships.Remove(theirs);
+            db.Relationships.Remove(theirs!);
         }
 
         await db.SaveChangesAsync();
+
+        await hub.Clients.User(me.Id).SendAsync("RemoveRelationship", userId);
+        if (removeTheirs)
+        {
+            await hub.Clients.User(userId).SendAsync("RemoveRelationship", me.Id);
+        }
+
         return Result.OK;
     }
 }

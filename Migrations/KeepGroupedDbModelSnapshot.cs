@@ -63,6 +63,9 @@ namespace KeepGrouped.Migrations
                     b.Property<bool>("CategorySync")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("EventId")
                         .HasColumnType("text");
 
