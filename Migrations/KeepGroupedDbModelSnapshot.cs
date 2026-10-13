@@ -120,8 +120,6 @@ namespace KeepGrouped.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("Name");
-
                     b.ToTable("ChannelCategories");
                 });
 

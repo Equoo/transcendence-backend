@@ -14,7 +14,6 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 	)
 	{
 		var channel = await db.Channels
-			.AsNoTracking()
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)

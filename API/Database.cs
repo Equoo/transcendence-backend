@@ -114,8 +114,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity.HasIndex(r => new { r.MeId, r.UserId }).IsUnique();
 		});
 
-		builder.Entity<ChannelCategory>().HasAlternateKey(c => c.Name);
-
 		builder.Entity<ChannelAck>(entity =>
 		{
 			entity.HasKey(a => new { a.UserId, a.ChannelId });
