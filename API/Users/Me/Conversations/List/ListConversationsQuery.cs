@@ -15,6 +15,8 @@ public sealed class ListConversationsQuery(KeepGroupedDb db) : IHandler
 			.Include(c => c.Members)
 				.ThenInclude(m => m.User)
 					.ThenInclude(u => u.Role)
+			.Include(c => c.LastMessage)
+				.ThenInclude(m => m!.Sender)
 			.ToListAsync();
 
 		return conversations.Select(c => ConversationResponse.FromEntity(c, meId)).ToList();

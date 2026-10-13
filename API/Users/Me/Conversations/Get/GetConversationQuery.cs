@@ -17,6 +17,8 @@ public sealed class GetConversationQuery(KeepGroupedDb db) : IHandler
 			.Include(c => c.Members)
 				.ThenInclude(m => m.User)
 					.ThenInclude(u => u.Role)
+			.Include(c => c.LastMessage)
+				.ThenInclude(m => m!.Sender)
 			.SingleOrDefaultAsync();
 
 		return conversation is null ? ConversationProblems.NotFound(id) : ConversationResponse.FromEntity(conversation, meId);

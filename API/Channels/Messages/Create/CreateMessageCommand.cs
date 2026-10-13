@@ -39,6 +39,7 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var msg = new Message(sender, channel, req.Content, msgRef);
 		db.Messages.Add(msg);
+		channel.LastMessage = msg;
 		await db.SaveChangesAsync();
 
 		var response = MessageResponse.FromEntity(msg);

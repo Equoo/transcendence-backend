@@ -8,7 +8,8 @@ public record ConversationResponse(
 	string Name,
 	string Topic,
 	DateTime CreateAt,
-	IReadOnlyList<UserSummary> Recipients
+	IReadOnlyList<UserSummary> Recipients,
+	MessageReference? LastMessage
 )
 {
 	public static ConversationResponse FromEntity(Channel c, string meId) =>
@@ -18,6 +19,7 @@ public record ConversationResponse(
 				c.Name,
 				c.Topic,
 				c.CreateAt,
-				[.. c.Members.Where(m => m.UserId != meId).Select(m => UserSummary.FromEntity(m.User))]
+				[.. c.Members.Where(m => m.UserId != meId).Select(m => UserSummary.FromEntity(m.User))],
+				c.LastMessage is null ? null : MessageReference.FromEntity(c.LastMessage)
 		);
 }

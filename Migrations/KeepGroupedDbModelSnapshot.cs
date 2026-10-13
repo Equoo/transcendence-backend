@@ -66,6 +66,9 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("EventId")
                         .HasColumnType("text");
 
+                    b.Property<string>("LastMessageId")
+                        .HasColumnType("character varying(36)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -84,6 +87,8 @@ namespace KeepGrouped.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("LastMessageId");
 
                     b.ToTable("Channels");
                 });
@@ -472,7 +477,14 @@ namespace KeepGrouped.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("KeepGrouped.API.Channels.Message", "LastMessage")
+                        .WithMany()
+                        .HasForeignKey("LastMessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Category");
+
+                    b.Navigation("LastMessage");
                 });
 
             modelBuilder.Entity("KeepGrouped.API.Channels.ChannelAck", b =>

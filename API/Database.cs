@@ -76,6 +76,16 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.WithMany()
 				.HasForeignKey(c => c.CategoryId)
 				.OnDelete(DeleteBehavior.SetNull);
+
+			entity
+				.HasOne(c => c.LastMessage)
+				.WithMany()
+				.HasForeignKey(c => c.LastMessageId)
+				.OnDelete(DeleteBehavior.SetNull);
+
+			entity
+				.Property(c => c.Type)
+				.HasConversion<string>();
 		});
 
 		builder.Entity<ChannelMember>(entity =>
@@ -94,10 +104,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 
 			entity.HasIndex(m => m.UserId);
 		});
-
-		builder.Entity<Channel>()
-			.Property(c => c.Type)
-			.HasConversion<string>();
 
 		builder.Entity<Relationship>(entity =>
 		{

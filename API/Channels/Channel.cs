@@ -40,6 +40,8 @@ public class Channel : IRoleWhitelist
 	public bool CategorySync { get; set; } = true;
 
 	public ICollection<ChannelMember> Members { get; set; } = [];
+	public Message? LastMessage { get; set; } = null;
+	public string? LastMessageId { get; set; } = null;
 
 	public bool IsWhitelisted(User sender)
 	{
