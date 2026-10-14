@@ -36,6 +36,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 
         var user = new User
         {
+            ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime(),
             UserName = req.UserName,
             Role = role_db
         };

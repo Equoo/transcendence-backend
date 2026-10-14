@@ -3,6 +3,7 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Activities;
+using KeepGrouped.Migrations;
 
 namespace KeepGrouped.API.Users;
 
@@ -13,8 +14,9 @@ public enum LanguageEnum
     汉语,
 }
 
-public class User
+public class User : IExpirable
 {
+    public DateTime ExpireAt { get; set; }
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserName { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;

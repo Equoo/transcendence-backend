@@ -228,6 +228,9 @@ namespace KeepGrouped.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("text");
@@ -345,7 +348,7 @@ namespace KeepGrouped.Migrations
                     b.ToTable("Files");
                 });
 
-            modelBuilder.Entity("KeepGrouped.API.Users.Invitation.Invitation", b =>
+            modelBuilder.Entity("KeepGrouped.API.Users.Invitations.Invitation", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -417,6 +420,9 @@ namespace KeepGrouped.Migrations
 
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");

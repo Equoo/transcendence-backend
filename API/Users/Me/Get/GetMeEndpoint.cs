@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
@@ -23,8 +24,15 @@ public static class GetMeEndpoint
         me.MapGet(
                 "/",
                 [Authorize]
-        (TokenContext token) =>
+        async (TokenContext token, GetMeCommand cmd) =>
                 {
+                    var res = await cmd.ExecuteAsync();
+
+                    if (res.IsProblem)
+                    {
+                        return res.Problem;
+                    }
+
                     return Results.Ok(GetMeResponse.FromEntity(token.User));
                 }
             )
