@@ -5,7 +5,7 @@ namespace KeepGrouped.API.AiBackend.Ingest;
 
 public sealed class CreateRagCommand(IAiBackendClient aiBackendClient)
 {
-	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf"];
+	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf", ".csv", ".json", ".log", ".xml", ".yaml", ".docs", ".xlsx", ".xls", ".xlsm", ".ods"];
 
 	public async Task<Result<CreateRagResponse>> ExecuteAsync(Stream content, string fileName, string documentId, long length, CancellationToken cancellationToken = default)
 	{
