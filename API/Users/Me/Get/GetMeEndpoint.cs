@@ -24,15 +24,8 @@ public static class GetMeEndpoint
         me.MapGet(
                 "/",
                 [Authorize]
-        async (TokenContext token, GetMeCommand cmd) =>
+        async (TokenContext token) =>
                 {
-                    var res = await cmd.ExecuteAsync();
-
-                    if (res.IsProblem)
-                    {
-                        return res.Problem;
-                    }
-
                     return Results.Ok(GetMeResponse.FromEntity(token.User));
                 }
             )

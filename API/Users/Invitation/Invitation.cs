@@ -2,10 +2,10 @@ using System.Security.Cryptography;
 
 namespace KeepGrouped.API.Users.Invitations;
 
-public class Invitation
+public class Invitation : IExpirable
 {
     public static int Infinite { get; } = -1;
     public string Id { get; init; } = RandomNumberGenerator.GetHexString(32, true);
-    public DateTime ExpiresAt { get; set; }
+    public DateTime ExpireAt { get; set; }
     public int Usages { get; set; }
 }

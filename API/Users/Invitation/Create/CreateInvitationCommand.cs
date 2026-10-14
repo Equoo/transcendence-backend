@@ -8,7 +8,7 @@ public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
     {
         Invitation invitation = new()
         {
-            ExpiresAt = req.ExpiresAt.ToUniversalTime(),
+            ExpireAt = req.ExpiresAt.ToUniversalTime(),
             Usages = req.Usages
         };
 

@@ -19,7 +19,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             return InvitationProblems.InvalidInvitation();
         }
-        if (invitation.Usages != Invitation.Infinite && ((DateTime.UtcNow >= invitation.ExpiresAt) || invitation.Usages == 0))
+        if (invitation.Usages != Invitation.Infinite && ((DateTime.UtcNow >= invitation.ExpireAt) || invitation.Usages == 0))
         {
             db.Invitations.Remove(invitation);
             await db.SaveChangesAsync();
