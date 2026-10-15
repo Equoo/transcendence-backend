@@ -14,7 +14,7 @@ public enum LanguageEnum
     汉语,
 }
 
-public class User : IExpirable, IIndentifier
+public class User : IExpirable
 {
     public DateTime ExpireAt { get; set; }
     public string Id { get; set; } = Guid.NewGuid().ToString();
