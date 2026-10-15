@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.AiBackend.Ingest;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,17 +37,23 @@ public static class UploadFileEndpoint
 {
     public static void MapUploadFile(this IEndpointRouteBuilder group)
     {
-        group.MapPost("/", [Authorize] async (UploadFileCommand command, TokenContext token, [FromForm] UploadFileRequest req) =>
+        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, RagQueue rag, TokenContext token,
+            [FromForm] UploadFileRequest req, CancellationToken ct) =>
         {
-            var result = await command.ExecuteAsync(
-                req.File.OpenReadStream(), req.Name, req.File.ContentType, req.File.Length, token.User);
+            using var fileStream = req.File.OpenReadStream();
+            using var memoryStream = new MemoryStream();
 
-            if (result.IsProblem)
+            _ = fileStream.CopyToAsync(memoryStream, ct);
+
+            var uploadResult = await uploadCmd.ExecuteAsync(memoryStream, req.Name, req.File.ContentType, req.File.Length, token.User, ct);
+
+            if (uploadResult.IsProblem)
             {
-                return result.Problem;
+                return uploadResult.Problem;
             }
-
-            return Results.CreatedAtRoute("files.get", new { key = result.Value.Key }, UploadFileResponse.FromEntity(result.Value));
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            rag.Upsert(RagItem.File(uploadResult.Value.Key));
+            return Results.CreatedAtRoute("files.get", new { key = uploadResult.Value.Key }, UploadFileResponse.FromEntity(uploadResult.Value));
         })
         .DisableAntiforgery()
         .WithName("files.upload")

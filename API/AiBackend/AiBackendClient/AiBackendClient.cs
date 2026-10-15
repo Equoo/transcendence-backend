@@ -1,6 +1,7 @@
 using KeepGrouped.API.AiBackend.Chatbot;
 using KeepGrouped.API.AiBackend.Ingest;
 using System.Net.ServerSentEvents;
+using KeepGrouped.API.AiBackend.Delete;
 using System.Runtime.CompilerServices;
 
 namespace KeepGrouped.API.AiBackend.AiClient;
@@ -14,6 +15,9 @@ public class AiBackendClient : IAiBackendClient
 		_apiClient = apiClient;
 	}
 
-	public Task<IngestResponse> IngestFileAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
-	=> _apiClient.PostFileAsync<IngestResponse>("/ingest", fileStream, fileName, cancellationToken);
+	public Task<CreateRagResponse> IngestFileAsync(Stream fileStream, string documentId, string fileName, CancellationToken cancellationToken = default)
+	=> _apiClient.PostFileAsync<CreateRagResponse>($"documents/{documentId}", fileStream, fileName, cancellationToken);
+
+	public Task<DeleteRagResponse> DeleteDocumentAsync(string documentId, CancellationToken cancellationToken = default)
+	=> _apiClient.DeleteFileAsync<DeleteRagResponse>($"documents/{documentId}", cancellationToken);
 }

@@ -5,7 +5,7 @@ using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Auth;
-using KeepGrouped.API.Users.Invitation;
+using KeepGrouped.API.Users.Invitations;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +22,9 @@ class Program
 		builder.BuildStorage();
 		builder.BuildDb();
 		builder.BuildAuthentication();
-		builder.AddHandlers();
 		builder.BuildAiBackend();
+		builder.BuildRag();
+		builder.AddHandlers();
 
 		builder.Services.Configure<ForwardedHeadersOptions>(options =>
 		{

@@ -1,4 +1,4 @@
-namespace KeepGrouped.API.Users.Invitation;
+namespace KeepGrouped.API.Users.Invitations;
 
 public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
 {

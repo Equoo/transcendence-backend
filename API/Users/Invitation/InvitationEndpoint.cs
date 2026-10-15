@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 
 
-namespace KeepGrouped.API.Users.Invitation;
+namespace KeepGrouped.API.Users.Invitations;
 
 public static class InvitationEndpoints
 {

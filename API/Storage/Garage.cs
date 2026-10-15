@@ -17,7 +17,7 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
         var req = new PutObjectRequest
         {
             InputStream = stream,
-            AutoCloseStream = true,
+            AutoCloseStream = false,
             BucketName = _options.BucketName,
             Key = key,
             ContentType = contentType,

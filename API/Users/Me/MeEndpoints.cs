@@ -12,6 +12,7 @@ public static class MeEndpoints
         me.MapGetMe();
         me.MapDeleteMe();
         me.MapDeleteAvatar();
+        me.MapPatchLanguage();
         me.MapPatchAvatar();
         me.MapUpdateMe();
         me.MapUpdateMePass();
