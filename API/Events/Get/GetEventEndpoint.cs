@@ -1,4 +1,4 @@
-using KeepGrouped.API.Chat;
+using KeepGrouped.API.Channels;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;

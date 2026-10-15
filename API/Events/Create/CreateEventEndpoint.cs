@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using KeepGrouped.API.Chat;
+using KeepGrouped.API.Channels;
 using System.Runtime.InteropServices;
 using KeepGrouped.API.Attributes.Roles;
 using KeepGrouped.API.Middlewares;

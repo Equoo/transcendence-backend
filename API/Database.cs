@@ -1,6 +1,6 @@
 namespace KeepGrouped.API;
 
-using KeepGrouped.API.Chat;
+using KeepGrouped.API.Channels;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Password;
 using KeepGrouped.API.Roles;
@@ -9,6 +9,7 @@ using KeepGrouped.API.Users.Auth;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
@@ -75,9 +76,52 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.WithMany()
 				.HasForeignKey(c => c.CategoryId)
 				.OnDelete(DeleteBehavior.SetNull);
+
+			entity
+				.HasOne(c => c.LastMessage)
+				.WithMany()
+				.HasForeignKey(c => c.LastMessageId)
+				.OnDelete(DeleteBehavior.SetNull);
+
+			entity
+				.Property(c => c.Type)
+				.HasConversion<string>();
+
+			// Get-only, so EF only maps it when told to
+			entity.Property(c => c.CreateAt);
 		});
 
-		builder.Entity<ChannelCategory>().HasAlternateKey(c => c.Name);
+		builder.Entity<ChannelMember>(entity =>
+		{
+			entity.HasKey(m => new { m.ChannelId, m.UserId });
+
+			entity.HasOne(m => m.Channel)
+				.WithMany(c => c.Members)
+				.HasForeignKey(m => m.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(m => m.User)
+				.WithMany()
+				.HasForeignKey(m => m.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasIndex(m => m.UserId);
+		});
+
+		builder.Entity<Relationship>(entity =>
+		{
+			entity.HasOne(r => r.Me)
+				.WithMany()
+				.HasForeignKey(r => r.MeId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(r => r.User)
+				.WithMany()
+				.HasForeignKey(r => r.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasIndex(r => new { r.MeId, r.UserId }).IsUnique();
+		});
 
 		builder.Entity<ChannelAck>(entity =>
 		{
@@ -123,8 +167,10 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 	public DbSet<Channel> Channels { get; set; } = null!;
 	public DbSet<ChannelCategory> ChannelCategories { get; set; } = null!;
 	public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
+	public DbSet<ChannelMember> ChannelMembers { get; set; } = null!;
 	public DbSet<ChannelRole> ChannelRoles { get; set; } = null!;
 	public DbSet<Message> Messages { get; set; } = null!;
+	public DbSet<Relationship> Relationships { get; set; } = null!;
 }
 
 public static class DbBuilder
