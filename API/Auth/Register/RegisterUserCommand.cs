@@ -36,7 +36,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 
         var user = new User
         {
-            ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime(),
+            ExpireAt = DateTime.UtcNow.AddYears(2),
             UserName = req.UserName,
             Role = role_db
         };
@@ -55,7 +55,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             Id = Hash256.GetHashSha256(id),
             UserId = user.Id,
-            ExpireAt = DateTime.Now.AddMinutes(2).Kind
+            ExpireAt = DateTime.UtcNow.AddMinutes(2)
         });
 
         if (invitation.Usages != Invitation.Infinite)

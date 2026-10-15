@@ -48,7 +48,7 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provide
         {
             Id = Hash256.GetHashSha256(id),
             UserId = refresh_db.UserId,
-            ExpireAt = DateTime.Now.AddDays(7).Kind
+            ExpireAt = DateTime.UtcNow.AddDays(7)
         });
 
         user.ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime();
