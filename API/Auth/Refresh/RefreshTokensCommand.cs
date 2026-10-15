@@ -51,6 +51,8 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provide
             ExpireAt = DateTime.Now.AddDays(7).Kind
         });
 
+        user.ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime();
+
         await db.SaveChangesAsync();
 
         return new RefreshedSession(RefreshResponse.FromEntity(user), new IssuedTokens(new_acess, new_refresh));

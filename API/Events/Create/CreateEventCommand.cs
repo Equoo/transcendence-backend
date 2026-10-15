@@ -29,6 +29,7 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
             return EventProblems.DefaultRoleMissing();
         }
 
+
         var ev = new Event
         {
             Name = req.Name,

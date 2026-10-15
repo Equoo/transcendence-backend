@@ -2,6 +2,7 @@
 using Amazon.S3.Model;
 using KeepGrouped.API;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -23,9 +24,19 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
         return Task.CompletedTask;
     }
 
-    public void DeleteDb<T>(KeepGroupedDb db) where T : class, IExpirable
+    public async void DeleteDb<T>(KeepGroupedDb db, RagQueue rag) where T : class, IExpirable
     {
-        db.Set<T>().Where(t => t.ExpireAt < DateTime.UtcNow).ExecuteDelete();
+
+        List<T>? list = await db.Set<T>().Where(t => t.ExpireAt < DateTime.UtcNow).ToListAsync();
+
+        foreach (T element in list)
+        {
+
+            db.Set<T>().Remove(element);
+
+            await db.SaveChangesAsync();
+
+        }
     }
 
     private async void DoWork(object? state)
@@ -34,18 +45,17 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
         await using var scope = scopes.CreateAsyncScope();
         KeepGroupedDb? context = scope.ServiceProvider.GetService<KeepGroupedDb>();
 
+        RagQueue? rag = scope.ServiceProvider.GetService<RagQueue>();
 
         var handlers = typeof(Program).Assembly.GetTypes()
            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IExpirable).IsAssignableFrom(t));
-
-
 
         foreach (var handler in handlers)
         {
 
             MethodInfo? methodInfo = GetType().GetMethod(nameof(DeleteDb));
 
-            methodInfo.MakeGenericMethod(handler).Invoke(this, [context]);
+            methodInfo.MakeGenericMethod(handler).Invoke(this, [context, rag]);
         }
     }
 

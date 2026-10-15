@@ -9,7 +9,7 @@ using KeepGrouped.API.Attributes.Roles;
 
 namespace KeepGrouped.API.Events;
 
-public class Event : IExpirable
+public class Event : IExpirable, IIndentifier
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = null!;
