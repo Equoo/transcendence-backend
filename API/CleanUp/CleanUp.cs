@@ -19,7 +19,7 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
 
-        _timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        _timer = new PeriodicTimer(TimeSpan.FromDays(1));
 
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
@@ -37,7 +37,7 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
             {
                 foreach (var handler in handlers)
                 {
-                    await (Task)methodInfo.MakeGenericMethod(handler).Invoke(this, [context, rag]);
+                    await (Task)methodInfo.MakeGenericMethod(handler).Invoke(this, [context, rag])!;
                 }
             }
 
