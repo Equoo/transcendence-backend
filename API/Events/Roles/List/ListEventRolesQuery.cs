@@ -6,7 +6,7 @@ public sealed class ListEventRolesQuery(KeepGroupedDb db) : IHandler
 {
     public async Task<Result<List<ListEventRolesResponse>>> ExecuteAsync()
     {
-        var ers = await db.EventRoles.Where(er => er.Name != EventRole.Implicit).ToListAsync();
+        var ers = await db.EventRoles.ToListAsync();
 
         return ers.Select(ListEventRolesResponse.FromEntity).ToList();
     }

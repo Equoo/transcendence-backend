@@ -9,6 +9,7 @@ public static class RegistrationEndpoints
         registrations.MapCreateRegistration();
         registrations.MapListRegistrations();
         registrations.MapDeleteRegistration();
+        registrations.MapUpdateRegistrationRole();
     }
 }
 
