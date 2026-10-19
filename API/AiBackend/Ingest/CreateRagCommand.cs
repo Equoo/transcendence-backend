@@ -5,19 +5,12 @@ namespace KeepGrouped.API.AiBackend.Ingest;
 
 public sealed class CreateRagCommand(IAiBackendClient aiBackendClient)
 {
-	private static readonly string[] AllowedExtensions = [".txt", ".md", ".pdf"];
 
 	public async Task<Result<CreateRagResponse>> ExecuteAsync(Stream content, string fileName, string documentId, long length, CancellationToken cancellationToken = default)
 	{
 		if (length <= 0)
 		{
 			return AiBackendProblems.EmptyFile();
-		}
-
-		var extension = Path.GetExtension(fileName).ToLowerInvariant();
-		if (!AllowedExtensions.Contains(extension))
-		{
-			return AiBackendProblems.UnsupportedFormat(extension);
 		}
 
 		try
