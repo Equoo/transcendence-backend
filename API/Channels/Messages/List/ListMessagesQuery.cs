@@ -40,20 +40,26 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 
 		if (before.HasValue)
 		{
-			query = query.Where(m => m.SentAt < before.Value);
+			query = query.Where(m => m.SentAt < before.Value)
+				.OrderByDescending(m => m.SentAt);
 		}
 		else if (after.HasValue)
 		{
-			query = query.Where(m => m.SentAt > after.Value);
+			query = query.Where(m => m.SentAt > after.Value)
+				.OrderBy(m => m.SentAt);
 		}
 		else if (around.HasValue)
 		{
-			query = query.Where(m => m.SentAt < around.Value);
+			query = query.Where(m => m.SentAt < around.Value)
+				.OrderByDescending(m => m.SentAt);
 			processedTake = (int)Math.Floor((double)take / 2);
+		}
+		else
+		{
+			query = query.OrderByDescending(m => m.SentAt);
 		}
 
 		var messages = await query
-			.OrderByDescending(m => m.SentAt)
 			.Take(processedTake)
 			.Select(m => MessageResponse.FromEntity(m))
 			.ToListAsync();
@@ -62,16 +68,16 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 		{
 			var leftMessages = await defaultQuery
 				.Where(m => m.SentAt >= around.Value)
-				.OrderByDescending(m => m.SentAt)
+				.OrderBy(m => m.SentAt)
 				.Take(processedTake + take % 2)
+				.OrderByDescending(m => m.SentAt)
 				.Select(m => MessageResponse.FromEntity(m))
 				.ToListAsync();
 
 			messages.AddRange(leftMessages);
 		}
 
-		messages.Reverse();
-
-		return messages;
+		// Pages are always returned oldest first, whatever the cursor
+		return messages.OrderBy(m => m.SentAt).ToList();
 	}
 }
