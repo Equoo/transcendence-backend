@@ -6,9 +6,13 @@ public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
 
     public async Task<Result<string>> ExecuteAsync(CreateInvitationRequest req)
     {
+
+        Console.WriteLine("\n\n\n\n" + req.ExpireAt + "\n\n\n\n\n");
+
         Invitation invitation = new()
         {
-            ExpiresAt = req.ExpiresAt.ToUniversalTime(),
+
+            ExpireAt = req.Usages == -1 ? DateTime.MaxValue : req.ExpireAt.ToUniversalTime(),
             Usages = req.Usages
         };
 

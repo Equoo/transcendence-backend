@@ -19,7 +19,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             return InvitationProblems.InvalidInvitation();
         }
-        if (invitation.Usages != Invitation.Infinite && ((DateTime.UtcNow >= invitation.ExpiresAt) || invitation.Usages == 0))
+        if (invitation.Usages != Invitation.Infinite && ((DateTime.UtcNow >= invitation.ExpireAt) || invitation.Usages == 0))
         {
             db.Invitations.Remove(invitation);
             await db.SaveChangesAsync();
@@ -36,6 +36,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 
         var user = new User
         {
+            ExpireAt = DateTime.UtcNow.AddYears(2),
             UserName = req.UserName,
             Role = role_db
         };
@@ -54,7 +55,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             Id = Hash256.GetHashSha256(id),
             UserId = user.Id,
-            ExpireAt = DateTime.Now.AddMinutes(2).Kind
+            ExpireAt = DateTime.UtcNow.AddMinutes(2)
         });
 
         if (invitation.Usages != Invitation.Infinite)

@@ -1,7 +1,7 @@
+using System.Security.Cryptography.X509Certificates;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
-using KeepGrouped.Migrations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
@@ -23,7 +23,7 @@ public static class GetMeEndpoint
         me.MapGet(
                 "/",
                 [Authorize]
-        (TokenContext token) =>
+        async (TokenContext token) =>
                 {
                     return Results.Ok(GetMeResponse.FromEntity(token.User));
                 }

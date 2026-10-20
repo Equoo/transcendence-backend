@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations
 {
     [DbContext(typeof(KeepGroupedDb))]
-    [Migration("20261006140232_ChannelCategoryNoAlternateKey")]
-    partial class ChannelCategoryNoAlternateKey
+    [Migration("20261019114838_fresh")]
+    partial class fresh
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -206,6 +206,9 @@ namespace KeepGrouped.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("text");
@@ -323,12 +326,12 @@ namespace KeepGrouped.Migrations
                     b.ToTable("Files");
                 });
 
-            modelBuilder.Entity("KeepGrouped.API.Users.Invitation.Invitation", b =>
+            modelBuilder.Entity("KeepGrouped.API.Users.Invitations.Invitation", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime>("ExpireAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Usages")
@@ -344,8 +347,8 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("ExpireAt")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -364,8 +367,14 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("Language")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

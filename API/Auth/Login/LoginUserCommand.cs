@@ -43,7 +43,7 @@ public sealed class LoginUserCommand(KeepGroupedDb db, KeepGroupedPasswordHasher
         {
             Id = Hash256.GetHashSha256(id),
             UserId = user_db.Id,
-            ExpireAt = DateTime.Now.AddDays(7).Kind
+            ExpireAt = DateTime.UtcNow.AddDays(7)
         });
 
         await db.SaveChangesAsync();
