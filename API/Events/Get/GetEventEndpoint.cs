@@ -9,6 +9,7 @@ public record GetEventResponse(
 	string Id,
 	string Name,
 	DateTime Date,
+	DateTime ExpireAt,
 	int Size,
 	string Location,
 	string Description,
@@ -23,7 +24,7 @@ public record GetEventResponse(
 )
 {
 	public static GetEventResponse FromEntity(Event ev, bool isRegistered) => new(
-		ev.Id, ev.Name, ev.Date, ev.Size, ev.Location, ev.Description,
+		ev.Id, ev.Name, ev.Date, ev.ExpireAt, ev.Size, ev.Location, ev.Description,
 		ChannelResponse.FromEntity(ev.Channel),
 		GetUserResponse.FromEntity(ev.Organizer), ev.Tags,
 		[.. ev.Registrations.Select(RegistrationSummary.FromEntity)],
