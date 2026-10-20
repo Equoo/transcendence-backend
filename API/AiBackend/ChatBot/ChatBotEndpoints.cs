@@ -1,5 +1,3 @@
-using System.Net.Mime;
-using System.Net.ServerSentEvents;
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 
