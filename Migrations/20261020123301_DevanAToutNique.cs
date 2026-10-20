@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KeepGrouped.Migrations
 {
     /// <inheritdoc />
-    public partial class fresh : Migration
+    public partial class DevanAToutNique : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,6 @@ namespace KeepGrouped.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ChannelCategories", x => x.Id);
-                    table.UniqueConstraint("AK_ChannelCategories_Name", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,26 +76,28 @@ namespace KeepGrouped.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Channels",
+                name: "ChannelAcks",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Topic = table.Column<string>(type: "text", nullable: false),
-                    Order = table.Column<long>(type: "bigint", nullable: false),
-                    CategoryId = table.Column<string>(type: "text", nullable: true),
-                    EventId = table.Column<string>(type: "text", nullable: true),
-                    CategorySync = table.Column<bool>(type: "boolean", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ChannelId = table.Column<string>(type: "text", nullable: false),
+                    AckAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Channels", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Channels_ChannelCategories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "ChannelCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                    table.PrimaryKey("PK_ChannelAcks", x => new { x.UserId, x.ChannelId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChannelMembers",
+                columns: table => new
+                {
+                    ChannelId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChannelMembers", x => new { x.ChannelId, x.UserId });
                 });
 
             migrationBuilder.CreateTable(
@@ -118,12 +119,6 @@ namespace KeepGrouped.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ChannelRoles_Channels_ChannelId",
-                        column: x => x.ChannelId,
-                        principalTable: "Channels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_ChannelRoles_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
@@ -132,22 +127,29 @@ namespace KeepGrouped.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChannelAcks",
+                name: "Channels",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    ChannelId = table.Column<string>(type: "text", nullable: false),
-                    AckAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Topic = table.Column<string>(type: "text", nullable: false),
+                    Order = table.Column<long>(type: "bigint", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CategoryId = table.Column<string>(type: "text", nullable: true),
+                    EventId = table.Column<string>(type: "text", nullable: true),
+                    CategorySync = table.Column<bool>(type: "boolean", nullable: false),
+                    LastMessageId = table.Column<string>(type: "character varying(36)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChannelAcks", x => new { x.UserId, x.ChannelId });
+                    table.PrimaryKey("PK_Channels", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ChannelAcks_Channels_ChannelId",
-                        column: x => x.ChannelId,
-                        principalTable: "Channels",
+                        name: "FK_Channels_ChannelCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ChannelCategories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -325,10 +327,43 @@ namespace KeepGrouped.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Relationships",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    MeId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Nickname = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Since = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Relationships", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Relationships_Users_MeId",
+                        column: x => x.MeId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Relationships_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ChannelAcks_ChannelId",
                 table: "ChannelAcks",
                 column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChannelMembers_UserId",
+                table: "ChannelMembers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChannelRoles_CategoryId",
@@ -349,6 +384,11 @@ namespace KeepGrouped.Migrations
                 name: "IX_Channels_CategoryId",
                 table: "Channels",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Channels_LastMessageId",
+                table: "Channels",
+                column: "LastMessageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EventEventRole_EventsId",
@@ -402,6 +442,17 @@ namespace KeepGrouped.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Relationships_MeId_UserId",
+                table: "Relationships",
+                columns: new[] { "MeId", "UserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Relationships_UserId",
+                table: "Relationships",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_AvatarKey",
                 table: "Users",
                 column: "AvatarKey",
@@ -413,12 +464,52 @@ namespace KeepGrouped.Migrations
                 column: "RoleId");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_ChannelAcks_Channels_ChannelId",
+                table: "ChannelAcks",
+                column: "ChannelId",
+                principalTable: "Channels",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_ChannelAcks_Users_UserId",
                 table: "ChannelAcks",
                 column: "UserId",
                 principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ChannelMembers_Channels_ChannelId",
+                table: "ChannelMembers",
+                column: "ChannelId",
+                principalTable: "Channels",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ChannelMembers_Users_UserId",
+                table: "ChannelMembers",
+                column: "UserId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ChannelRoles_Channels_ChannelId",
+                table: "ChannelRoles",
+                column: "ChannelId",
+                principalTable: "Channels",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Channels_Messages_LastMessageId",
+                table: "Channels",
+                column: "LastMessageId",
+                principalTable: "Messages",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_EventEventRole_Events_EventsId",
@@ -456,11 +547,18 @@ namespace KeepGrouped.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_Messages_Channels_ChannelId",
+                table: "Messages");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Files_Users_CreatorId",
                 table: "Files");
 
             migrationBuilder.DropTable(
                 name: "ChannelAcks");
+
+            migrationBuilder.DropTable(
+                name: "ChannelMembers");
 
             migrationBuilder.DropTable(
                 name: "ChannelRoles");
@@ -475,13 +573,13 @@ namespace KeepGrouped.Migrations
                 name: "Invitations");
 
             migrationBuilder.DropTable(
-                name: "Messages");
-
-            migrationBuilder.DropTable(
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "Registration");
+
+            migrationBuilder.DropTable(
+                name: "Relationships");
 
             migrationBuilder.DropTable(
                 name: "EventRoles");
@@ -494,6 +592,9 @@ namespace KeepGrouped.Migrations
 
             migrationBuilder.DropTable(
                 name: "ChannelCategories");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Users");
