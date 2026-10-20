@@ -7,9 +7,9 @@ public static class ListMessagesEndpoint
 {
 	public static void MapListMessages(this IEndpointRouteBuilder messages)
 	{
-		messages.MapGet("/", [Authorize] async (ListMessagesQuery query, string id, TokenContext token, DateTime? before, int take = 20) =>
+		messages.MapGet("/", [Authorize] async (ListMessagesQuery query, string id, TokenContext token, DateTime? before, DateTime? after, DateTime? around, int take = 20) =>
 		{
-			var result = await query.ExecuteAsync(id, before, take, token.User);
+			var result = await query.ExecuteAsync(id, before, after, around, take, token.User);
 			if (result.IsProblem)
 			{
 				return result.Problem;

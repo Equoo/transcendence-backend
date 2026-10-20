@@ -9,6 +9,8 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 	public async Task<Result<List<MessageResponse>>> ExecuteAsync(
 		string channelId,
 		DateTime? before,
+		DateTime? after,
+		DateTime? around,
 		int take,
 		User sender
 	)
@@ -33,17 +35,40 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 				.ThenInclude(r => r!.Sender)
 			.Include(m => m.Channel)
 			.Where(m => m.ChannelId == channelId);
+		var defaultQuery = query;
+		var processedTake = take;
 
 		if (before.HasValue)
 		{
 			query = query.Where(m => m.SentAt < before.Value);
 		}
+		else if (after.HasValue)
+		{
+			query = query.Where(m => m.SentAt > after.Value);
+		}
+		else if (around.HasValue)
+		{
+			query = query.Where(m => m.SentAt < around.Value);
+			processedTake = (int)Math.Floor((double)take / 2);
+		}
 
 		var messages = await query
 			.OrderByDescending(m => m.SentAt)
-			.Take(take)
+			.Take(processedTake)
 			.Select(m => MessageResponse.FromEntity(m))
 			.ToListAsync();
+
+		if (around.HasValue)
+		{
+			var leftMessages = await defaultQuery
+				.Where(m => m.SentAt >= around.Value)
+				.OrderByDescending(m => m.SentAt)
+				.Take(processedTake + take % 2)
+				.Select(m => MessageResponse.FromEntity(m))
+				.ToListAsync();
+
+			messages.AddRange(leftMessages);
+		}
 
 		messages.Reverse();
 
