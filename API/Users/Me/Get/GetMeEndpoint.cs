@@ -2,7 +2,6 @@ using System.Security.Cryptography.X509Certificates;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
-using KeepGrouped.Migrations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;

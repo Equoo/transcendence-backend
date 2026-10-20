@@ -29,12 +29,11 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
             return EventProblems.DefaultRoleMissing();
         }
 
-
         var ev = new Event
         {
             Name = req.Name,
             Date = req.Date.ToUniversalTime(),
-            ExpireAt = req.Date.AddMinutes(1).ToUniversalTime(),
+            ExpireAt = req.ExpireAt.ToUniversalTime(),
             Size = req.Size,
             Location = req.Location,
             Description = req.Description,

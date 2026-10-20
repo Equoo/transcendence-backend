@@ -3,7 +3,6 @@ using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Activities;
-using KeepGrouped.Migrations;
 
 namespace KeepGrouped.API.Users;
 

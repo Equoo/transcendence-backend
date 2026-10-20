@@ -401,8 +401,8 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("ExpireAt")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()

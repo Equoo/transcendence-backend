@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations
 {
     [DbContext(typeof(KeepGroupedDb))]
-    [Migration("20261014091700_user-expirate-remove")]
-    partial class userexpirateremove
+    [Migration("20261019114838_fresh")]
+    partial class fresh
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -331,7 +331,7 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime>("ExpireAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Usages")
@@ -347,8 +347,8 @@ namespace KeepGrouped.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("ExpireAt")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -366,6 +366,9 @@ namespace KeepGrouped.Migrations
 
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");
