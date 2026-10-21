@@ -22,62 +22,63 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 			.Include(c => c.Category)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
-		{
 			return ChannelProblems.NotFound(channelId);
-		}
 
 		if (!channel.IsWhitelisted(sender))
 			return MessageProblems.AccessNotAuthorized();
 
-		var query = db
-			.Messages.Include(m => m.Sender)
+		var messages = ListChannelMessages(channelId);
+
+		var page = (before, after, around) switch
+		{
+			({ } cursor, _, _) => await ListBefore(messages, cursor, take),
+			(_, { } cursor, _) => await ListAfter(messages, cursor, take),
+			(_, _, { } cursor) => await ListAround(messages, cursor, take),
+			_ => await ListLatest(messages, take),
+		};
+
+		return page.OrderBy(m => m.SentAt).ToList();
+	}
+
+	private IQueryable<Message> ListChannelMessages(string channelId) =>
+		db.Messages
+			.Include(m => m.Sender)
 			.Include(m => m.MessageRef)
 				.ThenInclude(r => r!.Sender)
 			.Include(m => m.Channel)
 			.Where(m => m.ChannelId == channelId);
-		var defaultQuery = query;
-		var processedTake = take;
 
-		if (before.HasValue)
-		{
-			query = query.Where(m => m.SentAt < before.Value)
-				.OrderByDescending(m => m.SentAt);
-		}
-		else if (after.HasValue)
-		{
-			query = query.Where(m => m.SentAt > after.Value)
-				.OrderBy(m => m.SentAt);
-		}
-		else if (around.HasValue)
-		{
-			query = query.Where(m => m.SentAt < around.Value)
-				.OrderByDescending(m => m.SentAt);
-			processedTake = (int)Math.Floor((double)take / 2);
-		}
-		else
-		{
-			query = query.OrderByDescending(m => m.SentAt);
-		}
-
-		var messages = await query
-			.Take(processedTake)
+	private static Task<List<MessageResponse>> ListLatest(IQueryable<Message> messages, int take) =>
+		messages
+			.OrderByDescending(m => m.SentAt)
+			.Take(take)
 			.Select(m => MessageResponse.FromEntity(m))
 			.ToListAsync();
 
-		if (around.HasValue)
-		{
-			var leftMessages = await defaultQuery
-				.Where(m => m.SentAt >= around.Value)
-				.OrderBy(m => m.SentAt)
-				.Take(processedTake + take % 2)
-				.OrderByDescending(m => m.SentAt)
-				.Select(m => MessageResponse.FromEntity(m))
-				.ToListAsync();
+	private static Task<List<MessageResponse>> ListBefore(IQueryable<Message> messages, DateTime cursor, int take) =>
+		ListLatest(messages.Where(m => m.SentAt < cursor), take);
 
-			messages.AddRange(leftMessages);
-		}
+	private static Task<List<MessageResponse>> ListAfter(IQueryable<Message> messages, DateTime cursor, int take) =>
+		messages
+			.Where(m => m.SentAt > cursor)
+			.OrderBy(m => m.SentAt)
+			.Take(take)
+			.Select(m => MessageResponse.FromEntity(m))
+			.ToListAsync();
 
-		// Pages are always returned oldest first, whatever the cursor
-		return messages.OrderBy(m => m.SentAt).ToList();
+	private static async Task<List<MessageResponse>> ListAround(IQueryable<Message> messages, DateTime cursor, int take)
+	{
+		var olderCount = take / 2;
+		var newerCount = take - olderCount;
+
+		var older = await ListBefore(messages, cursor, olderCount);
+		var newer = await messages
+			.Where(m => m.SentAt >= cursor)
+			.OrderBy(m => m.SentAt)
+			.Take(newerCount)
+			.Select(m => MessageResponse.FromEntity(m))
+			.ToListAsync();
+
+		return [.. older, .. newer];
 	}
 }
