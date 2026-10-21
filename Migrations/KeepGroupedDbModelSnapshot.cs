@@ -578,7 +578,7 @@ namespace KeepGrouped.Migrations
                     b.HasOne("KeepGrouped.API.Users.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Channel");

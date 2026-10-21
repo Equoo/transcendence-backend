@@ -53,7 +53,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.HasOne(m => m.Sender)
 				.WithMany()
 				.HasForeignKey(m => m.SenderId)
-				.OnDelete(DeleteBehavior.Restrict);
+				.OnDelete(DeleteBehavior.Cascade);
 
 			entity
 				.HasOne(m => m.MessageRef)
