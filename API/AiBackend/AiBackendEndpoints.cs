@@ -1,4 +1,5 @@
 using KeepGrouped.API.AiBackend.Chatbot;
+using KeepGrouped.API.AiBackend.HealthCheck;
 
 
 namespace KeepGrouped.API.AiBackend;
@@ -10,5 +11,6 @@ public static class AiBackendEndpoints
 		var aibackend = app.MapGroup("/ai").WithTags("AiBackend");
 
 		aibackend.MapChatBot();
+		aibackend.MapHealthCheck();
 	}
 }
