@@ -11,12 +11,10 @@ public static class HealthCheckEndpoints
 
 		HealthCheck.MapGet("/check", [Authorize] async (HttpClient client, CancellationToken cancellationToken) =>
 		{
-			using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			timeout.CancelAfter(TimeSpan.FromSeconds(5));
 
 			try
 			{
-				using var response = await client.GetAsync("http://ai-back-dev:7070/health", timeout.Token);
+				using var response = await client.GetAsync("http://ai-back-dev:7070/health");
 
 				return response.IsSuccessStatusCode
 					? Results.Ok(new { status = "healthy" })
