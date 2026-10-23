@@ -43,7 +43,8 @@ public static class UploadFileEndpoint
             using var fileStream = req.File.OpenReadStream();
             using var memoryStream = new MemoryStream();
 
-            _ = fileStream.CopyToAsync(memoryStream, ct);
+            await fileStream.CopyToAsync(memoryStream, ct);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             var uploadResult = await uploadCmd.ExecuteAsync(memoryStream, req.Name, req.File.ContentType, req.File.Length, token.User, ct);
 
@@ -51,7 +52,6 @@ public static class UploadFileEndpoint
             {
                 return uploadResult.Problem;
             }
-            memoryStream.Seek(0, SeekOrigin.Begin);
             rag.Upsert(RagItem.File(uploadResult.Value.Key));
             return Results.CreatedAtRoute("files.get", new { key = uploadResult.Value.Key }, UploadFileResponse.FromEntity(uploadResult.Value));
         })
