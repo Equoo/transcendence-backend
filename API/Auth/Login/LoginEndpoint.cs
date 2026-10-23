@@ -6,16 +6,12 @@ namespace KeepGrouped.API.Users;
 public record LoginRequest
 {
     [Required]
-
-    [Length(3, 25)]
-    public string UserName { get; init; } = null!;
+    [Length(1, 255)]
+    public string Login { get; init; } = null!;
     [Required]
     public string Password { get; init; } = null!;
 }
 
-/// <summary>
-/// Who was just logged in. The tokens are not in the body on purpose: they travel as cookies.
-/// </summary>
 public record LoginResponse(string Id, string UserName)
 {
     public static LoginResponse FromEntity(User user) => new(user.Id, user.UserName);

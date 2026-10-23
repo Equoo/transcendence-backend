@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
-
-public record GetMeResponse(string Id, string UserName, GetFileMetaResponse? Avatar, RoleResponse Role, LanguageEnum Language,
+public record GetMeResponse(string Id, string UserName, string Email, GetFileMetaResponse? Avatar, RoleResponse Role, LanguageEnum Language,
     Dictionary<string, DateTime> ChannelsAckMsg)
 {
-    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName,
+    public static GetMeResponse FromEntity(User user) => new(user.Id, user.UserName, user.Email,
     user.Avatar != null ? GetFileMetaResponse.FromEntity(user.Avatar) : null, RoleResponse.FromEntity(user.Role),
     user.Language, user.ChannelsAckMsg.ToDictionary(ack => ack.ChannelId, ack => ack.AckAt));
 }

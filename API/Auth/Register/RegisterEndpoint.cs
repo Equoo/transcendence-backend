@@ -8,6 +8,10 @@ public record RegisterRequest
     [Length(1, 255)]
     public string UserName { get; init; } = null!;
     [Required]
+    [EmailAddress]
+    [Length(3, 255)]
+    public string Email { get; init; } = null!;
+    [Required]
     [Length(1, 255)]
     public string Password { get; init; } = null!;
     [Required]
