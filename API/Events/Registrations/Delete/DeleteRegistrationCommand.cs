@@ -30,7 +30,7 @@ public sealed class DeleteRegistrationCommand(KeepGroupedDb db, RagQueue rag) : 
 
         ev.Registrations.Remove(registration);
         await db.SaveChangesAsync();
-        rag.Delete(RagItem.Event(ev.Id));
+        rag.Upsert(RagItem.Event(ev.Id));
         return Result.OK;
     }
 }
