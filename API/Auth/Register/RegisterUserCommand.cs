@@ -29,6 +29,11 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             return UserProblems.NameAlreadyUsed(req.UserName);
         }
+        var email = User.NormalizeEmail(req.Email);
+        if (await db.Users.AnyAsync(e => e.Email == email))
+        {
+            return UserProblems.EmailAlreadyUsed(email);
+        }
 
 
         var role_db = await db.Roles.SingleAsync(o => o.Name == "Member");
@@ -38,6 +43,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
         {
             ExpireAt = DateTime.UtcNow.AddYears(2),
             UserName = req.UserName,
+            Email = email,
             Role = role_db
         };
 

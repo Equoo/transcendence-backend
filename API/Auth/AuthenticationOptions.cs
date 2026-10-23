@@ -10,6 +10,10 @@ public class AuthenticationOptions
     public required string DefaultAdminLogin { get; init; }
 
     [Required]
+    [EmailAddress]
+    public required string DefaultAdminEmail { get; init; }
+
+    [Required]
     public required string DefaultAdminPwd { get; init; }
 
     [Required]

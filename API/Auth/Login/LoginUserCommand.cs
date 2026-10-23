@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
-/// <summary>Handler-to-endpoint carrier: the endpoint alone turns the tokens into cookies.</summary>
 public sealed record AuthenticatedUser(LoginResponse User, IssuedTokens Tokens);
 
 public sealed class LoginUserCommand(KeepGroupedDb db, KeepGroupedPasswordHasher pass, TokenProvider provider) : IHandler
 {
     public async Task<Result<AuthenticatedUser>> ExecuteAsync(LoginRequest req)
     {
-        User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.UserName);
+        var email = User.NormalizeEmail(req.Login);
+        User? user_db = await db.Users.SingleOrDefaultAsync(u => u.UserName == req.Login || u.Email == email);
 
         if (user_db is null)
         {

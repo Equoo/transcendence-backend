@@ -14,6 +14,11 @@ static public class UserProblems
         "Username already used",
         $"'{username}' is already used by an other user.");
 
+    static public ProblemHttpResult EmailAlreadyUsed(string email) => ProblemFactory.Create(
+        StatusCodes.Status409Conflict, "EMAIL_ALREADY_USED",
+        "Email already used",
+        $"'{email}' is already used by an other user.");
+
     static public ProblemHttpResult NotAuthenticated() => ProblemFactory.Create(
         StatusCodes.Status401Unauthorized, "NOT_AUTHENTICATED",
         "Not authenticated",
