@@ -11,45 +11,45 @@ namespace KeepGrouped.API;
 public class KeepGroupedHub(KeepGroupedDb db) : Hub
 {
 
-    public override async Task OnConnectedAsync()
-    {
-        var userId = Context.UserIdentifier;
+	public override async Task OnConnectedAsync()
+	{
+		var userId = Context.UserIdentifier;
 
-        var user = await db.Users.Where(user => user.Id == userId).SingleOrDefaultAsync();
-        user?.IsOnline = true;
-        await db.SaveChangesAsync();
-        await base.OnConnectedAsync();
-    }
+		var user = await db.Users.Where(user => user.Id == userId).SingleOrDefaultAsync();
+		user?.IsOnline = true;
+		await db.SaveChangesAsync();
+		await base.OnConnectedAsync();
+	}
 
-    public async Task ActivityReported(ActivityEnum activity)
-    {
-        var userId = Context.UserIdentifier;
+	public async Task ActivityReported(ActivityEnum activity)
+	{
+		var userId = Context.UserIdentifier;
 
-        await Clients.Others.SendAsync("OtherActivityUpdated", userId, activity);
-    }
+		await Clients.Others.SendAsync("OtherActivityUpdated", userId, activity);
+	}
 
-    public async Task ReportActivityTo(string userId, ActivityEnum activity)
-    {
-        await Clients.User(userId).SendAsync("OtherActivityUpdated", Context.UserIdentifier, activity);
-    }
+	public async Task ReportActivityTo(string userId, ActivityEnum activity)
+	{
+		await Clients.User(userId).SendAsync("OtherActivityUpdated", Context.UserIdentifier, activity);
+	}
 
-    public async Task AskOthersActivity()
-    {
-        await Clients.Others.SendAsync("ReportActivityTo", Context.UserIdentifier);
-    }
+	public async Task AskOthersActivity()
+	{
+		await Clients.Others.SendAsync("ReportActivityTo", Context.UserIdentifier);
+	}
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var userId = Context.UserIdentifier;
+	public override async Task OnDisconnectedAsync(Exception? exception)
+	{
+		var userId = Context.UserIdentifier;
 
-        if (exception != null)
-        {
-            Console.WriteLine($"Disconnected due to error: {exception.Message}");
-        }
+		if (exception != null)
+		{
+			Console.WriteLine($"Disconnected due to error: {exception.Message}");
+		}
 
-        var user = await db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
-        await db.SaveChangesAsync();
-        user?.IsOnline = false;
-        await base.OnDisconnectedAsync(exception);
-    }
+		var user = await db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
+		user?.IsOnline = false;
+		await db.SaveChangesAsync();
+		await base.OnDisconnectedAsync(exception);
+	}
 }
