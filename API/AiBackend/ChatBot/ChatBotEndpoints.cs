@@ -1,5 +1,6 @@
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
+using KeepGrouped.API.Problems;
 
 namespace KeepGrouped.API.AiBackend.Chatbot;
 
@@ -21,8 +22,15 @@ public static class ChatBotEndpoints
 				Content = JsonContent.Create(req)
 			}, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
+			// if (!response.IsSuccessStatusCode)
+			// {
+			// 	response.Dispose();
+			// 	return AiBackendProblems.ServiceUnavailable();
+			// }
+
 			ctx.Response.ContentType = "text/event-stream";
 			ctx.Response.Headers["X-Access-Buffering"] = "no";
+
 
 			await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 			await stream.CopyToAsync(ctx.Response.Body, cancellationToken);

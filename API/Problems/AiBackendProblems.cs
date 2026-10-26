@@ -4,12 +4,14 @@ namespace KeepGrouped.API.Problems;
 
 public static class AiBackendProblems
 {
+	public static ProblemHttpResult ServiceUnavailable() =>
+		TypedResults.Problem("AI is unavailable", statusCode: StatusCodes.Status503ServiceUnavailable);
 	public static ProblemHttpResult EmptyFile() =>
-		TypedResults.Problem("Le fichier envoyé est vide.", statusCode: StatusCodes.Status400BadRequest);
+		TypedResults.Problem("The uploaded file is empty.", statusCode: StatusCodes.Status400BadRequest);
 
 	public static ProblemHttpResult UnsupportedFormat(string extension) =>
-		TypedResults.Problem($"Format non supporté : {extension}", statusCode: StatusCodes.Status400BadRequest);
+		TypedResults.Problem($"Unsupported format : {extension}", statusCode: StatusCodes.Status400BadRequest);
 
 	public static ProblemHttpResult UpstreamUnavailable() =>
-		TypedResults.Problem("Le service d'ingestion est indisponible.", statusCode: StatusCodes.Status502BadGateway);
+		TypedResults.Problem("The ingestion service is unavailable.", statusCode: StatusCodes.Status502BadGateway);
 }
