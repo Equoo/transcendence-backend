@@ -5,13 +5,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Rag;
 
 
 namespace KeepGrouped.API.Events;
 
-public class Event : IExpirable
+public class Event : IExpirable, IRagProcessable
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
+    string IRagProcessable.RagId => Id;
     public string Name { get; set; } = null!;
     public DateTime Date { get; set; }
     public DateTime ExpireAt { get; set; }
@@ -26,6 +28,7 @@ public class Event : IExpirable
     public ICollection<Registration> Registrations { get; } = [];
     public ICollection<EventRole> EventRoles { get; set; } = [];
     public ICollection<StorageFile> Files { get; set; } = [];
+    public bool Ingested { get; set; } = false;
 }
 
 public record EventSummary(string Id,

@@ -46,7 +46,7 @@ public sealed class UpdateRegistrationRoleCommand(KeepGroupedDb db, RagQueue rag
         registration.Role = eventRole;
 
         await db.SaveChangesAsync();
-        rag.Upsert(RagItem.Event(ev.Id));
+        rag.Upsert(ev);
         return Result.OK;
     }
 }

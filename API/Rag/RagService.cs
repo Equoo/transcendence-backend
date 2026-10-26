@@ -2,8 +2,6 @@ namespace KeepGrouped.API.Rag;
 
 public abstract class RagHandler
 {
-    public abstract string Kind { get; }
-
     public ValueTask ProcessOperation(string id, RagOp op, CancellationToken ct = default)
     {
         switch (op)
@@ -29,7 +27,7 @@ public sealed class RagService(RagQueue queue, IServiceScopeFactory scopes, ILog
             try
             {
                 await using var scope = scopes.CreateAsyncScope();
-                RagHandler handler = scope.ServiceProvider.GetServices<RagHandler>().Single((ha) => ha.Kind == item.Kind);
+                RagHandler handler = scope.ServiceProvider.GetRequiredKeyedService<RagHandler>(item.Type);
                 logger.LogInformation("Beggining to process {Item}: {Operation}", item, op);
                 await handler.ProcessOperation(item.Id, op, ct);
             }

@@ -31,7 +31,7 @@ public sealed class DeleteUserRegistrationCommand(KeepGroupedDb db, RagQueue rag
 
         ev.Registrations.Remove(registration);
         await db.SaveChangesAsync();
-        rag.Upsert(RagItem.Event(ev.Id));
+        rag.Upsert(ev);
         return Result.OK;
     }
 }

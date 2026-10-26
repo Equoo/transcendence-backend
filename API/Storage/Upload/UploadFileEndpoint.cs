@@ -37,7 +37,7 @@ public static class UploadFileEndpoint
 {
     public static void MapUploadFile(this IEndpointRouteBuilder group)
     {
-        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, RagQueue rag, TokenContext token,
+        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, TokenContext token,
             [FromForm] UploadFileRequest req, CancellationToken ct) =>
         {
             var uploadResult = await uploadCmd.ExecuteAsync(req.File.OpenReadStream(), req.Name, req.File.ContentType, req.File.Length, token.User, ct);
@@ -46,7 +46,6 @@ public static class UploadFileEndpoint
             {
                 return uploadResult.Problem;
             }
-            rag.Upsert(RagItem.File(uploadResult.Value.Key));
             return Results.CreatedAtRoute("files.get", new { key = uploadResult.Value.Key }, UploadFileResponse.FromEntity(uploadResult.Value));
         })
         .DisableAntiforgery()

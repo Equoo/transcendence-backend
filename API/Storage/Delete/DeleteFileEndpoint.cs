@@ -8,14 +8,13 @@ public static class DeleteFileEndpoint
 {
     public static void MapDeleteFile(this IEndpointRouteBuilder group)
     {
-        group.MapDelete("/{key}", [Authorize] async (DeleteFileCommand fileCmd, RagQueue rag, string key) =>
+        group.MapDelete("/{key}", [Authorize] async (DeleteFileCommand fileCmd, string key) =>
         {
             var fileResult = await fileCmd.ExecuteAsync(key);
             if (fileResult.IsProblem)
             {
                 return fileResult.Problem;
             }
-            rag.Delete(RagItem.File(key));
             return Results.NoContent();
         })
         .WithName("files.delete")

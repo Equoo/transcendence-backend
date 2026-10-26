@@ -10,8 +10,6 @@ namespace KeepGrouped.API.Rag;
 
 public sealed class RagEvent(KeepGroupedDb db, IApiClient client) : RagHandler
 {
-    public override string Kind => RagItem.EventKey;
-
     public override async ValueTask Upsert(string id, CancellationToken ct = default)
     {
         await Delete(id, ct);
@@ -30,7 +28,9 @@ public sealed class RagEvent(KeepGroupedDb db, IApiClient client) : RagHandler
         }
         var bytes = Encoding.UTF8.GetBytes(ToText(ev));
         using var stream = new MemoryStream(bytes);
-        await client.PostFileAsync<CreateRagResponse>($"documents/{id}", stream, $"Event_{ev.Name}.txt", ct);
+        var res = await client.PostFileAsync<CreateRagResponse>($"documents/{id}", stream, $"Event_{ev.Name}.txt", ct);
+        ev.Ingested = true;
+        await db.SaveChangesAsync(ct);
     }
 
     public override async ValueTask Delete(string id, CancellationToken ct = default)

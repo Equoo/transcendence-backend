@@ -9,8 +9,6 @@ namespace KeepGrouped.API.Rag;
 
 public sealed class RagFile(KeepGroupedDb db, IApiClient client, IStorage storage) : RagHandler
 {
-    public override string Kind => RagItem.FileKey;
-
     public override async ValueTask Delete(string id, CancellationToken ct = default)
     {
         await client.DeleteFileAsync<DeleteRagResponse>($"documents/{id}", ct);
@@ -33,5 +31,7 @@ public sealed class RagFile(KeepGroupedDb db, IApiClient client, IStorage storag
         }
 
         await client.PostFileAsync<CreateRagResponse>($"documents/{id}", fileContent.Stream, filedb.Name, ct);
+        filedb.Ingested = true;
+        await db.SaveChangesAsync(ct);
     }
 }

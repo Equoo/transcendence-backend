@@ -5,16 +5,9 @@ namespace KeepGrouped.API.Rag;
 
 public enum RagOp { Upsert, Delete };
 
-public record RagItem(string Kind, string Id)
-{
-    public static string EventKey { get; } = "event";
-    public static string FileKey { get; } = "file";
+public record RagItem(Type Type, string Id);
 
-    public static RagItem Event(string eventId) => new(EventKey, eventId);
-    public static RagItem File(string key) => new(FileKey, key);
-};
-
-public sealed class RagQueue(ILogger<RagQueue> logger)
+public class RagQueue(ILogger<RagQueue> logger)
 {
     private readonly Channel<RagItem> _channel = Channel.CreateUnbounded<RagItem>();
     private readonly Dictionary<RagItem, RagOp> _pending = [];
@@ -22,8 +15,8 @@ public sealed class RagQueue(ILogger<RagQueue> logger)
 
     public ChannelReader<RagItem> Reader => _channel.Reader;
 
-    public void Upsert(RagItem item) => Enqueue(item, RagOp.Upsert);
-    public void Delete(RagItem item) => Enqueue(item, RagOp.Delete);
+    public void Upsert<T>(T item) where T : IRagProcessable => Enqueue(new RagItem(typeof(T), item.RagId), RagOp.Upsert);
+    public void Delete<T>(T item) where T : IRagProcessable => Enqueue(new RagItem(typeof(T), item.RagId), RagOp.Delete);
 
     private void Enqueue(RagItem item, RagOp op)
     {
