@@ -19,7 +19,6 @@ public class User : IExpirable
     public DateTime ExpireAt { get; set; }
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserName { get; set; } = null!;
-    [Key]
     [Length(1, 255)]
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
