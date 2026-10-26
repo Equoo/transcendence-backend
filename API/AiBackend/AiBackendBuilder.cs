@@ -11,6 +11,11 @@ static class AiBackendBuilder
 	{
 		var myOptions = new RateLimitOptions();
 
+		builder.Services.AddOptions<AiBackendOptions>()
+			.Bind(builder.Configuration.GetSection(AiBackendOptions.SectionName))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
+
 		builder.Configuration.GetSection(RateLimitOptions.RateLimit).Bind(myOptions);
 		builder.Services.AddRateLimiter(options =>
 		{
