@@ -1,5 +1,6 @@
 using KeepGrouped.API.Middlewares;
 using Microsoft.AspNetCore.Authorization;
+using KeepGrouped.API.Problems;
 
 namespace KeepGrouped.API.AiBackend.Chatbot;
 
@@ -13,16 +14,25 @@ public static class ChatBotEndpoints
 	public static void MapChatBot(this IEndpointRouteBuilder aibackend)
 	{
 		var chatBot = aibackend.MapGroup("/chatbot").WithTags("ChatBot");
+		HttpResponseMessage response;
 
 		chatBot.MapPost("/stream", [Authorize] async (ChatRequest req, CancellationToken cancellationToken, HttpClient client, HttpContext ctx) =>
 		{
-			var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "http://ai-back-dev:7070/chat/stream")
+			try
 			{
-				Content = JsonContent.Create(req)
-			}, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+				response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "http://ai-back-dev:7070/chat/stream")
+				{
+					Content = JsonContent.Create(req)
+				}, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+			}
+			catch (HttpRequestException)
+			{
+				return AiBackendProblems.ServiceUnavailable();
+			}
 
 			ctx.Response.ContentType = "text/event-stream";
 			ctx.Response.Headers["X-Access-Buffering"] = "no";
+
 
 			await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 			await stream.CopyToAsync(ctx.Response.Body, cancellationToken);
