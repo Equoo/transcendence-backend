@@ -16,7 +16,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261023165727_EmailLogin";
+    public override string LastMigrationId => "20261026131338_AlternateKeyUser";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -244,7 +244,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("text");
 
-                b.Property<string>("OrganizerEmail")
+                b.Property<string>("OrganizerId")
                     .IsRequired()
                     .HasColumnType("text");
 
@@ -260,7 +260,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.HasIndex("ChannelId")
                     .IsUnique();
 
-                b.HasIndex("OrganizerEmail");
+                b.HasIndex("OrganizerId");
 
                 b.ToTable("Events");
             });
@@ -284,7 +284,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.Property<string>("EventId")
                     .HasColumnType("text");
 
-                b.Property<string>("UserEmail")
+                b.Property<string>("UserId")
                     .HasColumnType("text");
 
                 b.Property<DateTime>("RegisteredAt")
@@ -294,11 +294,11 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("text");
 
-                b.HasKey("EventId", "UserEmail");
+                b.HasKey("EventId", "UserId");
 
                 b.HasIndex("RoleId");
 
-                b.HasIndex("UserEmail");
+                b.HasIndex("UserId");
 
                 b.ToTable("Registration");
             });
@@ -329,7 +329,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("text");
 
-                b.Property<string>("CreatorEmail")
+                b.Property<string>("CreatorId")
                     .HasColumnType("text");
 
                 b.Property<string>("ETag")
@@ -348,7 +348,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
                 b.HasKey("Key");
 
-                b.HasIndex("CreatorEmail");
+                b.HasIndex("CreatorId");
 
                 b.ToTable("Files");
             });
@@ -420,18 +420,18 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("KeepGrouped.API.Users.User", b =>
             {
-                b.Property<string>("Email")
+                b.Property<string>("Id")
                     .HasColumnType("text");
 
                 b.Property<string>("AvatarKey")
                     .HasColumnType("text");
 
-                b.Property<DateTime>("ExpireAt")
-                    .HasColumnType("timestamp with time zone");
-
-                b.Property<string>("Id")
+                b.Property<string>("Email")
                     .IsRequired()
                     .HasColumnType("text");
+
+                b.Property<DateTime>("ExpireAt")
+                    .HasColumnType("timestamp with time zone");
 
                 b.Property<bool>("IsOnline")
                     .HasColumnType("boolean");
@@ -451,7 +451,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("text");
 
-                b.HasKey("Email");
+                b.HasKey("Id");
+
+                b.HasAlternateKey("Email");
 
                 b.HasIndex("AvatarKey")
                     .IsUnique();
@@ -607,7 +609,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
                 b.HasOne("KeepGrouped.API.Users.User", "Organizer")
                     .WithMany()
-                    .HasForeignKey("OrganizerEmail")
+                    .HasForeignKey("OrganizerId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
@@ -632,7 +634,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
                 b.HasOne("KeepGrouped.API.Users.User", "User")
                     .WithMany("Registrations")
-                    .HasForeignKey("UserEmail")
+                    .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
@@ -647,7 +649,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
             {
                 b.HasOne("KeepGrouped.API.Users.User", "Creator")
                     .WithMany()
-                    .HasForeignKey("CreatorEmail");
+                    .HasForeignKey("CreatorId");
 
                 b.Navigation("Creator");
             });

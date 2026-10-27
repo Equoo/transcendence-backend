@@ -40,13 +40,7 @@ public static class UploadFileEndpoint
         group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, RagQueue rag, TokenContext token,
             [FromForm] UploadFileRequest req, CancellationToken ct) =>
         {
-            using var fileStream = req.File.OpenReadStream();
-            using var memoryStream = new MemoryStream();
-
-            await fileStream.CopyToAsync(memoryStream, ct);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            var uploadResult = await uploadCmd.ExecuteAsync(memoryStream, req.Name, req.File.ContentType, req.File.Length, token.User, ct);
+            var uploadResult = await uploadCmd.ExecuteAsync(req.File.OpenReadStream(), req.Name, req.File.ContentType, req.File.Length, token.User, ct);
 
             if (uploadResult.IsProblem)
             {

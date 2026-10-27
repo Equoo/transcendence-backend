@@ -22,7 +22,7 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHan
 			ContentType = contentType,
 			Length = length,
 			LastUpdated = DateTime.UtcNow,
-			Creator = creator
+			Creator = creator,
 		};
 
 		db.Files.Add(filedb);
