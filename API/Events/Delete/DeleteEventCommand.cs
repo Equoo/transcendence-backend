@@ -18,7 +18,7 @@ public sealed class DeleteEventCommand(KeepGroupedDb db, RagQueue rag) : IHandle
         db.Events.Remove(ev);
         await db.SaveChangesAsync();
 
-        rag.Delete(RagItem.Event(ev.Id));
+        rag.Delete(ev);
         return Result.OK;
     }
 }

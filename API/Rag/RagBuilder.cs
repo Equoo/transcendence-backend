@@ -1,4 +1,6 @@
+using KeepGrouped.API.Events;
 using KeepGrouped.API.Rag;
+using KeepGrouped.API.Storage;
 
 public static class RagBuilder
 {
@@ -6,7 +8,7 @@ public static class RagBuilder
     {
         builder.Services.AddHostedService<RagService>();
         builder.Services.AddSingleton<RagQueue>();
-        builder.Services.AddScoped<RagHandler, RagEvent>();
-        builder.Services.AddScoped<RagHandler, RagFile>();
+        builder.Services.AddKeyedScoped<RagHandler, RagEvent>(typeof(Event));
+        builder.Services.AddKeyedScoped<RagHandler, RagFile>(typeof(StorageFile));
     }
 }

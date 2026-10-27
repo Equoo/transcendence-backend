@@ -19,7 +19,7 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
 
-        _timer = new PeriodicTimer(TimeSpan.FromHours(2));
+        _timer = new PeriodicTimer(TimeSpan.FromHours(1));
 
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
@@ -47,9 +47,14 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
 
     public async Task DeleteDb<T>(KeepGroupedDb db, RagQueue rag) where T : class, IExpirable
     {
-        Console.WriteLine("\n\n\n\n\n" + DateTime.UtcNow + "\n\n\n\n\n");
+        var entities = await db.Set<T>().Where(t => t.ExpireAt < DateTime.UtcNow).ToListAsync();
 
-        await db.Set<T>().Where(t => t.ExpireAt < DateTime.UtcNow).ExecuteDeleteAsync();
+        foreach (var entity in entities.OfType<IRagProcessable>())
+        {
+            rag.Delete(entity);
+        }
+        db.RemoveRange(entities);
+        await db.SaveChangesAsync();
     }
 }
 

@@ -56,7 +56,7 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
         db.Events.Add(ev);
         await db.SaveChangesAsync();
 
-        rag.Upsert(RagItem.Event(ev.Id));
+        rag.Upsert(ev);
         return CreateEventResponse.FromEntity(ev, channelResult.Value);
     }
 }

@@ -16,7 +16,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261026131338_AlternateKeyUser";
+    public override string LastMigrationId => "20261026143720_RagProcessable";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -236,6 +236,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.Property<DateTime>("ExpireAt")
                     .HasColumnType("timestamp with time zone");
 
+                b.Property<bool>("Ingested")
+                    .HasColumnType("boolean");
+
                 b.Property<string>("Location")
                     .IsRequired()
                     .HasColumnType("text");
@@ -335,6 +338,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.Property<string>("ETag")
                     .IsRequired()
                     .HasColumnType("text");
+
+                b.Property<bool>("Ingested")
+                    .HasColumnType("boolean");
 
                 b.Property<DateTime>("LastUpdated")
                     .HasColumnType("timestamp with time zone");

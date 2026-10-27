@@ -1,10 +1,11 @@
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.AiBackend.Delete;
+using KeepGrouped.API.Rag;
 
 namespace KeepGrouped.API.Storage;
 
-public sealed class DeleteFileCommand(IStorage storage, KeepGroupedDb db) : IHandler
+public sealed class DeleteFileCommand(IStorage storage, KeepGroupedDb db, RagQueue rag) : IHandler
 {
 	public async Task<Result> ExecuteAsync(string key)
 	{
@@ -19,7 +20,7 @@ public sealed class DeleteFileCommand(IStorage storage, KeepGroupedDb db) : IHan
 		{
 			return StorageProblems.DeleteFailed((int)res.Code);
 		}
-
+		rag.Delete(filedb);
 		db.Files.Remove(filedb);
 		await db.SaveChangesAsync();
 		return Result.OK;

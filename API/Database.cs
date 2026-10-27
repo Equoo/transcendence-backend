@@ -225,6 +225,7 @@ public static class DbBuilder
 			{
 				Name = "Default Event",
 				Date = DateTime.UtcNow.AddMinutes(30),
+				ExpireAt = DateTime.UtcNow.AddMinutes(5),
 				Location = "Default Location",
 				Size = 10,
 				Organizer = user,

@@ -1,13 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Events;
+using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API.Storage;
 
-public class StorageFile
+public class StorageFile : IRagProcessable
 {
     [Key]
     public string Key { get; set; } = null!;
+
+    string IRagProcessable.RagId => Key;
 
     public string Name { get; set; } = null!;
 
@@ -22,6 +25,7 @@ public class StorageFile
     public User Creator { get; set; } = null!;
 
     public ICollection<Event> Events { get; } = [];
+    public bool Ingested { get; set; } = false;
 }
 
 public record FileSummary(string Key, string Name, long Length, string ContentType)

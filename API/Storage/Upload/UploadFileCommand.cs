@@ -1,10 +1,11 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.AiBackend.Ingest;
+using KeepGrouped.API.Rag;
 
 namespace KeepGrouped.API.Storage;
 
-public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHandler
+public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db, RagQueue rag) : IHandler
 {
 	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken ct = default)
 	{
@@ -26,8 +27,11 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db) : IHan
 		};
 
 		db.Files.Add(filedb);
-
-		await db.SaveChangesAsync();
+		if (name != creator.Id + "_avatar")
+		{
+			rag.Upsert(filedb);
+		}
+		await db.SaveChangesAsync(ct);
 		return filedb;
 	}
 }
