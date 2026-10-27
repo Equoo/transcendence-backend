@@ -26,7 +26,7 @@ public static class HealthCheckEndpoints
 			}
 		})
 		.WithName("ai.health")
-		.WithSummary("Vérifie que le backend IA est disponible")
+		.WithSummary("Check that the AI backend is available")
 		.Produces(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 	}
