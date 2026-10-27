@@ -15,8 +15,8 @@ public class RagQueue(ILogger<RagQueue> logger)
 
     public ChannelReader<RagItem> Reader => _channel.Reader;
 
-    public void Upsert<T>(T item) where T : IRagProcessable => Enqueue(new RagItem(typeof(T), item.RagId), RagOp.Upsert);
-    public void Delete<T>(T item) where T : IRagProcessable => Enqueue(new RagItem(typeof(T), item.RagId), RagOp.Delete);
+    public void Upsert(IRagProcessable item) => Enqueue(new RagItem(item.GetType(), item.RagId), RagOp.Upsert);
+    public void Delete(IRagProcessable item) => Enqueue(new RagItem(item.GetType(), item.RagId), RagOp.Delete);
 
     private void Enqueue(RagItem item, RagOp op)
     {

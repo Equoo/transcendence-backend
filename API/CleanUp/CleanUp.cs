@@ -48,18 +48,13 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
     public async Task DeleteDb<T>(KeepGroupedDb db, RagQueue rag) where T : class, IExpirable
     {
         var entities = await db.Set<T>().Where(t => t.ExpireAt < DateTime.UtcNow).ToListAsync();
-        if (entities is not null)
+
+        foreach (var entity in entities.OfType<IRagProcessable>())
         {
-            if (entities is List<IRagProcessable> li)
-            {
-                foreach (var entity in li)
-                {
-                    rag.Delete(entity);
-                }
-            }
-            db.RemoveRange(entities);
-            await db.SaveChangesAsync();
+            rag.Delete(entity);
         }
+        db.RemoveRange(entities);
+        await db.SaveChangesAsync();
     }
 }
 
