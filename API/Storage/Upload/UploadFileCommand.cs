@@ -9,7 +9,7 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db, RagQue
 {
 	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken ct = default)
 	{
-		bool isFolder = name.Contains('/');
+		bool isFolder = name.EndsWith('/');
 
 		if (!isFolder && length == 0)
 		{
