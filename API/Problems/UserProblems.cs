@@ -29,6 +29,11 @@ static public class UserProblems
         "Invalid avatar type",
         $"'{contentType}' is not an image. The avatar must be an image file.");
 
+    static public ProblemHttpResult AvatarTooLarge(long max_size) => ProblemFactory.Create(
+    StatusCodes.Status413PayloadTooLarge, "AVATAR_TOO_LARGE",
+    "Avatar too large",
+    $"Avatar must be under {max_size / 1000000} Mb");
+
     static public ProblemHttpResult UserCannotBeDelete() => ProblemFactory.Create(
    StatusCodes.Status401Unauthorized, "USER_CANNOT_BE_DELETED",
    "User cannot be deleted",

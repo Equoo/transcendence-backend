@@ -12,6 +12,10 @@ public class PatchAvatarCommand(UploadFileCommand uploadFileCmd, DeleteFileComma
 
     public async Task<Result<GetFileMetaResponse>> ExecuteAsync(IFormFile file, User user)
     {
+        if (file.Length > 10_000_000)
+        {
+            return UserProblems.AvatarTooLarge(10_000_000);
+        }
         if (!file.ContentType.StartsWith("image"))
         {
             return UserProblems.InvalidAvatarType(file.ContentType);
