@@ -17,7 +17,7 @@ public sealed class PatchRolePermQuery(KeepGroupedDb db, TokenContext tk) : IHan
             return RoleProblems.NotFound(id);
         }
 
-        if (tk.User.Role.Ranking >= db_role.Ranking || (tk.User.Role.Permission & perm) == 0)
+        if (tk.User.Role.Ranking >= db_role.Ranking || (~tk.User.Role.Permission & perm) != 0)
         {
             return RoleProblems.RankingTooLow();
         }

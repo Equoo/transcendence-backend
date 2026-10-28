@@ -12,5 +12,6 @@ public static class RolesEndpoints
         roles.MapPatchPermRole();
         roles.MapPatchNameRole();
         roles.MapDeleteRole();
+        roles.MapRankingControl();
     }
 }
