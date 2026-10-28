@@ -12,6 +12,7 @@ public record UpdateEventRequest
 	public string Name { get; init; } = null!;
 	[Required]
 	public DateTime Date { get; init; }
+	public DateTime ExpireAt { get; init; }
 	[Required]
 	[Range(1, int.MaxValue)]
 	public int Size { get; init; }

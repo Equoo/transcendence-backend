@@ -39,6 +39,7 @@ public sealed class UpdateEventCommand(KeepGroupedDb db, RagQueue rag) : IHandle
 
         ev.Name = req.Name;
         ev.Date = req.Date.ToUniversalTime();
+        ev.ExpireAt = req.ExpireAt.ToUniversalTime();
         ev.Size = req.Size;
         ev.Location = req.Location;
         ev.Description = req.Description;
