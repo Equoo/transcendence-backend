@@ -1,10 +1,11 @@
 
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Roles;
 
-public sealed class CreateRoleQuery(KeepGroupedDb db): IHandler
+public sealed class CreateRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandler
 {
     public async Task<Result> ExecAsync(string name)
     {
@@ -16,7 +17,7 @@ public sealed class CreateRoleQuery(KeepGroupedDb db): IHandler
             return RoleProblems.NameAlreadyUsed(name);
         }
 
-        Role role = new(name);
+        Role role = new(name, tk.User.Role.Ranking + 1);
 
         db.Roles.Add(role);
 

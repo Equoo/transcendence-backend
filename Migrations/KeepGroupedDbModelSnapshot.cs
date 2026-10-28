@@ -16,7 +16,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261029151559_EventChannelRelation";
+    public override string LastMigrationId => "20261028110348_ranking-role";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -312,6 +312,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .HasColumnType("text");
 
                 b.Property<int>("Permission")
+                    .HasColumnType("integer");
+
+                b.Property<int>("Ranking")
                     .HasColumnType("integer");
 
                 b.HasKey("Id");

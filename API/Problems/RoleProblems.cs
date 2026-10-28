@@ -18,4 +18,8 @@ static public class RoleProblems
    StatusCodes.Status404NotFound, "ROLE_NOT_FOUND",
    "Role not found",
    $"No role has the id.");
+
+    static public ProblemHttpResult RankingTooLow() => ProblemFactory.Create(
+  StatusCodes.Status404NotFound, "RANKING_TOO_LOW",
+  "Ranking too low", "Your actual role ranking is too low to doing this action");
 }

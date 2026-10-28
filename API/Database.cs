@@ -13,16 +13,16 @@ using KeepGrouped.API.Users.Me.Relationships;
 
 public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(options)
 {
-	protected override void OnModelCreating(ModelBuilder builder)
-	{
-		base.OnModelCreating(builder);
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
 
-		builder.Entity<Event>(entity =>
-		{
+        builder.Entity<Event>(entity =>
+        {
 
-			entity.HasMany(e => e.Users)
-				.WithMany(e => e.Events)
-				.UsingEntity<Registration>();
+            entity.HasMany(e => e.Users)
+                .WithMany(e => e.Events)
+                .UsingEntity<Registration>();
 
 			entity.HasOne(e => e.Organizer);
 		});
@@ -35,35 +35,35 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity.HasAlternateKey(u => u.Email);
 		});
 
-		builder.Entity<Message>(entity =>
-		{
-			entity.Property(c => c.Id).HasMaxLength(36);
+        builder.Entity<Message>(entity =>
+        {
+            entity.Property(c => c.Id).HasMaxLength(36);
 
-			entity
-				.HasOne(m => m.Channel)
-				.WithMany()
-				.HasForeignKey(m => m.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity
+                .HasOne(m => m.Channel)
+                .WithMany()
+                .HasForeignKey(m => m.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity
-				.HasOne(m => m.Sender)
-				.WithMany()
-				.HasForeignKey(m => m.SenderId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity
-				.HasOne(m => m.MessageRef)
-				.WithMany()
-				.HasForeignKey(m => m.MessageRefId)
-				.OnDelete(DeleteBehavior.SetNull);
+            entity
+                .HasOne(m => m.MessageRef)
+                .WithMany()
+                .HasForeignKey(m => m.MessageRefId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-			// Speeds up: WHERE ChannelId = X ORDER BY SentAt DESC
-			entity
-				.HasIndex(m => new { m.ChannelId, m.SentAt })
-				.HasDatabaseName("IX_Messages_ChannelId_SentAt");
+            // Speeds up: WHERE ChannelId = X ORDER BY SentAt DESC
+            entity
+                .HasIndex(m => new { m.ChannelId, m.SentAt })
+                .HasDatabaseName("IX_Messages_ChannelId_SentAt");
 
-			entity.Property(m => m.Content).HasMaxLength(8192);
-		});
+            entity.Property(m => m.Content).HasMaxLength(8192);
+        });
 
 		builder.Entity<Channel>(entity =>
 		{
@@ -78,178 +78,178 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.HasForeignKey(c => c.CategoryId)
 				.OnDelete(DeleteBehavior.SetNull);
 
-			entity
-				.HasOne(c => c.LastMessage)
-				.WithMany()
-				.HasForeignKey(c => c.LastMessageId)
-				.OnDelete(DeleteBehavior.SetNull);
+            entity
+                .HasOne(c => c.LastMessage)
+                .WithMany()
+                .HasForeignKey(c => c.LastMessageId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-			entity
-				.Property(c => c.Type)
-				.HasConversion<string>();
+            entity
+                .Property(c => c.Type)
+                .HasConversion<string>();
 
-			// Get-only, so EF only maps it when told to
-			entity.Property(c => c.CreateAt);
-		});
+            // Get-only, so EF only maps it when told to
+            entity.Property(c => c.CreateAt);
+        });
 
-		builder.Entity<ChannelMember>(entity =>
-		{
-			entity.HasKey(m => new { m.ChannelId, m.UserId });
+        builder.Entity<ChannelMember>(entity =>
+        {
+            entity.HasKey(m => new { m.ChannelId, m.UserId });
 
-			entity.HasOne(m => m.Channel)
-				.WithMany(c => c.Members)
-				.HasForeignKey(m => m.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Channel)
+                .WithMany(c => c.Members)
+                .HasForeignKey(m => m.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(m => m.User)
-				.WithMany()
-				.HasForeignKey(m => m.UserId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasIndex(m => m.UserId);
-		});
+            entity.HasIndex(m => m.UserId);
+        });
 
-		builder.Entity<Relationship>(entity =>
-		{
-			entity.HasOne(r => r.Me)
-				.WithMany()
-				.HasForeignKey(r => r.MeId)
-				.OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<Relationship>(entity =>
+        {
+            entity.HasOne(r => r.Me)
+                .WithMany()
+                .HasForeignKey(r => r.MeId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(r => r.User)
-				.WithMany()
-				.HasForeignKey(r => r.UserId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasIndex(r => new { r.MeId, r.UserId }).IsUnique();
-		});
+            entity.HasIndex(r => new { r.MeId, r.UserId }).IsUnique();
+        });
 
-		builder.Entity<ChannelAck>(entity =>
-		{
-			entity.HasKey(a => new { a.UserId, a.ChannelId });
+        builder.Entity<ChannelAck>(entity =>
+        {
+            entity.HasKey(a => new { a.UserId, a.ChannelId });
 
-			entity.HasOne(m => m.Channel)
-				.WithMany()
-				.HasForeignKey(m => m.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Channel)
+                .WithMany()
+                .HasForeignKey(m => m.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			// entity.HasOne(m => m.User)
-			// 	.WithMany()
-			// 	.HasForeignKey(m => m.UserId)
-			// 	.OnDelete(DeleteBehavior.Cascade);
-		});
+            // entity.HasOne(m => m.User)
+            // 	.WithMany()
+            // 	.HasForeignKey(m => m.UserId)
+            // 	.OnDelete(DeleteBehavior.Cascade);
+        });
 
-		builder.Entity<ChannelRole>(entity =>
-		{
-			entity.HasOne(m => m.Channel)
-				.WithMany(c => c.RolesWhitelist)
-				.HasForeignKey(m => m.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<ChannelRole>(entity =>
+        {
+            entity.HasOne(m => m.Channel)
+                .WithMany(c => c.RolesWhitelist)
+                .HasForeignKey(m => m.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(m => m.Category)
-				.WithMany(c => c.RolesWhitelist)
-				.HasForeignKey(m => m.CategoryId)
-				.OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Category)
+                .WithMany(c => c.RolesWhitelist)
+                .HasForeignKey(m => m.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(m => m.Role)
-				.WithMany()
-				.HasForeignKey(m => m.RoleId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
-	}
+            entity.HasOne(m => m.Role)
+                .WithMany()
+                .HasForeignKey(m => m.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
 
-	public DbSet<User> Users { get; set; } = null!;
-	public DbSet<Event> Events { get; set; } = null!;
-	public DbSet<EventRole> EventRoles { get; set; } = null!;
-	public DbSet<StorageFile> Files { get; set; } = null!;
-	public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
-	public DbSet<Invitation> Invitations { get; set; } = null!;
-	public DbSet<Role> Roles { get; set; } = null!;
-	public DbSet<Channel> Channels { get; set; } = null!;
-	public DbSet<ChannelCategory> ChannelCategories { get; set; } = null!;
-	public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
-	public DbSet<ChannelMember> ChannelMembers { get; set; } = null!;
-	public DbSet<ChannelRole> ChannelRoles { get; set; } = null!;
-	public DbSet<Message> Messages { get; set; } = null!;
-	public DbSet<Relationship> Relationships { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Event> Events { get; set; } = null!;
+    public DbSet<EventRole> EventRoles { get; set; } = null!;
+    public DbSet<StorageFile> Files { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<Invitation> Invitations { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<Channel> Channels { get; set; } = null!;
+    public DbSet<ChannelCategory> ChannelCategories { get; set; } = null!;
+    public DbSet<ChannelAck> ChannelAcks { get; set; } = null!;
+    public DbSet<ChannelMember> ChannelMembers { get; set; } = null!;
+    public DbSet<ChannelRole> ChannelRoles { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; } = null!;
+    public DbSet<Relationship> Relationships { get; set; } = null!;
 }
 
 public static class DbBuilder
 {
-	static public void BuildDb(this WebApplicationBuilder builder)
-	{
-		var authOptions = builder.Configuration
-			.GetSection(AuthenticationOptions.SectionName)
-			.Get<AuthenticationOptions>()!;
-		builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
-		{
-			if (db.Set<User>().FirstOrDefault(u => u.UserName == authOptions.DefaultAdminLogin) != null)
-			{
-				return;
-			}
-			User user = new() { UserName = authOptions.DefaultAdminLogin, Email = User.NormalizeEmail(authOptions.DefaultAdminEmail), Role = new("\\(*-*)/", (Perms)int.MaxValue), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
+    static public void BuildDb(this WebApplicationBuilder builder)
+    {
+        var authOptions = builder.Configuration
+            .GetSection(AuthenticationOptions.SectionName)
+            .Get<AuthenticationOptions>()!;
+        builder.Services.AddDbContext<KeepGroupedDb>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSeeding((db, _) =>
+        {
+            if (db.Set<User>().FirstOrDefault(u => u.UserName == authOptions.DefaultAdminLogin) != null)
+            {
+                return;
+            }
+            User user = new() { UserName = authOptions.DefaultAdminLogin, Email = User.NormalizeEmail(authOptions.DefaultAdminEmail), Role = new("\\(*-*)/", (Perms)int.MaxValue, 0), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
 
-			user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
-			db.Set<User>().Add(user);
-			db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
-			db.Set<Role>().Add(new Role("Member"));
+            user.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user, authOptions.DefaultAdminPwd);
+            db.Set<User>().Add(user);
+            db.Set<EventRole>().Add(new EventRole() { Name = EventRole.Implicit });
+            db.Set<Role>().Add(new Role("Member", 4));
 
-			db.SaveChanges();
+            db.SaveChanges();
 
-			if (!builder.Environment.IsDevelopment())
-			{
-				return;
-			}
+            if (!builder.Environment.IsDevelopment())
+            {
+                return;
+            }
 
-			db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
-			db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
-			db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
-			User user1 = new() { UserName = "devan", Email = "devan@keepgrouped.dev", Role = new("Modo", Perms.HandleEvent), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
-			User user2 = new() { UserName = "pierre", Email = "pierre@keepgrouped.dev", Role = new("Helper", Perms.HandleEvent), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
-			User user3 = new() { UserName = "tom", Email = "tom@keepgrouped.dev", Role = new("Gold", (Perms)int.MaxValue), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
-			User user4 = new() { UserName = "david", Email = "david@keepgrouped.dev", Role = db.Set<Role>().Single((role) => role.Name == "Member"), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
+            db.Set<EventRole>().Add(new EventRole() { Name = "DPS" });
+            db.Set<EventRole>().Add(new EventRole() { Name = "Heal" });
+            db.Set<EventRole>().Add(new EventRole() { Name = "Tank" });
+            User user1 = new() { UserName = "devan", Email = "devan@keepgrouped.dev", Role = new("Modo", Perms.HandleEvent, 2), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
+            User user2 = new() { UserName = "pierre", Email = "pierre@keepgrouped.dev", Role = new("Helper", Perms.HandleEvent, 3), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
+            User user3 = new() { UserName = "tom", Email = "tom@keepgrouped.dev", Role = new("Gold", (Perms)int.MaxValue, 1), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
+            User user4 = new() { UserName = "david", Email = "david@keepgrouped.dev", Role = db.Set<Role>().Single((role) => role.Name == "Member"), ExpireAt = DateTime.Now.AddYears(1).ToUniversalTime() };
 
-			user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");
-			user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user2, "a");
-			user3.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user3, "a");
-			user4.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user4, "a");
+            user1.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user1, "a");
+            user2.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user2, "a");
+            user3.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user3, "a");
+            user4.PasswordHash = new KeepGroupedPasswordHasher().HashPassword(user4, "a");
 
-			db.Set<User>().Add(user1);
-			db.Set<User>().Add(user2);
-			db.Set<User>().Add(user3);
-			db.Set<User>().Add(user4);
+            db.Set<User>().Add(user1);
+            db.Set<User>().Add(user2);
+            db.Set<User>().Add(user3);
+            db.Set<User>().Add(user4);
 
-			db.SaveChanges();
+            db.SaveChanges();
 
-			var ev = new Event()
-			{
-				Name = "Default Event",
-				Date = DateTime.UtcNow.AddMinutes(30),
-				ExpireAt = DateTime.UtcNow.AddMinutes(5),
-				Location = "Default Location",
-				Size = 10,
-				Organizer = user,
-			};
-			var evChan = new Channel("default-event", "", ev.Id);
-			ev.Channel = evChan;
-			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
-			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
-			ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == EventRole.Implicit));
-			db.Set<Event>().Add(ev);
+            var ev = new Event()
+            {
+                Name = "Default Event",
+                Date = DateTime.UtcNow.AddMinutes(30),
+                ExpireAt = DateTime.UtcNow.AddMinutes(5),
+                Location = "Default Location",
+                Size = 10,
+                Organizer = user,
+            };
+            var evChan = new Channel("default-event", "", ev.Id);
+            ev.Channel = evChan;
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "DPS"));
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == "Heal"));
+            ev.EventRoles.Add(db.Set<EventRole>().First(er => er.Name == EventRole.Implicit));
+            db.Set<Event>().Add(ev);
 
-			var chanCat = new ChannelCategory("Default Category", 0);
-			db.Set<ChannelCategory>().Add(chanCat);
+            var chanCat = new ChannelCategory("Default Category", 0);
+            db.Set<ChannelCategory>().Add(chanCat);
 
-			var chan = new Channel(
-					"default",
-					"This is a default channel, say everything in ur mind",
-					null
-				)
-			{ CategoryId = chanCat.Id };
-			db.Set<Channel>().Add(chan);
+            var chan = new Channel(
+                    "default",
+                    "This is a default channel, say everything in ur mind",
+                    null
+                )
+            { CategoryId = chanCat.Id };
+            db.Set<Channel>().Add(chan);
 
-			db.SaveChanges();
-		}));
-	}
+            db.SaveChanges();
+        }));
+    }
 
 }

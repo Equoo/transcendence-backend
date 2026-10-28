@@ -1,11 +1,12 @@
 using System.Data;
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Roles;
 
-public sealed class DeleteRoleQuery(KeepGroupedDb db) : IHandler
+public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandler
 {
     public async Task<Result> ExecAsync(string id)
     {
@@ -14,6 +15,11 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db) : IHandler
         if (db_role is null)
         {
             return RoleProblems.NotFound(id);
+        }
+
+        if (tk.User.Role.Ranking >= db_role.Ranking)
+        {
+            return RoleProblems.RankingTooLow();
         }
 
         db.Roles.Remove(db_role);
