@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net.Mime;
 using KeepGrouped.API.AiBackend.Ingest;
 using KeepGrouped.API.Middlewares;
+using KeepGrouped.API.Problems;
 using KeepGrouped.API.Rag;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
