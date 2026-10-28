@@ -32,10 +32,10 @@ public class Message
 	public Channel Channel { get; init; } = null!;
 }
 
-public record MessageReference(string Id, string Content, DateTime SentAt, GetMeResponse Sender)
+public record MessageReference(string Id, string Content, DateTime SentAt, GetUserResponse Sender)
 {
 	public static MessageReference FromEntity(Message msg) =>
-		new(msg.Id, msg.Content, msg.SentAt, GetMeResponse.FromEntity(msg.Sender));
+		new(msg.Id, msg.Content, msg.SentAt, GetUserResponse.FromEntity(msg.Sender));
 }
 
 public record MessageResponse(
@@ -44,7 +44,7 @@ public record MessageResponse(
 	DateTime SentAt,
 	DateTime? EditAt,
 	MessageReference? MessageRef,
-	GetMeResponse Sender,
+	GetUserResponse Sender,
 	ChannelResponse Channel
 )
 {
@@ -57,7 +57,7 @@ public record MessageResponse(
 			(msg.MessageRefId is not null && msg.MessageRef is not null)
 				? MessageReference.FromEntity(msg.MessageRef)
 				: null,
-			GetMeResponse.FromEntity(msg.Sender),
+			GetUserResponse.FromEntity(msg.Sender),
 			ChannelResponse.FromEntity(msg.Channel)
 		);
 }

@@ -2,8 +2,6 @@ using KeepGrouped.API.Channels;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
-using KeepGrouped.API.Activities;
-using System.ComponentModel.DataAnnotations;
 
 namespace KeepGrouped.API.Users;
 
