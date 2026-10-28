@@ -10,6 +10,8 @@ public sealed class CreateRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
     public async Task<Result> ExecAsync(string name)
     {
 
+        int count_role = await db.Roles.CountAsync(r => r.Name != "\\(*-*)/");
+
         Role? role_db = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
 
         if (role_db is not null)
@@ -17,7 +19,7 @@ public sealed class CreateRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
             return RoleProblems.NameAlreadyUsed(name);
         }
 
-        Role role = new(name, tk.User.Role.Ranking + 1);
+        Role role = new(name, count_role + 1);
 
         db.Roles.Add(role);
 

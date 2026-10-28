@@ -17,12 +17,21 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
             return RoleProblems.NotFound(id);
         }
 
+
         if (tk.User.Role.Ranking >= db_role.Ranking)
         {
             return RoleProblems.RankingTooLow();
         }
 
         db.Roles.Remove(db_role);
+
+        List<Role> list_change = await db.Roles.Where(r => r.Ranking > db_role.Ranking).ToListAsync();
+
+        foreach (Role rl in list_change)
+        {
+            rl.Ranking--;
+            await db.SaveChangesAsync();
+        }
 
         if (db_role.Users.Count > 0)
         {
