@@ -13,7 +13,8 @@ public sealed class CreateRegistrationCommand(KeepGroupedDb db, RagQueue rag) : 
         {
             return UserProblems.NotAuthenticated();
         }
-
+        await using var tx = await db.Database.BeginTransactionAsync();
+        await db.Database.ExecuteSqlAsync($"SELECT 1 FROM \"Events\" WHERE \"Id\" = {eventId} FOR UPDATE");
         Event? ev = await db.Events
             .Include(e => e.EventRoles)
             .Include(e => e.Registrations).ThenInclude(r => r.User)
@@ -53,6 +54,7 @@ public sealed class CreateRegistrationCommand(KeepGroupedDb db, RagQueue rag) : 
         ev.Registrations.Add(registration);
 
         await db.SaveChangesAsync();
+        await tx.CommitAsync();
         rag.Upsert(ev);
         return Result.OK;
     }
