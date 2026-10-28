@@ -39,7 +39,7 @@ public sealed class CreateRegistrationCommand(KeepGroupedDb db, RagQueue rag) : 
             return RegistrationProblems.AlreadyRegistered(user.UserName, ev.Name);
         }
 
-        if (ev.Registrations.Count >= ev.Size)
+        if (ev.Registrations.Count >= ev.Size && ev.Size != -1)
         {
             return EventProblems.Full(ev.Name, ev.Size);
         }
