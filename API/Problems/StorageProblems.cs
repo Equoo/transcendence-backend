@@ -14,6 +14,11 @@ static public class StorageProblems
         "Empty file",
         "The uploaded file has no content.");
 
+    static public ProblemHttpResult InvalidFolderName() => ProblemFactory.Create(
+        StatusCodes.Status400BadRequest, "INVALID_FOLDER_NAME",
+        "Invalid Folder Name",
+        "Folder name should not contains '.'");
+
     static public ProblemHttpResult UploadFailed(int status) => Upstream(
         "STORAGE_UPLOAD_FAILED", "Upload failed", "store the file", status);
 

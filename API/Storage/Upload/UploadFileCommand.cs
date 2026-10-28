@@ -9,6 +9,18 @@ public sealed class UploadFileCommand(IStorage storage, KeepGroupedDb db, RagQue
 {
 	public async Task<Result<StorageFile>> ExecuteAsync(Stream content, string name, string contentType, long length, User creator, CancellationToken ct = default)
 	{
+		bool isFolder = name.Contains('/');
+
+		if (!isFolder && length == 0)
+		{
+			return StorageProblems.EmptyFile();
+		}
+
+		if (isFolder && name.Contains('.'))
+		{
+			return StorageProblems.InvalidFolderName();
+		}
+
 		var res = await storage.UploadAsync(content, contentType, ct);
 		if ((int)res.Code >= 400)
 		{
