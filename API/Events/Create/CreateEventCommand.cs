@@ -32,9 +32,9 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
         var ev = new Event
         {
             Name = req.Name,
-            Date = req.Date.ToUniversalTime(),
+            Date = req.Date!.Value.ToUniversalTime(),
             ExpireAt = req.ExpireAt.ToUniversalTime(),
-            Size = req.Size,
+            Size = req.Size!.Value,
             Location = req.Location,
             Description = req.Description,
             Organizer = organizer,

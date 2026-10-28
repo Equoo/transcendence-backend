@@ -12,8 +12,8 @@ public sealed class CreateInvitationCommand(KeepGroupedDb db) : IHandler
         Invitation invitation = new()
         {
 
-            ExpireAt = req.Usages == -1 ? DateTime.MaxValue : req.ExpireAt.ToUniversalTime(),
-            Usages = req.Usages
+            ExpireAt = req.Usages!.Value == -1 ? DateTime.MaxValue : req.ExpireAt!.Value.ToUniversalTime(),
+            Usages = req.Usages.Value
         };
 
         _db.Invitations.Add(invitation);

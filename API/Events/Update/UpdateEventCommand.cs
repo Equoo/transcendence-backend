@@ -20,9 +20,9 @@ public sealed class UpdateEventCommand(KeepGroupedDb db, RagQueue rag) : IHandle
             return EventProblems.NotFound(id);
         }
 
-        if (req.Size < ev.Registrations.Count)
+        if (req.Size!.Value < ev.Registrations.Count)
         {
-            return EventProblems.SizeBelowRegistrations(req.Size, ev.Registrations.Count);
+            return EventProblems.SizeBelowRegistrations(req.Size.Value, ev.Registrations.Count);
         }
 
         List<EventRole> roles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync();
@@ -38,9 +38,9 @@ public sealed class UpdateEventCommand(KeepGroupedDb db, RagQueue rag) : IHandle
         }
 
         ev.Name = req.Name;
-        ev.Date = req.Date.ToUniversalTime();
+        ev.Date = req.Date!.Value.ToUniversalTime();
         ev.ExpireAt = req.ExpireAt.ToUniversalTime();
-        ev.Size = req.Size;
+        ev.Size = req.Size.Value;
         ev.Location = req.Location;
         ev.Description = req.Description;
         ev.Tags = req.Tags;
