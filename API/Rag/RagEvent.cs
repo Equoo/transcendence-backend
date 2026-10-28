@@ -64,7 +64,7 @@ public sealed class RagEvent(KeepGroupedDb db, IApiClient client) : RagHandler
             : ev.Description.Trim());
 
         sb.AppendLine();
-        sb.AppendLine("## Capacity and availability");
+        sb.AppendLine("## Capacity and availability - If size equals -1 it means this event doesn't have registration limits");
         sb.AppendLine($"\"{ev.Name}\" accepts a maximum of {ev.Size} participants.");
         sb.AppendLine($"{registered} {(registered == 1 ? "person is" : "people are")} currently registered.");
         sb.AppendLine(registered >= ev.Size
