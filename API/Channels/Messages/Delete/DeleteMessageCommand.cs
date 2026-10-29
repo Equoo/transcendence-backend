@@ -25,7 +25,7 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (!channel.IsWhitelisted(sender))
 			return MessageProblems.AccessNotAuthorized();
 
-		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
+		var msg = await db.Messages.SingleOrDefaultAsync(m => m.ChannelId == channelId && m.Id == msgId);
 		if (msg is null)
 		{
 			return MessageProblems.NotFound(msgId);

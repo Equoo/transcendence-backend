@@ -29,6 +29,7 @@ public sealed class GetMessageQuery(KeepGroupedDb db) : IHandler
 			.Include(m => m.Channel)
 			.Include(m => m.MessageRef)
 				.ThenInclude(r => r!.Sender)
+			.Where(m => m.ChannelId == channelId)
 			.SingleOrDefaultAsync(m => m.Id == msgId);
 
 		return msg is null ? MessageProblems.NotFound(msgId) : MessageResponse.FromEntity(msg);
