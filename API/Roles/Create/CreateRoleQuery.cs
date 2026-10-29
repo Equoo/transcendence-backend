@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Roles;
 
-public sealed class CreateRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandler
+public sealed class CreateRoleQuery(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecAsync(string name)
     {

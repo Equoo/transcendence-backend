@@ -11,7 +11,7 @@ public static class PatchRolePermEndpoint
     {
         roles.MapPatch("/{id}/permission", [Authorize][Roles(Perms.HandleRoles)] async (PatchRolePermQuery query, string id, [FromBody] int permission) =>
         {
-            var res = await query.ExecAsync(id, (Perms)permission);
+            var res = await query.ExecAsync(id, permission);
             if (res.IsProblem)
             {
                 return res.Problem;

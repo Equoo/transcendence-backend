@@ -8,7 +8,7 @@ namespace KeepGrouped.API.Roles;
 
 public sealed class PatchRolePermQuery(KeepGroupedDb db, TokenContext tk) : IHandler
 {
-    public async Task<Result> ExecAsync(string id, Perms perm)
+    public async Task<Result> ExecAsync(string id, int perm)
     {
         Role? db_role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
 
@@ -17,12 +17,12 @@ public sealed class PatchRolePermQuery(KeepGroupedDb db, TokenContext tk) : IHan
             return RoleProblems.NotFound(id);
         }
 
-        if (tk.User.Role.Ranking >= db_role.Ranking || (~tk.User.Role.Permission & perm) != 0)
+        if (tk.User.Role.Ranking >= db_role.Ranking || ((int)tk.User.Role.Permission & Math.Abs(perm)g) == 0)
         {
             return RoleProblems.RankingTooLow();
         }
 
-        db_role.Permission = perm;
+        db_role.Permission += perm;
 
         await db.SaveChangesAsync();
 
