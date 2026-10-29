@@ -43,8 +43,13 @@ public class Channel : IRoleWhitelist
 	public Message? LastMessage { get; set; } = null;
 	public string? LastMessageId { get; set; } = null;
 
+	public bool IsConversation => Type is ChannelType.DirectMessage or ChannelType.GroupDirectMessage;
+
 	public bool IsWhitelisted(User sender)
 	{
+		if (IsConversation)
+			return Members.Any(m => m.UserId == sender.Id);
+
 		if (sender.Role.Permission.HasFlag(Perms.HandleChannels))
 			return true;
 

@@ -13,7 +13,7 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 		var channel = await db.Channels
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
-			.SingleOrDefaultAsync(c => c.Id == id);
+			.SingleOrDefaultAsync(c => c.Id == id && c.Type == ChannelType.Text);
 		if (channel is null)
 		{
 			return ChannelProblems.NotFound(id);
