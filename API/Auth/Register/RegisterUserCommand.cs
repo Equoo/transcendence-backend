@@ -19,6 +19,10 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 		{
 			return InvitationProblems.InvalidInvitation();
 		}
+
+		await using var tx = await db.Database.BeginTransactionAsync();
+		await db.Database.ExecuteSqlAsync($"SELECT * FROM \"Users\" FOR UPDATE");
+
 		if (invitation.Usages != Invitation.Infinite && ((DateTime.UtcNow >= invitation.ExpireAt) || invitation.Usages == 0))
 		{
 			db.Invitations.Remove(invitation);
@@ -69,6 +73,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 			invitation.Usages -= 1;
 		}
 		await db.SaveChangesAsync();
+		await tx.CommitAsync();
 
 		return new RegisteredUser(RegisterResponse.FromEntity(user), new IssuedTokens(acess_token, refresh_token));
 	}
