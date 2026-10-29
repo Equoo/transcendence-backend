@@ -12,7 +12,7 @@ static public class UserProblems
     static public ProblemHttpResult NotAuthorized() => ProblemFactory.Create(
         StatusCodes.Status401Unauthorized, "NOT_AUTHORIZED",
         "Not authorize",
-        $"Your not authorize to do this action'.");
+        $"Your not authorize to do this action.");
 
 
     static public ProblemHttpResult CannotChangeSelf() => ProblemFactory.Create(

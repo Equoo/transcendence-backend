@@ -1,3 +1,6 @@
+
+using KeepGrouped.API;
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users.Auth;
@@ -6,18 +9,23 @@ using Microsoft.Extensions.Options;
 
 namespace KeepGrouped.API.Users;
 
-public sealed class DeleteUserCommand(KeepGroupedDb db, IOptions<AuthenticationOptions> option, DeleteBatchFileCommand deleteFiles) : IHandler
+public sealed class DeleteUserCommand(KeepGroupedDb db, IOptions<AuthenticationOptions> option, DeleteBatchFileCommand deleteFiles, TokenContext tk) : IHandler
 {
     public async Task<Result> ExecuteAsync(string id)
     {
-        User? user = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
+        User? db_user = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
 
-        if (user is null)
+        if (db_user is null)
         {
             return UserProblems.NotFound(id);
         }
 
-        if (option.Value.DefaultAdminLogin == user.UserName)
+        if (tk.User.Role.Ranking > db_user.Role.Ranking)
+        {
+            return UserProblems.NotAuthorized();
+        }
+
+        if (option.Value.DefaultAdminLogin == db_user.UserName)
         {
             return UserProblems.UserCannotBeDelete();
         }
@@ -28,15 +36,15 @@ public sealed class DeleteUserCommand(KeepGroupedDb db, IOptions<AuthenticationO
         {
             db.RefreshTokens.Remove(refresh);
         }
-        var userFiles = await db.Files.Where(fi => fi.Creator.Id == user.Id).ToListAsync();
+        var userFiles = await db.Files.Where(fi => fi.Creator.Id == db_user.Id).ToListAsync();
         await deleteFiles.ExecuteAsync(userFiles.Select(fi => fi.Key));
 
-        var chans = await db.Channels.Where(chan => chan.Members.Any(member => member.UserId == user.Id)
+        var chans = await db.Channels.Where(chan => chan.Members.Any(member => member.UserId == db_user.Id)
             && chan.Type == Channels.ChannelType.DirectMessage).ToListAsync();
 
         db.RemoveRange(chans);
 
-        db.Users.Remove(user);
+        db.Users.Remove(db_user);
 
         await db.SaveChangesAsync();
 
