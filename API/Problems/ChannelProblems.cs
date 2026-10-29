@@ -17,7 +17,7 @@ static public class ChannelProblems
 	static public ProblemHttpResult NameInvalid() => ProblemFactory.Create(
 		StatusCodes.Status422UnprocessableEntity, "CHANNEL_NAME_INVALID",
 		"Invalid channel name",
-		"Channel name contains unauthorized characters.");
+		"Channel name must not be empty and cannot contain whitespace or special characters.");
 
 	static public ProblemHttpResult EventChannel(string eventId) => ProblemFactory.Create(
 		StatusCodes.Status409Conflict, "CHANNEL_EVENT_OWNED",

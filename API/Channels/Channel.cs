@@ -109,13 +109,17 @@ public static partial class ChannelSlug
 	[GeneratedRegex(@"-{2,}")]
 	private static partial Regex DashRuns();
 
+	public static bool IsValidName(string? name, bool allowWhitespace = false) =>
+		!string.IsNullOrWhiteSpace(name) &&
+		!Forbidden().IsMatch(name) &&
+		(allowWhitespace || !Whitespace().IsMatch(name));
+
 	public static string Sanitize(string? input)
 	{
 		if (string.IsNullOrWhiteSpace(input))
 			return string.Empty;
 
-		var s = input.ToLowerInvariant();
-		s = Whitespace().Replace(s, "-");
+		var s = Whitespace().Replace(input, "-");
 		s = Forbidden().Replace(s, "");
 		s = DashRuns().Replace(s, "-");
 		return s.Trim('-');

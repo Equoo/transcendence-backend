@@ -17,5 +17,5 @@ static public class CategoryProblems
     static public ProblemHttpResult NameInvalid() => ProblemFactory.Create(
         StatusCodes.Status422UnprocessableEntity, "CATEGORY_NAME_INVALID",
         "Invalid category name",
-        "Category name contains unauthorized characters.");
+        "Category name must not be empty and cannot contain special characters.");
 }
