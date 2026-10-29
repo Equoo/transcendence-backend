@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Channels;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
