@@ -3,14 +3,21 @@ using KeepGrouped.API.Problems;
 using KeepGrouped.API.Rag;
 using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Events;
 
-public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand createChannelCmd, RagQueue rag) : IHandler
+public sealed class CreateEventCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub, RagQueue rag) : IHandler
 {
     public async Task<Result<CreateEventResponse>> ExecuteAsync(CreateEventRequest req, User organizer)
     {
+        string channelName = ChannelSlug.Sanitize(req.Name);
+        if (channelName.Length == 0)
+        {
+            return EventProblems.NameInvalid();
+        }
+
         List<EventRole> roles = await db.EventRoles.Where(er => req.EventRoleIds.Contains(er.Id)).ToListAsync();
         if (roles.Count != req.EventRoleIds.Distinct().Count())
         {
@@ -43,20 +50,16 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
             Tags = req.Tags
         };
 
-        var channelReq = new CreateChannelRequest { Name = ChannelSlug.Sanitize(req.Name), EventId = ev.Id };
-        var channelResult = await createChannelCmd.ExecuteAsync(channelReq);
-        if (channelResult.IsProblem)
-        {
-            return channelResult.Problem!;
-        }
-
-        ev.ChannelId = channelResult.Value.Id;
+        ev.Channel = new Channel(channelName, string.Empty, ev.Id);
 
         ev.EventRoles.Add(anyRole);
         db.Events.Add(ev);
         await db.SaveChangesAsync();
 
+        var channel = ChannelResponse.FromEntity(ev.Channel);
+        await hub.Clients.All.SendAsync("NewChannel", channel);
+
         rag.Upsert(ev);
-        return CreateEventResponse.FromEntity(ev, channelResult.Value);
+        return CreateEventResponse.FromEntity(ev, channel);
     }
 }

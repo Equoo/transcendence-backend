@@ -19,6 +19,11 @@ static public class ChannelProblems
 		"Invalid channel name",
 		"Channel name contains unauthorized characters.");
 
+	static public ProblemHttpResult EventChannel(string eventId) => ProblemFactory.Create(
+		StatusCodes.Status409Conflict, "CHANNEL_EVENT_OWNED",
+		"Channel owned by an event",
+		$"This channel belongs to the event '{eventId}', delete the event instead.");
+
 	static public ProblemHttpResult RoleNotFound() => ProblemFactory.Create(
 		StatusCodes.Status422UnprocessableEntity, "CHANNEL_ROLE_NOT_FOUND",
 		"Inexistant channel role",

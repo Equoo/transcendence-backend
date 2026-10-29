@@ -16,7 +16,6 @@ public record CreateChannelRequest
 	public bool CategorySync { get; init; } = true;
 	public List<string> WhitelistRoles { get; init; } = [];
 	public string? Category { get; init; } = null;
-	public string? EventId { get; init; } = null;
 }
 
 public static class CreateChannelEndpoint

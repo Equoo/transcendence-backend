@@ -53,6 +53,12 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
         {
             rag.Delete(entity);
         }
+        var channelIds = entities.OfType<Event>().Select(e => e.ChannelId).ToList();
+        if (channelIds.Count > 0)
+        {
+            db.Channels.RemoveRange(await db.Channels.Where(c => channelIds.Contains(c.Id)).ToListAsync());
+        }
+
         db.RemoveRange(entities);
         await db.SaveChangesAsync();
     }

@@ -19,7 +19,7 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return ChannelProblems.NotFound(id);
 		}
 
-		if (ChannelNameValidation().IsMatch(req.Name))
+		if (string.IsNullOrWhiteSpace(req.Name) || ChannelNameValidation().IsMatch(req.Name))
 		{
 			return ChannelProblems.NameInvalid();
 		}

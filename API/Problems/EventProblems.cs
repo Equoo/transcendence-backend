@@ -9,6 +9,11 @@ static public class EventProblems
         "Event not found",
         $"No event has the id '{id}'.");
 
+    static public ProblemHttpResult NameInvalid() => ProblemFactory.Create(
+        StatusCodes.Status422UnprocessableEntity, "EVENT_NAME_INVALID",
+        "Invalid event name",
+        "Event name must contain at least one character allowed in a channel name.");
+
     static public ProblemHttpResult Full(string eventName, int size) => ProblemFactory.Create(
         StatusCodes.Status409Conflict, "EVENT_FULL",
         "Event is full",
