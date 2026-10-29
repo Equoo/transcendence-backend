@@ -52,4 +52,16 @@ public class Garage(IAmazonS3 s3, IOptions<StorageOptions> options, KeepGroupedD
 
         return new DeleteResponse(res.HttpStatusCode);
     }
+
+    public async Task<DeleteResponse> DeleteBatchAsync(IEnumerable<string> keys, CancellationToken ct = default)
+    {
+        var req = new DeleteObjectsRequest()
+        {
+            BucketName = _options.BucketName,
+            Objects = [.. keys.Select(key => new KeyVersion() { Key = key })]
+        };
+
+        var res = await _s3.DeleteObjectsAsync(req, ct);
+        return new DeleteResponse(res.HttpStatusCode);
+    }
 }

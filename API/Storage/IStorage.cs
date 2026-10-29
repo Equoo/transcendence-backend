@@ -11,4 +11,5 @@ public interface IStorage
     Task<UploadResponse> UploadAsync(Stream stream, string contentType, CancellationToken ct = default);
     Task<DownloadResponse> DownloadAsync(string key, CancellationToken ct = default);
     Task<DeleteResponse> DeleteAsync(string key, CancellationToken ct = default);
+    Task<DeleteResponse> DeleteBatchAsync(IEnumerable<string> keys, CancellationToken ct = default);
 }

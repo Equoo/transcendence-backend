@@ -49,9 +49,9 @@ public sealed class CreateEventCommand(KeepGroupedDb db, CreateChannelCommand cr
         {
             return channelResult.Problem!;
         }
+        var channel = await db.Channels.SingleAsync(chan => chan.Id == channelResult.Value.Id);
 
-        ev.ChannelId = channelResult.Value.Id;
-
+        ev.Channel = channel;
         ev.EventRoles.Add(anyRole);
         db.Events.Add(ev);
         await db.SaveChangesAsync();
