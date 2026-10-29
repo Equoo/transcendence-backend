@@ -1,12 +1,12 @@
-
-using KeepGrouped.API;
 using KeepGrouped.API.Problems;
-using KeepGrouped.API.Users;
+using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-public sealed class DeleteUserQuery(KeepGroupedDb db, IOptions<AuthenticationOptions> option) : IHandler
+namespace KeepGrouped.API.Users;
+
+public sealed class DeleteUserCommand(KeepGroupedDb db, IOptions<AuthenticationOptions> option, DeleteFileCommand deleteFile) : IHandler
 {
     public async Task<Result> ExecuteAsync(string id)
     {
@@ -28,7 +28,10 @@ public sealed class DeleteUserQuery(KeepGroupedDb db, IOptions<AuthenticationOpt
         {
             db.RefreshTokens.Remove(refresh);
         }
-
+        if (user.Avatar is not null)
+        {
+            await deleteFile.ExecuteAsync(user.Avatar.Key);
+        }
         db.Users.Remove(user);
 
         await db.SaveChangesAsync();
