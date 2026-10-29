@@ -10,37 +10,38 @@ namespace KeepGrouped.API.Users;
 /// </summary>
 public record UpdateMeRequest
 {
-    [Required]
-    [Length(1, 255)]
-    public string UserName { get; init; } = null!;
+	[Required]
+	[Length(1, 255)]
+	[RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores (_).")]
+	public string UserName { get; init; } = null!;
 }
 
 public record UpdateMeResponse(string Id, string UserName)
 {
-    public static UpdateMeResponse FromEntity(User user) => new(user.Id, user.UserName);
+	public static UpdateMeResponse FromEntity(User user) => new(user.Id, user.UserName);
 }
 
 public static class UpdateMeEndpoint
 {
-    public static void MapUpdateMe(this IEndpointRouteBuilder me)
-    {
-        me.MapPatch("/", [Authorize] async (UpdateMeCommand command, UpdateMeRequest req, TokenContext tk) =>
-        {
-            var result = await command.ExecuteAsync(tk.User, req);
-            if (result.IsProblem)
-            {
-                return result.Problem;
-            }
+	public static void MapUpdateMe(this IEndpointRouteBuilder me)
+	{
+		me.MapPatch("/", [Authorize] async (UpdateMeCommand command, UpdateMeRequest req, TokenContext tk) =>
+		{
+			var result = await command.ExecuteAsync(tk.User, req);
+			if (result.IsProblem)
+			{
+				return result.Problem;
+			}
 
-         
-            return Results.Ok(result.Value);
-        })
-        .WithName("me.update")
-        .WithSummary("Rename the current user")
-        .WithDescription("Changes the current user's name. Names are unique across the API.")
-        .Produces<UpdateMeResponse>(StatusCodes.Status200OK)
-        .ProducesValidationProblem()
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status409Conflict);
-    }
+
+			return Results.Ok(result.Value);
+		})
+		.WithName("me.update")
+		.WithSummary("Rename the current user")
+		.WithDescription("Changes the current user's name. Names are unique across the API.")
+		.Produces<UpdateMeResponse>(StatusCodes.Status200OK)
+		.ProducesValidationProblem()
+		.ProducesProblem(StatusCodes.Status401Unauthorized)
+		.ProducesProblem(StatusCodes.Status409Conflict);
+	}
 }
