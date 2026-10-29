@@ -9,7 +9,8 @@ public sealed class DeleteEventCommand(KeepGroupedDb db, RagQueue rag) : IHandle
 {
     public async Task<Result> ExecuteAsync(string id)
     {
-        Event? ev = await db.Events.SingleOrDefaultAsync(e => e.Id == id);
+        Event? ev = await db.Events
+        .SingleOrDefaultAsync(e => e.Id == id);
         if (ev is null)
         {
             return EventProblems.NotFound(id);

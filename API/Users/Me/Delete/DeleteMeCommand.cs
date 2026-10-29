@@ -23,6 +23,12 @@ public sealed class DeleteMeCommand(KeepGroupedDb db, IOptions<AuthenticationOpt
 
         var userFiles = await db.Files.Where(fi => fi.Creator.Id == user.Id).ToListAsync();
         await deleteFiles.ExecuteAsync(userFiles.Select(fi => fi.Key));
+        
+        var chans = await db.Channels.Where(chan => chan.Members.Any(member => member.UserId == user.Id)
+            && chan.Type == Channels.ChannelType.DirectMessage).ToListAsync();
+
+        db.RemoveRange(chans);
+
         db.Users.Remove(user);
         await db.SaveChangesAsync();
 

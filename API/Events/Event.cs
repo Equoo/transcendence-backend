@@ -21,7 +21,6 @@ public class Event : IExpirable, IRagProcessable
     public string Location { get; set; } = null!;
     public ICollection<string> Tags { get; set; } = [];
     public string Description { get; set; } = string.Empty;
-    public string ChannelId { get; set; } = null!;
     public Channel Channel { get; set; } = null!;
     public User Organizer { get; set; } = null!;
     public ICollection<User> Users { get; } = [];

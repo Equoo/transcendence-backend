@@ -16,7 +16,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261026143720_RagProcessable";
+    public override string LastMigrationId => "20261029151559_EventChannelRelation";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -95,6 +95,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.HasKey("Id");
 
                 b.HasIndex("CategoryId");
+
+                b.HasIndex("EventId")
+                    .IsUnique();
 
                 b.HasIndex("LastMessageId");
 
@@ -222,10 +225,6 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                 b.Property<string>("Id")
                     .HasColumnType("text");
 
-                b.Property<string>("ChannelId")
-                    .IsRequired()
-                    .HasColumnType("text");
-
                 b.Property<DateTime>("Date")
                     .HasColumnType("timestamp with time zone");
 
@@ -259,9 +258,6 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .HasColumnType("text[]");
 
                 b.HasKey("Id");
-
-                b.HasIndex("ChannelId")
-                    .IsUnique();
 
                 b.HasIndex("OrganizerId");
 
@@ -506,12 +502,19 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
                     .HasForeignKey("CategoryId")
                     .OnDelete(DeleteBehavior.SetNull);
 
+                b.HasOne("KeepGrouped.API.Events.Event", "Event")
+                    .WithOne("Channel")
+                    .HasForeignKey("KeepGrouped.API.Channels.Channel", "EventId")
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 b.HasOne("KeepGrouped.API.Channels.Message", "LastMessage")
                     .WithMany()
                     .HasForeignKey("LastMessageId")
                     .OnDelete(DeleteBehavior.SetNull);
 
                 b.Navigation("Category");
+
+                b.Navigation("Event");
 
                 b.Navigation("LastMessage");
             });
@@ -607,19 +610,11 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
             {
-                b.HasOne("KeepGrouped.API.Channels.Channel", "Channel")
-                    .WithOne("Event")
-                    .HasForeignKey("KeepGrouped.API.Events.Event", "ChannelId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
                 b.HasOne("KeepGrouped.API.Users.User", "Organizer")
                     .WithMany()
                     .HasForeignKey("OrganizerId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
-
-                b.Navigation("Channel");
 
                 b.Navigation("Organizer");
             });
@@ -698,8 +693,6 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("KeepGrouped.API.Channels.Channel", b =>
             {
-                b.Navigation("Event");
-
                 b.Navigation("Members");
 
                 b.Navigation("RolesWhitelist");
@@ -712,6 +705,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
             {
+                b.Navigation("Channel")
+                    .IsRequired();
+
                 b.Navigation("Registrations");
             });
 

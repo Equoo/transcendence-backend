@@ -25,11 +25,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.UsingEntity<Registration>();
 
 			entity.HasOne(e => e.Organizer);
-
-			entity.HasOne(e => e.Channel)
-				.WithOne(c => c.Event)
-				.HasForeignKey<Event>(e => e.ChannelId)
-				.OnDelete(DeleteBehavior.Cascade);
 		});
 		builder.Entity<StorageFile>().HasOne(f => f.Creator);
 		builder.Entity<User>(entity =>
@@ -72,6 +67,11 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 
 		builder.Entity<Channel>(entity =>
 		{
+			entity
+				.HasOne(c => c.Event)
+				.WithOne(e => e.Channel)
+				.HasForeignKey<Channel>(c => c.EventId)
+				.OnDelete(DeleteBehavior.Cascade);
 			entity
 				.HasOne(c => c.Category)
 				.WithMany()
