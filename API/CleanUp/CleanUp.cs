@@ -19,7 +19,7 @@ public class CleanUp(IServiceScopeFactory scopes) : BackgroundService
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
 
-        _timer = new PeriodicTimer(TimeSpan.FromHours(1));
+        _timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
 
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {

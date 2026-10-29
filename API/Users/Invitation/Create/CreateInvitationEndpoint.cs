@@ -9,11 +9,11 @@ namespace KeepGrouped.API.Users.Invitations;
 public record CreateInvitationRequest
 {
     [Required]
-    public DateTime ExpireAt { get; init; }
+    public DateTime? ExpireAt { get; init; }
 
     [Required]
     [Range(-1, int.MaxValue)]
-    public int Usages { get; init; }
+    public int? Usages { get; init; }
 }
 
 public static class CreateInvitationEndpoint
