@@ -36,6 +36,14 @@ public static class MessageProblems
 			"This operation can only be performed by the message's sender or manage messages permission needed."
 		);
 
+	public static ProblemHttpResult Blocked() =>
+		ProblemFactory.Create(
+			StatusCodes.Status403Forbidden,
+			"MESSAGE_BLOCKED",
+			"Conversation blocked",
+			"You cannot send messages in a conversation with a blocked user."
+		);
+
 	public static ProblemHttpResult TooLong() =>
 		ProblemFactory.Create(
 			StatusCodes.Status404NotFound,

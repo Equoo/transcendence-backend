@@ -1,5 +1,6 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,8 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (!channel.IsWhitelisted(sender))
 			return MessageProblems.AccessNotAuthorized();
 
+		if (await db.IsDirectMessageBlockedAsync(channel, sender.Id))
+			return MessageProblems.Blocked();
 
 		var msg = await db
 			.Messages.Include(m => m.Channel)
