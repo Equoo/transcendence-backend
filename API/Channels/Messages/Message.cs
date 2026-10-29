@@ -15,6 +15,7 @@ public class Message
 		Channel = channel;
 		MessageRefId = messageRef?.Id;
 		MessageRef = messageRef;
+		HasMessageRef = messageRef != null;
 	}
 
 	public string Id { get; init; } = Guid.NewGuid().ToString();
@@ -24,6 +25,7 @@ public class Message
 
 	public string? MessageRefId { get; set; } = null;
 	public Message? MessageRef { get; set; } = null;
+	public bool HasMessageRef { get; set; } = false;
 
 	public string SenderId { get; init; } = null!;
 	public User Sender { get; init; } = null!;
@@ -44,6 +46,7 @@ public record MessageResponse(
 	DateTime SentAt,
 	DateTime? EditAt,
 	MessageReference? MessageRef,
+	bool HasMessageRef,
 	GetUserResponse Sender,
 	ChannelResponse Channel
 )
@@ -57,6 +60,7 @@ public record MessageResponse(
 			(msg.MessageRefId is not null && msg.MessageRef is not null)
 				? MessageReference.FromEntity(msg.MessageRef)
 				: null,
+			msg.HasMessageRef,
 			GetUserResponse.FromEntity(msg.Sender),
 			ChannelResponse.FromEntity(msg.Channel)
 		);
