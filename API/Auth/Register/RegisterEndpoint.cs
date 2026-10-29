@@ -6,7 +6,9 @@ public record RegisterRequest
 {
 	[Required]
 	[Length(1, 255)]
-	public string UserName { get; init; } = null!;
+	[RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores (_).")]
+
+	public string Username { get; init; } = null!;
 	[Required]
 	[EmailAddress]
 	[Length(3, 255)]
