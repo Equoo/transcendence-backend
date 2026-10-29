@@ -17,10 +17,11 @@ public sealed class ListMessagesQuery(KeepGroupedDb db) : IHandler
 	{
 		var channel = await db.Channels
 			.AsNoTracking()
+			.Include(c => c.Members)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
-				.ThenInclude(ct => ct.RolesWhitelist)
+				.ThenInclude(ct => ct!.RolesWhitelist)
 					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)

@@ -15,10 +15,11 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 	)
 	{
 		var channel = await db.Channels
+			.Include(c => c.Members)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
-				.ThenInclude(ct => ct.RolesWhitelist)
+				.ThenInclude(ct => ct!.RolesWhitelist)
 					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
