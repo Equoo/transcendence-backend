@@ -9,6 +9,17 @@ static public class UserProblems
         "User not found",
         $"No user has the id '{id}'.");
 
+    static public ProblemHttpResult NotAuthorized() => ProblemFactory.Create(
+        StatusCodes.Status401Unauthorized, "NOT_AUTHORIZED",
+        "Not authorize",
+        $"Your not authorize to do this action'.");
+
+
+    static public ProblemHttpResult CannotChangeSelf() => ProblemFactory.Create(
+    StatusCodes.Status401Unauthorized, "CANNOT_CHANGE_SELF",
+    "You cannot change yourself",
+    $"You cannot interact to yourself'.");
+
     static public ProblemHttpResult NameAlreadyUsed(string username) => ProblemFactory.Create(
         StatusCodes.Status409Conflict, "NAME_ALREADY_USED",
         "Username already used",
@@ -35,17 +46,17 @@ static public class UserProblems
     $"Avatar must be under {max_size / 1000000} Mb");
 
     static public ProblemHttpResult UserCannotBeDelete() => ProblemFactory.Create(
-   StatusCodes.Status401Unauthorized, "USER_CANNOT_BE_DELETED",
+   StatusCodes.Status403Forbidden, "USER_CANNOT_BE_DELETED",
    "User cannot be deleted",
    "This user cannot be deleted");
 
     static public ProblemHttpResult PasswordCannotBeChanged() => ProblemFactory.Create(
-  StatusCodes.Status401Unauthorized, "PASSWORD_CANNOT_BE_CHANGED",
+  StatusCodes.Status403Forbidden, "PASSWORD_CANNOT_BE_CHANGED",
   "Password cannot be changed",
   "This user's password cannot be changed");
 
     static public ProblemHttpResult UsernameCannotBeChanged() => ProblemFactory.Create(
- StatusCodes.Status401Unauthorized, "USERNAME_CANNOT_BE_CHANGED",
+ StatusCodes.Status403Forbidden, "USERNAME_CANNOT_BE_CHANGED",
  "Username cannot be changed",
  "This user's name cannot be changed");
 

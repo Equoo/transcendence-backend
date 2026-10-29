@@ -1,4 +1,5 @@
 
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Password;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users.Auth;
@@ -8,15 +9,21 @@ using Microsoft.Extensions.Options;
 
 namespace KeepGrouped.API.Users;
 
-public sealed class ResetPasswordQuery(KeepGroupedDb db, KeepGroupedPasswordHasher hash, IOptions<AuthenticationOptions> option) : IHandler
+public sealed class ResetPasswordQuery(KeepGroupedDb db, KeepGroupedPasswordHasher hash, IOptions<AuthenticationOptions> option, TokenContext tk) : IHandler
 {
     public async Task<Result> ExecAsync(string id, string newPassword)
     {
         User? db_user = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
 
+
         if (db_user is null)
         {
             return UserProblems.NotFound(id);
+        }
+
+        if (tk.User.Role.Ranking > db_user.Role.Ranking)
+        {
+            return UserProblems.NotAuthorized();
         }
 
         if (option.Value.DefaultAdminLogin == db_user.UserName)
