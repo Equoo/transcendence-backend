@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeepGrouped.API.Users;
 
-public sealed class DeleteMeCommand(KeepGroupedDb db, IOptions<AuthenticationOptions> option, DeleteFileCommand deleteFile) : IHandler
+public sealed class DeleteMeCommand(KeepGroupedDb db, IOptions<AuthenticationOptions> option, DeleteBatchFileCommand deleteFiles) : IHandler
 {
     public async Task<Result<DeleteMeResponse>> ExecuteAsync(User user)
     {
@@ -20,11 +20,9 @@ public sealed class DeleteMeCommand(KeepGroupedDb db, IOptions<AuthenticationOpt
         // Refresh tokens have no navigation to their user, so nothing cascades: revoke them here or
         // they outlive the account they authenticate.
         await db.RefreshTokens.Where(t => t.UserId == user.Id).ExecuteDeleteAsync();
-        if (user.Avatar is not null)
-        {
-            await deleteFile.ExecuteAsync(user.Avatar.Key);
-        }
 
+        var userFiles = await db.Files.Where(fi => fi.Creator.Id == user.Id).ToListAsync();
+        await deleteFiles.ExecuteAsync(userFiles.Select(fi => fi.Key));
         db.Users.Remove(user);
         await db.SaveChangesAsync();
 
