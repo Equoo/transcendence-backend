@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.SignalR;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
 
-public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
+public sealed class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
 	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(string id, UpdateCategoryRequest req)
 	{
@@ -19,12 +18,12 @@ public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<
 			return CategoryProblems.NotFound(id);
 		}
 
-		if (CategoryNameValidation().IsMatch(req.Name))
+		if (!ChannelSlug.IsValidName(req.Name, allowWhitespace: true))
 		{
 			return CategoryProblems.NameInvalid();
 		}
 
-		if (await db.ChannelCategories.AnyAsync(c => c.Name == req.Name && c.Id != id))
+		if (await db.ChannelCategories.AnyAsync(c => c.Name.ToLower() == req.Name.ToLower() && c.Id != id))
 		{
 			return CategoryProblems.NameAlreadyUsed(req.Name);
 		}
@@ -47,7 +46,4 @@ public sealed partial class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<
 
 		return response;
 	}
-
-	[GeneratedRegex(@"[$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]
-	private static partial Regex CategoryNameValidation();
 }
