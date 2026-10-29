@@ -17,6 +17,8 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
+				.ThenInclude(ct => ct.RolesWhitelist)
+					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);

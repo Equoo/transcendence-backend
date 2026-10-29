@@ -13,6 +13,8 @@ public sealed class GetMessageQuery(KeepGroupedDb db) : IHandler
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
+				.ThenInclude(ct => ct.RolesWhitelist)
+					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);
