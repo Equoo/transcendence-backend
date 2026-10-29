@@ -17,7 +17,7 @@ public static class UpdateMePassEndpoint
 {
     public static void MapUpdateMePass(this IEndpointRouteBuilder me)
     {
-        me.MapPatch("/password", [Authorize] async (UpdateMePassRequest req, UpdateMePassCommand cmd, LogoutQuery query, TokenContext tk, HttpContext http) =>
+        me.MapPatch("/password", [Authorize] async (UpdateMePassRequest req, UpdateMePassCommand cmd, LogoutCommand query, TokenContext tk, HttpContext http) =>
         {
 
             var result = await cmd.ExecuteAsync(req);

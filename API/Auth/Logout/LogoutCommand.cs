@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Users;
 
-public sealed class LogoutQuery(KeepGroupedDb db) : IHandler
+public sealed class LogoutCommand(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecAsync(string id)
     {
@@ -13,7 +13,7 @@ public sealed class LogoutQuery(KeepGroupedDb db) : IHandler
 
         if (refresh is null)
         {
-            return TokensProblems.NotFound(id);
+            return Result.OK;
         }
 
         db.RefreshTokens.Remove(refresh);

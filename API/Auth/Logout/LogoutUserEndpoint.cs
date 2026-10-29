@@ -7,7 +7,7 @@ public static class LogoutUserEndpoint
 {
     public static void MapLogoutUser(this IEndpointRouteBuilder auth)
     {
-        auth.MapDelete("/logout/{id}", [Authorize] async (LogoutQuery query, HttpContext http, string id) =>
+        auth.MapDelete("/logout/{id}", [Authorize] async (LogoutCommand query, HttpContext http, string id) =>
         {
             var result = await query.ExecAsync(id);
 

@@ -10,7 +10,7 @@ public static class ResetPasswordEndpoint
 {
 	public static void MapResetPassword(this IEndpointRouteBuilder auth)
 	{
-		auth.MapPatch("{id}/password", [Authorize][Roles(Perms.HandleUsers)] async (ResetPasswordQuery pass, LogoutQuery logout, string id, [FromBody] string password) =>
+		auth.MapPatch("{id}/password", [Authorize][Roles(Perms.HandleUsers)] async (ResetPasswordQuery pass, LogoutCommand logout, string id, [FromBody] string password) =>
 		{
 			var result = await pass.ExecAsync(id, password);
 			if (result.IsProblem)
