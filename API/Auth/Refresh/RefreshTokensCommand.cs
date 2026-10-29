@@ -18,7 +18,7 @@ public sealed class RefreshTokensCommand(KeepGroupedDb db, TokenProvider provide
         }
 
         string refresh_id = Hash256.GetHashSha256(provider.ReadFirstClaim(cookieRefresh));
-        RefreshToken? refresh_db = await db.RefreshTokens.FirstOrDefaultAsync(o => o.Id == refresh_id);
+        RefreshToken? refresh_db = await db.RefreshTokens.SingleOrDefaultAsync(o => o.Id == refresh_id);
         if (refresh_db is null)
         {
             return AuthProblems.RefreshTokenUnknown();

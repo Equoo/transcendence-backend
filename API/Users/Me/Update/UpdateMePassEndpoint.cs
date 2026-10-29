@@ -28,7 +28,7 @@ public static class UpdateMePassEndpoint
             }
 
 
-            var res = await logoutCmd.ExecAsync(tk.User.Id);
+            var res = await logoutCmd.ExecAsync(tk.User.Id, TokenCookies.Get(http, "RefreshToken"));
             if (res.IsProblem)
             {
                 return result.Problem;

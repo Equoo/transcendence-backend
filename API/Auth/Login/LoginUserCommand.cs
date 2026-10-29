@@ -27,15 +27,6 @@ public sealed class LoginUserCommand(KeepGroupedDb db, KeepGroupedPasswordHasher
 
         string acess_token = provider.CreateAccess(user_db.Id);
 
-        RefreshToken? refresh_db = await db.RefreshTokens.SingleOrDefaultAsync(r => r.UserId
-         == user_db.Id);
-
-        if (refresh_db is not null)
-        {
-            db.RefreshTokens.Remove(refresh_db);
-            await db.SaveChangesAsync();
-        }
-
         string id = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
         string refresh_token = provider.CreateRefresh(id);
 
