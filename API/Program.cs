@@ -6,6 +6,7 @@ using KeepGrouped.API.Storage;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Auth;
 using KeepGrouped.API.Users.Invitations;
+using KeepGrouped.API.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,24 +14,25 @@ namespace KeepGrouped.API;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        // ------------ Buildings Dependances
+	static void Main(string[] args)
+	{
+		// ------------ Buildings Dependances
 
-        var builder = WebApplication.CreateBuilder(args);
+		var builder = WebApplication.CreateBuilder(args);
 
-        builder.BuildStorage();
-        builder.BuildDb();
-        builder.BuildAuthentication();
-        builder.BuildAiBackend();
-        builder.BuildRag();
-        builder.AddHandlers();
-        builder.BuildCleanUp();
+		builder.BuildStorage();
+		builder.BuildDb();
+		builder.BuildRateLimiting();
+		builder.BuildAuthentication();
+		builder.BuildAiBackend();
+		builder.BuildRag();
+		builder.AddHandlers();
+		builder.BuildCleanUp();
 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-        });
+		builder.Services.Configure<ForwardedHeadersOptions>(options =>
+		{
+			options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+		});
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
@@ -42,43 +44,43 @@ class Program
         builder.Services.AddValidation();
         builder.Services.AddSignalR();
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddSwaggerGen();
-        }
-        var app = builder.Build();
-        app.UseForwardedHeaders();
-        app.UseStatusCodePages();
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            using var serviceScope = app.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.Migrate();
-        }
-        else
-        {
-            using var serviceScope = app.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
-            context.Database.Migrate();
-        }
+		if (builder.Environment.IsDevelopment())
+		{
+			builder.Services.AddSwaggerGen();
+		}
+		var app = builder.Build();
+		app.UseForwardedHeaders();
+		app.UseStatusCodePages();
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseSwagger();
+			app.UseSwaggerUI();
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+			context.Database.Migrate();
+		}
+		else
+		{
+			using var serviceScope = app.Services.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<KeepGroupedDb>();
+			context.Database.Migrate();
+		}
 
-        app.MapEvents();
-        app.MapRegistrations();
-        app.MapUsers();
-        app.MapMe();
-        app.MapEventRoles();
-        app.MapStorageFiles();
-        app.MapAuthentication();
-        app.UseRateLimiter();
-        app.MapInvitations();
-        app.MapRoles();
-        app.MapHub<KeepGroupedHub>("");
-        app.MapAiBackend();
-        app.MapCategories();
-        app.MapChannels();
-        app.MapMessages();
-        app.Run();
-    }
+		app.MapEvents();
+		app.MapRegistrations();
+		app.MapUsers();
+		app.MapMe();
+		app.MapEventRoles();
+		app.MapStorageFiles();
+		app.MapAuthentication();
+		app.UseRateLimiter();
+		app.MapInvitations();
+		app.MapRoles();
+		app.MapHub<KeepGroupedHub>("");
+		app.MapAiBackend();
+		app.MapCategories();
+		app.MapChannels();
+		app.MapMessages();
+		app.Run();
+	}
 }
