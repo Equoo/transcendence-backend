@@ -7,9 +7,9 @@ public static class LogoutEndpoint
 {
     public static void MapLogout(this IEndpointRouteBuilder auth)
     {
-        auth.MapGet("/logout", [Authorize] async (LogoutQuery query, HttpContext http, TokenContext tk) =>
+        auth.MapGet("/logout", [Authorize] async (LogoutCommand cmd, HttpContext http, TokenContext tk) =>
         {
-            var result = await query.ExecAsync(tk.User.Id);
+            var result = await cmd.ExecAsync(tk.User.Id, TokenCookies.Get(http, "RefreshToken"));
 
             if (result.IsProblem)
             {

@@ -67,7 +67,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 		{
 			Id = Hash256.GetHashSha256(id),
 			UserId = user.Id,
-			ExpireAt = DateTime.UtcNow.AddMinutes(2)
+			ExpireAt = DateTime.UtcNow.AddDays(7)
 		});
 
 		if (invitation.Usages != Invitation.Infinite)
