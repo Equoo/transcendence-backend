@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using KeepGrouped.API.Attributes.Roles;
+using KeepGrouped.API.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +17,7 @@ public static class UpdateFileNameEndpoint
 {
     public static void MapUpdateFileName(this IEndpointRouteBuilder group)
     {
-        group.MapPatch("/{key}/name", [Authorize] async (UpdateFileNameCommand query, string key, [FromBody] UpdateFileNameRequest req) =>
+        group.MapPatch("/{key}/name", [Authorize][Roles(Perms.HandleKnowledge)] async (UpdateFileNameCommand query, string key, [FromBody] UpdateFileNameRequest req) =>
         {
             var result = await query.ExecuteAsync(key, req.Name);
             if (result.IsProblem)

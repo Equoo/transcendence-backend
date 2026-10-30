@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using KeepGrouped.API.AiBackend.Ingest;
+using KeepGrouped.API.Attributes.Roles;
 using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Rag;
+using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +41,7 @@ public static class UploadFileEndpoint
 {
     public static void MapUploadFile(this IEndpointRouteBuilder group)
     {
-        group.MapPost("/", [Authorize] async (UploadFileCommand uploadCmd, TokenContext token,
+        group.MapPost("/", [Authorize][Roles(Perms.HandleKnowledge)] async (UploadFileCommand uploadCmd, TokenContext token,
             [FromForm] UploadFileRequest req, CancellationToken ct) =>
         {
             var uploadResult = await uploadCmd.ExecuteAsync(req.File.OpenReadStream(), req.Name, req.File.ContentType, req.File.Length, token.User, ct);

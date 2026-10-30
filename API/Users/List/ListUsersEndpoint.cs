@@ -1,5 +1,6 @@
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KeepGrouped.API.Users;
 
@@ -13,7 +14,7 @@ public static class ListUsersEndpoint
 {
     public static void MapListUsers(this IEndpointRouteBuilder users)
     {
-        users.MapGet("/", async (ListUsersQuery query) =>
+        users.MapGet("/", [Authorize] async(ListUsersQuery query) =>
         {
             var result = await query.ExecuteAsync();
             if (result.IsProblem)

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KeepGrouped.Migrations;
 
 [DbContext(typeof(KeepGroupedDb))]
-[Migration("20261026130808_IdPrimaryKey")]
-partial class _20261026130808_IdPrimaryKey
+[Migration("20261030133101_coucou")]
+partial class _20261030133101_coucou
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,6 +93,9 @@ partial class _20261026130808_IdPrimaryKey
                 b.HasKey("Id");
 
                 b.HasIndex("CategoryId");
+
+                b.HasIndex("EventId")
+                    .IsUnique();
 
                 b.HasIndex("LastMessageId");
 
@@ -220,10 +223,6 @@ partial class _20261026130808_IdPrimaryKey
                 b.Property<string>("Id")
                     .HasColumnType("text");
 
-                b.Property<string>("ChannelId")
-                    .IsRequired()
-                    .HasColumnType("text");
-
                 b.Property<DateTime>("Date")
                     .HasColumnType("timestamp with time zone");
 
@@ -233,6 +232,9 @@ partial class _20261026130808_IdPrimaryKey
 
                 b.Property<DateTime>("ExpireAt")
                     .HasColumnType("timestamp with time zone");
+
+                b.Property<bool>("Ingested")
+                    .HasColumnType("boolean");
 
                 b.Property<string>("Location")
                     .IsRequired()
@@ -254,9 +256,6 @@ partial class _20261026130808_IdPrimaryKey
                     .HasColumnType("text[]");
 
                 b.HasKey("Id");
-
-                b.HasIndex("ChannelId")
-                    .IsUnique();
 
                 b.HasIndex("OrganizerId");
 
@@ -313,6 +312,9 @@ partial class _20261026130808_IdPrimaryKey
                 b.Property<int>("Permission")
                     .HasColumnType("integer");
 
+                b.Property<int>("Ranking")
+                    .HasColumnType("integer");
+
                 b.HasKey("Id");
 
                 b.ToTable("Roles");
@@ -333,6 +335,9 @@ partial class _20261026130808_IdPrimaryKey
                 b.Property<string>("ETag")
                     .IsRequired()
                     .HasColumnType("text");
+
+                b.Property<bool>("Ingested")
+                    .HasColumnType("boolean");
 
                 b.Property<DateTime>("LastUpdated")
                     .HasColumnType("timestamp with time zone");
@@ -451,6 +456,8 @@ partial class _20261026130808_IdPrimaryKey
 
                 b.HasKey("Id");
 
+                b.HasAlternateKey("Email");
+
                 b.HasIndex("AvatarKey")
                     .IsUnique();
 
@@ -496,12 +503,19 @@ partial class _20261026130808_IdPrimaryKey
                     .HasForeignKey("CategoryId")
                     .OnDelete(DeleteBehavior.SetNull);
 
+                b.HasOne("KeepGrouped.API.Events.Event", "Event")
+                    .WithOne("Channel")
+                    .HasForeignKey("KeepGrouped.API.Channels.Channel", "EventId")
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 b.HasOne("KeepGrouped.API.Channels.Message", "LastMessage")
                     .WithMany()
                     .HasForeignKey("LastMessageId")
                     .OnDelete(DeleteBehavior.SetNull);
 
                 b.Navigation("Category");
+
+                b.Navigation("Event");
 
                 b.Navigation("LastMessage");
             });
@@ -597,19 +611,11 @@ partial class _20261026130808_IdPrimaryKey
 
         modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
             {
-                b.HasOne("KeepGrouped.API.Channels.Channel", "Channel")
-                    .WithOne("Event")
-                    .HasForeignKey("KeepGrouped.API.Events.Event", "ChannelId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
                 b.HasOne("KeepGrouped.API.Users.User", "Organizer")
                     .WithMany()
                     .HasForeignKey("OrganizerId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
-
-                b.Navigation("Channel");
 
                 b.Navigation("Organizer");
             });
@@ -688,8 +694,6 @@ partial class _20261026130808_IdPrimaryKey
 
         modelBuilder.Entity("KeepGrouped.API.Channels.Channel", b =>
             {
-                b.Navigation("Event");
-
                 b.Navigation("Members");
 
                 b.Navigation("RolesWhitelist");
@@ -702,6 +706,9 @@ partial class _20261026130808_IdPrimaryKey
 
         modelBuilder.Entity("KeepGrouped.API.Events.Event", b =>
             {
+                b.Navigation("Channel")
+                    .IsRequired();
+
                 b.Navigation("Registrations");
             });
 

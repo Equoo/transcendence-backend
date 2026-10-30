@@ -1,13 +1,16 @@
 
+using KeepGrouped.API.Middlewares;
 using KeepGrouped.API.Problems;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Roles;
 
-public sealed class CreateRoleQuery(KeepGroupedDb db): IHandler
+public sealed class CreateRoleCommand(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecAsync(string name)
     {
+
+        int count_role = await db.Roles.CountAsync(r => r.Name != Role.SuperRole);
 
         Role? role_db = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
 
@@ -16,7 +19,7 @@ public sealed class CreateRoleQuery(KeepGroupedDb db): IHandler
             return RoleProblems.NameAlreadyUsed(name);
         }
 
-        Role role = new(name);
+        Role role = new(name, count_role + 1);
 
         db.Roles.Add(role);
 
