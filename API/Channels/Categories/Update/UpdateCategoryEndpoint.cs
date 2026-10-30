@@ -12,6 +12,7 @@ public record UpdateCategoryRequest
 	[Length(1, 25)]
 	public string Name { get; init; } = null!;
 	public uint Order { get; init; } = 0;
+	[Required]
 	public List<string> WhitelistRoles { get; init; } = [];
 }
 
