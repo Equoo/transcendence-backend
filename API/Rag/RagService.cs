@@ -31,6 +31,10 @@ public sealed class RagService(RagQueue queue, IServiceScopeFactory scopes, ILog
                 logger.LogInformation("Beggining to process {Item}: {Operation}", item, op);
                 await handler.ProcessOperation(item.Id, op, ct);
             }
+            catch (HttpRequestException ex)
+            {
+                logger.LogWarning("AI backend unavailable, {Item}: {Operation} skipped ({Reason})", item, op, ex.Message);
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Rag processing failed for {Item}: {Operation}", item, op);
