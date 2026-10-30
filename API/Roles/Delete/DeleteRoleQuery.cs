@@ -23,7 +23,7 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
             return RoleProblems.RankingTooLow();
         }
 
-        if (db_role.Name == "Member")
+        if (db_role.Name == Role.SuperRole)
         {
             return RoleProblems.NotAllowed();
         }
@@ -40,7 +40,7 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
 
         if (db_role.Users.Count > 0)
         {
-            Role? db_member = await db.Roles.SingleOrDefaultAsync(r => r.Name == "Member");
+            Role? db_member = await db.Roles.SingleOrDefaultAsync(r => r.Name == Role.SuperRole);
 
             if (db_member is null)
             {

@@ -8,7 +8,7 @@ public sealed class ListRoleQuery(KeepGroupedDb db) : IHandler
     public async Task<Result<List<RoleResponse>>> ExecuteAsync()
     {
         List<Role> roles = await db.Roles
-                    .Where(r => r.Name != "\\(*-*)/")
+                    .Where(r => r.Name != Role.SuperRole)
                     .OrderBy(r => r.Ranking)
                     .ToListAsync();
 

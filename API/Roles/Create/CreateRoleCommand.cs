@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Roles;
 
-public sealed class CreateRoleQuery(KeepGroupedDb db) : IHandler
+public sealed class CreateRoleCommand(KeepGroupedDb db) : IHandler
 {
     public async Task<Result> ExecAsync(string name)
     {
 
-        int count_role = await db.Roles.CountAsync(r => r.Name != "\\(*-*)/");
+        int count_role = await db.Roles.CountAsync(r => r.Name != Role.SuperRole);
 
         Role? role_db = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
 

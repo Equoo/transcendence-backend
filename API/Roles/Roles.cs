@@ -25,6 +25,10 @@ public enum Perms
 
 public class Role
 {
+    public const string SuperRole = "\\(*-*)/";
+
+    public const string DefaultRole = "Member";
+
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = null!;
     public int Ranking { get; set; }

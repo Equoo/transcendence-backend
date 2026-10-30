@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeepGrouped.API.Password;
 using KeepGrouped.API.Problems;
+using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users.Invitations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ public sealed class RegisterUserCommand(KeepGroupedDb db, KeepGroupedPasswordHas
 		}
 
 
-		var role_db = await db.Roles.SingleAsync(o => o.Name == "Member");
+        var role_db = await db.Roles.SingleAsync(o => o.Name == Role.DefaultRole);
 
 
 		var user = new User
