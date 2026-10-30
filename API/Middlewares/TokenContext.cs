@@ -43,6 +43,7 @@ public class TokenContextMiddleware
 		if (db_user is null)
 		{
 			TokenCookies.Remove(http);
+			await UserProblems.NotAuthenticated().ExecuteAsync(http);
 			return;
 		}
 
