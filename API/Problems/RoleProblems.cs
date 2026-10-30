@@ -14,6 +14,11 @@ static public class RoleProblems
     "Role Name already used",
     $"'{name}' is already used by an other role.");
 
+    static public ProblemHttpResult InvalidPermission(int perm) => ProblemFactory.Create(
+    StatusCodes.Status400BadRequest, "INVALID_PERMISSION",
+    "Invalid permission",
+    $"'{perm}' contains unknown permission bits.");
+
     static public ProblemHttpResult NotFound() => ProblemFactory.Create(
    StatusCodes.Status404NotFound, "ROLE_NOT_FOUND",
    "Role not found",

@@ -11,16 +11,17 @@ public sealed class PatchRoleNameQuery(KeepGroupedDb db, TokenContext tk) : IHan
     public async Task<Result> ExecAsync(string id, string name)
     {
         Role? db_role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
-        Role? check_name = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
-
-        if (check_name is not null)
-        {
-            return RoleProblems.NameAlreadyUsed(name);
-        }
 
         if (db_role is null)
         {
             return RoleProblems.NotFound(id);
+        }
+
+        Role? check_name = await db.Roles.FirstOrDefaultAsync(r => r.Id != id && r.Name.ToLower() == name.ToLower());
+
+        if (check_name is not null)
+        {
+            return RoleProblems.NameAlreadyUsed(name);
         }
 
         if (tk.User.Role.Ranking >= db_role.Ranking)
