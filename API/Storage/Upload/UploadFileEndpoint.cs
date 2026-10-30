@@ -16,6 +16,7 @@ public record UploadFileRequest
 {
     [Required]
     [Length(1, 255)]
+    [RegularExpression(NulFreeStringConverter.Pattern, ErrorMessage = NulFreeStringConverter.ErrorMessage)]
     public string Name { get; init; } = null!;
 
     [Required]
