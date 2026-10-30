@@ -25,7 +25,7 @@ static public class RoleProblems
     $"Not allowed to remove the role member");
 
     static public ProblemHttpResult RankingTooLow() => ProblemFactory.Create(
-  StatusCodes.Status404NotFound, "RANKING_TOO_LOW",
+  StatusCodes.Status403Forbidden, "RANKING_TOO_LOW",
   "Ranking too low", "Your actual role ranking is too low to doing this action");
 
     static public ProblemHttpResult OpNotFound(string op) => ProblemFactory.Create(
