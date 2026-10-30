@@ -29,6 +29,15 @@ public class Role
 
     public const string DefaultRole = "Member";
 
+    public const int NameMaxLength = 20;
+
+    /// <summary>
+    /// Letters, digits, '_' and '-', words separated by a single space.
+    /// </summary>
+    public const string NamePattern = @"^[\p{L}\p{N}_-]+( [\p{L}\p{N}_-]+)*$";
+
+    public static readonly Perms AllPerms = Enum.GetValues<Perms>().Aggregate((Perms)0, (acc, p) => acc | p);
+
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = null!;
     public int Ranking { get; set; }

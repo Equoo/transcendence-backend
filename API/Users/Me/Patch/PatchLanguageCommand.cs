@@ -8,6 +8,11 @@ public sealed class PatchLanguageCommand(KeepGroupedDb db, TokenContext tk) : IH
 {
     public async Task<Result> ExecuteAsync(LanguageEnum language)
     {
+        if (!Enum.IsDefined(language))
+        {
+            return UserProblems.InvalidLanguage(language);
+        }
+
         User? db_user = await db.Users.SingleOrDefaultAsync(u => u == tk.User);
 
         if (db_user is null)

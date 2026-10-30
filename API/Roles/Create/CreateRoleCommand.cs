@@ -12,7 +12,7 @@ public sealed class CreateRoleCommand(KeepGroupedDb db) : IHandler
 
         int count_role = await db.Roles.CountAsync(r => r.Name != Role.SuperRole);
 
-        Role? role_db = await db.Roles.SingleOrDefaultAsync(r => r.Name == name);
+        Role? role_db = await db.Roles.FirstOrDefaultAsync(r => r.Name.ToLower() == name.ToLower());
 
         if (role_db is not null)
         {

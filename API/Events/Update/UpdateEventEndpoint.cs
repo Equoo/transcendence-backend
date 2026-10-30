@@ -20,9 +20,13 @@ public record UpdateEventRequest
 	[Length(1, 255)]
 	public string Location { get; init; } = null!;
 
+	[Required]
 	public ICollection<string> Tags { get; init; } = [];
+	[Required]
 	public ICollection<string> EventRoleIds { get; init; } = [];
+	[Required(AllowEmptyStrings = true)]
 	public string Description { get; init; } = string.Empty;
+	[Required]
 	public ICollection<string> FileKeys { get; init; } = [];
 }
 

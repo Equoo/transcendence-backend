@@ -17,6 +17,11 @@ public sealed class PatchRolePermQuery(KeepGroupedDb db, TokenContext tk) : IHan
             return RoleProblems.NotAllowed();
         }
 
+        if (((Perms)Math.Abs(perm) & ~Role.AllPerms) != 0)
+        {
+            return RoleProblems.InvalidPermission(perm);
+        }
+
         Role? db_role = await db.Roles.SingleOrDefaultAsync(r => r.Id == id);
 
         if (db_role is null)
