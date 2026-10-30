@@ -35,7 +35,6 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
         foreach (Role rl in list_change)
         {
             rl.Ranking--;
-            await db.SaveChangesAsync();
         }
 
         if (db_role.Users.Count > 0)
