@@ -16,23 +16,6 @@ public static class RateLimitBuilder
 		{
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-			options.OnRejected = async (context, ct) =>
-			{
-				if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
-				{
-					context.HttpContext.Response.Headers.RetryAfter =
-						((int)retryAfter.TotalSeconds).ToString();
-				}
-
-				context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-				await context.HttpContext.Response.WriteAsJsonAsync(new ProblemDetails
-				{
-					Status = StatusCodes.Status429TooManyRequests,
-					Title = "Too many requests",
-					Detail = "Please try again later."
-				}, ct);
-			};
-
 			options.AddPolicy<string>(RateLimitPolicies.AiChat, ctx =>
 			{
 				var userId = ctx.RequestServices.GetRequiredService<TokenContext>().User.Id;
