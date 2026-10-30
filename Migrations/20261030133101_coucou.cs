@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KeepGrouped.Migrations;
 
 /// <inheritdoc />
-public partial class _20261023165727_EmailLogin : Migration
+public partial class _20261030133101_coucou : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,6 +68,7 @@ public partial class _20261023165727_EmailLogin : Migration
             {
                 Id = table.Column<string>(type: "text", nullable: false),
                 Name = table.Column<string>(type: "text", nullable: false),
+                Ranking = table.Column<int>(type: "integer", nullable: false),
                 Permission = table.Column<int>(type: "integer", nullable: false)
             },
             constraints: table =>
@@ -182,18 +183,12 @@ public partial class _20261023165727_EmailLogin : Migration
                 Location = table.Column<string>(type: "text", nullable: false),
                 Tags = table.Column<string[]>(type: "text[]", nullable: false),
                 Description = table.Column<string>(type: "text", nullable: false),
-                ChannelId = table.Column<string>(type: "text", nullable: false),
-                OrganizerEmail = table.Column<string>(type: "text", nullable: false)
+                OrganizerId = table.Column<string>(type: "text", nullable: false),
+                Ingested = table.Column<bool>(type: "boolean", nullable: false)
             },
             constraints: table =>
             {
                 table.PrimaryKey("PK_Events", x => x.Id);
-                table.ForeignKey(
-                    name: "FK_Events_Channels_ChannelId",
-                    column: x => x.ChannelId,
-                    principalTable: "Channels",
-                    principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
             });
 
         migrationBuilder.CreateTable(
@@ -224,7 +219,8 @@ public partial class _20261023165727_EmailLogin : Migration
                 ETag = table.Column<string>(type: "text", nullable: false),
                 ContentType = table.Column<string>(type: "text", nullable: false),
                 LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                CreatorEmail = table.Column<string>(type: "text", nullable: true)
+                CreatorId = table.Column<string>(type: "text", nullable: true),
+                Ingested = table.Column<bool>(type: "boolean", nullable: false)
             },
             constraints: table =>
             {
@@ -235,10 +231,10 @@ public partial class _20261023165727_EmailLogin : Migration
             name: "Users",
             columns: table => new
             {
-                Email = table.Column<string>(type: "text", nullable: false),
-                ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 Id = table.Column<string>(type: "text", nullable: false),
+                ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 UserName = table.Column<string>(type: "text", nullable: false),
+                Email = table.Column<string>(type: "text", nullable: false),
                 PasswordHash = table.Column<string>(type: "text", nullable: false),
                 Language = table.Column<int>(type: "integer", nullable: false),
                 RoleId = table.Column<string>(type: "text", nullable: false),
@@ -247,7 +243,8 @@ public partial class _20261023165727_EmailLogin : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_Users", x => x.Email);
+                table.PrimaryKey("PK_Users", x => x.Id);
+                table.UniqueConstraint("AK_Users_Email", x => x.Email);
                 table.ForeignKey(
                     name: "FK_Users_Files_AvatarKey",
                     column: x => x.AvatarKey,
@@ -292,7 +289,7 @@ public partial class _20261023165727_EmailLogin : Migration
                     name: "FK_Messages_Users_SenderId",
                     column: x => x.SenderId,
                     principalTable: "Users",
-                    principalColumn: "Email",
+                    principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade);
             });
 
@@ -301,13 +298,13 @@ public partial class _20261023165727_EmailLogin : Migration
             columns: table => new
             {
                 EventId = table.Column<string>(type: "text", nullable: false),
-                UserEmail = table.Column<string>(type: "text", nullable: false),
+                UserId = table.Column<string>(type: "text", nullable: false),
                 RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 RoleId = table.Column<string>(type: "text", nullable: false)
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_Registration", x => new { x.EventId, x.UserEmail });
+                table.PrimaryKey("PK_Registration", x => new { x.EventId, x.UserId });
                 table.ForeignKey(
                     name: "FK_Registration_EventRoles_RoleId",
                     column: x => x.RoleId,
@@ -321,10 +318,10 @@ public partial class _20261023165727_EmailLogin : Migration
                     principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
-                    name: "FK_Registration_Users_UserEmail",
-                    column: x => x.UserEmail,
+                    name: "FK_Registration_Users_UserId",
+                    column: x => x.UserId,
                     principalTable: "Users",
-                    principalColumn: "Email",
+                    principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade);
             });
 
@@ -346,13 +343,13 @@ public partial class _20261023165727_EmailLogin : Migration
                     name: "FK_Relationships_Users_MeId",
                     column: x => x.MeId,
                     principalTable: "Users",
-                    principalColumn: "Email",
+                    principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_Relationships_Users_UserId",
                     column: x => x.UserId,
                     principalTable: "Users",
-                    principalColumn: "Email",
+                    principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade);
             });
 
@@ -387,6 +384,12 @@ public partial class _20261023165727_EmailLogin : Migration
             column: "CategoryId");
 
         migrationBuilder.CreateIndex(
+            name: "IX_Channels_EventId",
+            table: "Channels",
+            column: "EventId",
+            unique: true);
+
+        migrationBuilder.CreateIndex(
             name: "IX_Channels_LastMessageId",
             table: "Channels",
             column: "LastMessageId");
@@ -397,15 +400,9 @@ public partial class _20261023165727_EmailLogin : Migration
             column: "EventsId");
 
         migrationBuilder.CreateIndex(
-            name: "IX_Events_ChannelId",
+            name: "IX_Events_OrganizerId",
             table: "Events",
-            column: "ChannelId",
-            unique: true);
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Events_OrganizerEmail",
-            table: "Events",
-            column: "OrganizerEmail");
+            column: "OrganizerId");
 
         migrationBuilder.CreateIndex(
             name: "IX_EventStorageFile_FilesKey",
@@ -413,9 +410,9 @@ public partial class _20261023165727_EmailLogin : Migration
             column: "FilesKey");
 
         migrationBuilder.CreateIndex(
-            name: "IX_Files_CreatorEmail",
+            name: "IX_Files_CreatorId",
             table: "Files",
-            column: "CreatorEmail");
+            column: "CreatorId");
 
         migrationBuilder.CreateIndex(
             name: "IX_Messages_ChannelId_SentAt",
@@ -438,9 +435,9 @@ public partial class _20261023165727_EmailLogin : Migration
             column: "RoleId");
 
         migrationBuilder.CreateIndex(
-            name: "IX_Registration_UserEmail",
+            name: "IX_Registration_UserId",
             table: "Registration",
-            column: "UserEmail");
+            column: "UserId");
 
         migrationBuilder.CreateIndex(
             name: "IX_Relationships_MeId_UserId",
@@ -477,7 +474,7 @@ public partial class _20261023165727_EmailLogin : Migration
             table: "ChannelAcks",
             column: "UserId",
             principalTable: "Users",
-            principalColumn: "Email",
+            principalColumn: "Id",
             onDelete: ReferentialAction.Cascade);
 
         migrationBuilder.AddForeignKey(
@@ -493,7 +490,7 @@ public partial class _20261023165727_EmailLogin : Migration
             table: "ChannelMembers",
             column: "UserId",
             principalTable: "Users",
-            principalColumn: "Email",
+            principalColumn: "Id",
             onDelete: ReferentialAction.Cascade);
 
         migrationBuilder.AddForeignKey(
@@ -501,6 +498,14 @@ public partial class _20261023165727_EmailLogin : Migration
             table: "ChannelRoles",
             column: "ChannelId",
             principalTable: "Channels",
+            principalColumn: "Id",
+            onDelete: ReferentialAction.Cascade);
+
+        migrationBuilder.AddForeignKey(
+            name: "FK_Channels_Events_EventId",
+            table: "Channels",
+            column: "EventId",
+            principalTable: "Events",
             principalColumn: "Id",
             onDelete: ReferentialAction.Cascade);
 
@@ -521,11 +526,11 @@ public partial class _20261023165727_EmailLogin : Migration
             onDelete: ReferentialAction.Cascade);
 
         migrationBuilder.AddForeignKey(
-            name: "FK_Events_Users_OrganizerEmail",
+            name: "FK_Events_Users_OrganizerId",
             table: "Events",
-            column: "OrganizerEmail",
+            column: "OrganizerId",
             principalTable: "Users",
-            principalColumn: "Email",
+            principalColumn: "Id",
             onDelete: ReferentialAction.Cascade);
 
         migrationBuilder.AddForeignKey(
@@ -537,11 +542,11 @@ public partial class _20261023165727_EmailLogin : Migration
             onDelete: ReferentialAction.Cascade);
 
         migrationBuilder.AddForeignKey(
-            name: "FK_Files_Users_CreatorEmail",
+            name: "FK_Files_Users_CreatorId",
             table: "Files",
-            column: "CreatorEmail",
+            column: "CreatorId",
             principalTable: "Users",
-            principalColumn: "Email");
+            principalColumn: "Id");
     }
 
     /// <inheritdoc />
@@ -552,7 +557,7 @@ public partial class _20261023165727_EmailLogin : Migration
             table: "Messages");
 
         migrationBuilder.DropForeignKey(
-            name: "FK_Files_Users_CreatorEmail",
+            name: "FK_Files_Users_CreatorId",
             table: "Files");
 
         migrationBuilder.DropTable(
@@ -586,13 +591,13 @@ public partial class _20261023165727_EmailLogin : Migration
             name: "EventRoles");
 
         migrationBuilder.DropTable(
-            name: "Events");
-
-        migrationBuilder.DropTable(
             name: "Channels");
 
         migrationBuilder.DropTable(
             name: "ChannelCategories");
+
+        migrationBuilder.DropTable(
+            name: "Events");
 
         migrationBuilder.DropTable(
             name: "Messages");
