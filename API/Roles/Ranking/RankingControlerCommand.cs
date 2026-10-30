@@ -22,12 +22,11 @@ public sealed class RankingControlCommand(KeepGroupedDb db, TokenContext tk) : I
 
         Role db_role = await db.Roles.SingleAsync(r => r.Id == id);
 
-        if (tk.User.Role.Ranking >= db_role.Ranking)
-        {
-            return RoleProblems.RankingTooLow();
-        }
+        if (tk.User.Role.Ranking >= db_role.Ranking) return RoleProblems.RankingTooLow();
 
         Role db_seconde = await db.Roles.SingleAsync(r => r.Ranking == db_role.Ranking + op);
+
+        if (db_role.Ranking + op <= tk.User.Role.Ranking) return RoleProblems.RankingTooLow();
 
         db_seconde.Ranking -= op;
         db_role.Ranking += op;
