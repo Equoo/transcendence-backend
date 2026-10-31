@@ -38,7 +38,7 @@ public sealed class UpdateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGrou
 			return res.Problem;
 
 		category.Name = req.Name;
-		category.Order = req.Order;
+		category.Order = req.Order ?? category.Order;
 		await db.SaveChangesAsync();
 
 		var response = ChannelCategoryResponse.FromEntity(category);

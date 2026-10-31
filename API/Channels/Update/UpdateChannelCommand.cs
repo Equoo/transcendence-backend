@@ -44,6 +44,10 @@ public sealed class UpdateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		channel.Name = req.Name;
 		channel.Topic = req.Topic;
+		if (channel.CategoryId != req.Category)
+		{
+			channel.Order = await Channel.NextOrderAsync(db, req.Category);
+		}
 		channel.CategoryId = req.Category;
 		channel.CategorySync = req.CategorySync;
 		await db.SaveChangesAsync();

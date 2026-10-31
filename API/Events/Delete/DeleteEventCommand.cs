@@ -20,7 +20,7 @@ public sealed class DeleteEventCommand(KeepGroupedDb db, IHubContext<KeepGrouped
 		db.Channels.Remove(ev.Channel);
 		await db.SaveChangesAsync();
 
-		await hub.Clients.All.SendAsync("RemoveChannel", ev.ChannelId);
+		await hub.Clients.All.SendAsync("RemoveChannel", ev.Channel.Id);
 
 		rag.Delete(ev);
 		return Result.OK;

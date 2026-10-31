@@ -16,7 +16,7 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261030133101_coucou";
+    public override string LastMigrationId => "20261031191121_MessageHasMessageRef";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -197,6 +197,9 @@ partial class KeepGroupedDbModelSnapshot : ModelSnapshot
 
                 b.Property<DateTime?>("EditAt")
                     .HasColumnType("timestamp with time zone");
+
+                b.Property<bool>("HasMessageRef")
+                    .HasColumnType("boolean");
 
                 b.Property<string>("MessageRefId")
                     .HasColumnType("character varying(36)");

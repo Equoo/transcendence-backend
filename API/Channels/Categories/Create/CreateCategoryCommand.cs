@@ -19,7 +19,7 @@ public sealed class CreateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGrou
 			return CategoryProblems.NameAlreadyUsed(req.Name);
 		}
 
-		var category = new ChannelCategory(req.Name, req.Order);
+		var category = new ChannelCategory(req.Name, req.Order ?? await ChannelCategory.NextOrderAsync(db));
 
 		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, category, (c, role) => new ChannelRole
 		{

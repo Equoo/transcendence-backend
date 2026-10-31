@@ -27,7 +27,8 @@ public sealed class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		var channel = new Channel(req.Name, req.Topic, null)
 		{
 			CategorySync = req.CategorySync,
-			CategoryId = req.Category
+			CategoryId = req.Category,
+			Order = await Channel.NextOrderAsync(db, req.Category)
 		};
 
 		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, channel, (c, role) => new ChannelRole

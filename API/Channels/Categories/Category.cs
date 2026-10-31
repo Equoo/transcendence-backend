@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace KeepGrouped.API.Channels;
 
 public class ChannelCategory : IRoleWhitelist
@@ -14,6 +16,12 @@ public class ChannelCategory : IRoleWhitelist
 	public string Name { get; set; } = null!;
 	public uint Order { get; set; } = 0;
 	public ICollection<ChannelRole> RolesWhitelist { get; set; } = [];
+
+	public static async Task<uint> NextOrderAsync(KeepGroupedDb db)
+	{
+		var max = await db.ChannelCategories.MaxAsync(c => (uint?)c.Order);
+		return max is null ? 0 : max.Value + 1;
+	}
 }
 
 public record ChannelCategoryResponse(

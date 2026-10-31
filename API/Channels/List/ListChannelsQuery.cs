@@ -10,6 +10,7 @@ public sealed class ListChannelsQuery(KeepGroupedDb db) : IHandler
 			.Where(c => c.Type == ChannelType.Text)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
+			.OrderBy(c => c.Order)
 			.AsNoTracking().ToListAsync();
 
 		return channels.Select(ChannelResponse.FromEntity).ToList();

@@ -14,6 +14,11 @@ static public class CategoryProblems
         "Category name already used",
         $"'{name}' is already used by another category.");
 
+    static public ProblemHttpResult OrderMismatch() => ProblemFactory.Create(
+        StatusCodes.Status422UnprocessableEntity, "CATEGORY_ORDER_MISMATCH",
+        "Invalid category order",
+        "The list must contain each category exactly once.");
+
     static public ProblemHttpResult NameInvalid() => ProblemFactory.Create(
         StatusCodes.Status422UnprocessableEntity, "CATEGORY_NAME_INVALID",
         "Invalid category name",
