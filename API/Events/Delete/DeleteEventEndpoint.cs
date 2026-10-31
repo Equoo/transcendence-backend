@@ -20,7 +20,7 @@ public static class DeleteEventEndpoint
 		})
 		.WithName("events.delete")
 		.WithSummary("Delete an event")
-		.WithDescription("Deletes an event and every registration attached to it.")
+		.WithDescription("Deletes an event, its channel with its messages, and every registration attached to it.")
 		.Produces(StatusCodes.Status204NoContent)
 		.ProducesProblem(StatusCodes.Status404NotFound);
 	}

@@ -14,6 +14,11 @@ public sealed class DeleteChannelCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			return ChannelProblems.NotFound(id);
 		}
 
+		if (channel.EventId is not null)
+		{
+			return ChannelProblems.EventChannel(channel.EventId);
+		}
+
 		db.Channels.Remove(channel);
 		await db.SaveChangesAsync();
 

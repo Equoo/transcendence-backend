@@ -10,7 +10,7 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 {
 	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req)
 	{
-		if (ChannelNameValidation().IsMatch(req.Name))
+		if (string.IsNullOrWhiteSpace(req.Name) || ChannelNameValidation().IsMatch(req.Name))
 		{
 			return ChannelProblems.NameInvalid();
 		}
@@ -25,7 +25,7 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return CategoryProblems.NotFound(req.Category);
 		}
 
-		var channel = new Channel(req.Name, req.Topic, req.EventId)
+		var channel = new Channel(req.Name, req.Topic, null)
 		{
 			CategorySync = req.CategorySync,
 			CategoryId = req.Category
