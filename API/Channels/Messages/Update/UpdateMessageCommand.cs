@@ -58,8 +58,10 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			.Users.Include(u => u.Role)
 			.Where(user => user.IsOnline && user.Id != sender.Id)
 			.ToListAsync();
+		var blockers = await db.ConversationBlockersOfAsync(channel, sender.Id);
 		var whitelisted = users
 			.Where(channel.IsWhitelisted)
+			.Where(user => !blockers.Contains(user.Id))
 			.Select(user => user.Id);
 		await hub.Clients.Users(whitelisted).SendAsync("UpdateMessage", channelId, msgId, response);
 

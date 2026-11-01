@@ -22,7 +22,6 @@ public static class CreateRelationshipEndpoint
         .WithDescription("Sends a friend request to the user, or accepts it if that user already sent one to the current user.")
         .Produces<RelationshipResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status403Forbidden)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);

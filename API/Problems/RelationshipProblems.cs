@@ -19,8 +19,8 @@ static public class RelationshipProblems
         "Relationship already exists",
         $"You already have a friend request, a friendship or a block with '{username}'.");
 
-    static public ProblemHttpResult Blocked(string username) => ProblemFactory.Create(
-        StatusCodes.Status403Forbidden, "RELATIONSHIP_BLOCKED",
-        "Relationship blocked",
-        $"You cannot send a friend request to '{username}'.");
+    static public ProblemHttpResult NicknameEmpty() => ProblemFactory.Create(
+        StatusCodes.Status422UnprocessableEntity, "RELATIONSHIP_NICKNAME_EMPTY",
+        "Empty nickname",
+        "The nickname cannot be empty or only whitespace. Send null to remove it.");
 }

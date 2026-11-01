@@ -14,9 +14,19 @@ public sealed class DeleteRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
             return RelationshipProblems.NotFound(userId);
         }
 
-        db.Relationships.Remove(mine);
-
         Relationship? theirs = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == userId && r.UserId == me.Id);
+
+        if (mine.Type == RelationshipState.Blocked && theirs?.Type == RelationshipState.PendingRequest)
+        {
+            await db.Entry(mine).Reference(r => r.User).LoadAsync();
+            mine.Type = RelationshipState.PendingResponse;
+            await db.SaveChangesAsync();
+
+            await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", RelationshipResponse.FromEntity(mine));
+            return Result.OK;
+        }
+
+        db.Relationships.Remove(mine);
         bool removeTheirs = theirs is not null && theirs.Type != RelationshipState.Blocked;
         if (removeTheirs)
         {

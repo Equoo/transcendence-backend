@@ -1,6 +1,7 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,8 +45,10 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			.Users.Include(u => u.Role)
 			.Where(user => user.IsOnline && user.Id != sender.Id)
 			.ToListAsync();
+		var blockers = await db.ConversationBlockersOfAsync(channel, msg.SenderId);
 		var whitelisted = users
 			.Where(channel.IsWhitelisted)
+			.Where(user => !blockers.Contains(user.Id))
 			.Select(user => user.Id);
 		await hub.Clients.Users(whitelisted).SendAsync("RemoveMessage", channelId, msgId);
 

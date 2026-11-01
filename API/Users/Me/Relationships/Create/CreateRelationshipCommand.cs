@@ -24,7 +24,18 @@ public sealed class CreateRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
 
 		if (theirs?.Type == RelationshipState.Blocked)
 		{
-			return RelationshipProblems.Blocked(user.UserName);
+			if (mine is not null)
+			{
+				return RelationshipProblems.AlreadyExists(user.UserName);
+			}
+
+			mine = new() { MeId = me.Id, Me = me, UserId = user.Id, User = user, Type = RelationshipState.PendingRequest };
+			db.Relationships.Add(mine);
+			await db.SaveChangesAsync();
+
+			var pending = RelationshipResponse.FromEntity(mine);
+			await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", pending);
+			return pending;
 		}
 
 		if (mine?.Type == RelationshipState.PendingResponse && theirs is not null)
