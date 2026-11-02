@@ -37,7 +37,7 @@ public sealed class DeleteRoleQuery(KeepGroupedDb db, TokenContext tk) : IHandle
 
         if (db_role.Users.Count > 0)
         {
-            Role? db_member = await db.Roles.SingleOrDefaultAsync(r => r.Name == Role.SuperRole);
+            Role? db_member = await db.Roles.SingleOrDefaultAsync(r => r.Name == Role.DefaultRole);
 
             if (db_member is null)
             {

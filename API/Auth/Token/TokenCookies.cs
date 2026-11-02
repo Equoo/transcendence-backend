@@ -5,8 +5,8 @@ public static class TokenCookies
 {
     public static void Write(HttpContext http, IssuedTokens tokens)
     {
-        http.Response.Cookies.Append("AccessToken", tokens.AccessToken, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Strict });
-        http.Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Strict });
+        http.Response.Cookies.Append("AccessToken", tokens.AccessToken, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Strict, Secure = true });
+        http.Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Strict, Secure = true });
     }
 
     public static void Remove(HttpContext http)
