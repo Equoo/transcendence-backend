@@ -57,6 +57,6 @@ public static class MessageProblems
 			StatusCodes.Status422UnprocessableEntity,
 			"MESSAGE_TOO_LONG",
 			"Message too long",
-			$"Message content has more than 8192 characters."
+			$"Message content has more than 2048 characters."
 		);
 }

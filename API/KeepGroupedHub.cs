@@ -1,17 +1,15 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Activities;
-using Microsoft.AspNetCore.Http.HttpResults;
 using KeepGrouped.API.Channels;
 using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API;
 
-class MessagesDb() : Hub
+static class MessagesDb
 {
-	public static async Task<User?> GetUser(KeepGroupedDb db, string id) => await db.Users
+	public static async Task<User?> GetUser(KeepGroupedDb db, string? id) => await db.Users
 			.Include(user => user.Role)
 			.Include(user => user.Avatar)
 			.SingleOrDefaultAsync(user => user.Id == id);
