@@ -32,7 +32,7 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 			entity.HasOne(u => u.Avatar).WithOne().HasForeignKey<User>("AvatarKey");
 			entity.Navigation(u => u.Avatar).AutoInclude();
 			entity.Navigation(u => u.Role).AutoInclude();
-			entity.HasAlternateKey(u => u.Email);
+			entity.HasIndex(u => u.Email).IsUnique();
 		});
 
 		builder.Entity<Message>(entity =>

@@ -83,6 +83,12 @@ public class TokenProvider
 
     public bool CanRead(string token) => new JwtSecurityTokenHandler().CanReadToken(token);
 
-    public string ReadFirstClaim(string token) =>
-        new JwtSecurityTokenHandler().ReadJwtToken(token).Claims.First().Value;
+    public string ReadFirstClaim(string token)
+    {
+        if (!CanRead(token))
+        {
+            return "";
+        }
+        return new JwtSecurityTokenHandler().ReadJwtToken(token).Claims.First().Value;
+    }
 }

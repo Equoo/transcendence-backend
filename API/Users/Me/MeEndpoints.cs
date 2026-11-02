@@ -16,6 +16,7 @@ public static class MeEndpoints
         me.MapPatchAvatar();
         me.MapUpdateMe();
         me.MapUpdateMePass();
+        me.MapUpdateMeEmail();
         me.MapListMyTokens();
         me.MapRelationships();
         me.MapConversations();

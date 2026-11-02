@@ -66,4 +66,9 @@ static public class UserProblems
  "Username cannot be changed",
  "This user's name cannot be changed");
 
+    static public ProblemHttpResult EmailCannotBeChanged() => ProblemFactory.Create(
+ StatusCodes.Status403Forbidden, "EMAIL_CANNOT_BE_CHANGED",
+ "Email cannot be changed",
+ "This user's email cannot be changed");
+
 };
