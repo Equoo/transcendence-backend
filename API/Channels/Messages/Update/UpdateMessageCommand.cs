@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Me.Relationships;
@@ -5,6 +6,12 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
+
+public record UpdateMessageRequest
+{
+	[Required]
+	public string Content { get; init; } = null!;
+}
 
 public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
@@ -61,7 +68,7 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var users = await db
 			.Users.Include(u => u.Role)
-			.Where(user => user.IsOnline && user.Id != sender.Id)
+			.Where(user => user.Id != sender.Id)
 			.ToListAsync();
 		var blockers = await db.ConversationBlockersOfAsync(channel, sender.Id);
 		var whitelisted = users

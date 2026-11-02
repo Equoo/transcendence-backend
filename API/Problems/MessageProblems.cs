@@ -44,6 +44,14 @@ public static class MessageProblems
 			"You cannot send messages in a conversation with a blocked user."
 		);
 
+	public static ProblemHttpResult Empty() =>
+		ProblemFactory.Create(
+			StatusCodes.Status422UnprocessableEntity,
+			"MESSAGE_EMPTY",
+			"Message empty",
+			"Message content cannot be empty."
+		);
+
 	public static ProblemHttpResult TooLong() =>
 		ProblemFactory.Create(
 			StatusCodes.Status422UnprocessableEntity,

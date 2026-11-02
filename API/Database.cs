@@ -132,11 +132,6 @@ public class KeepGroupedDb(DbContextOptions<KeepGroupedDb> options) : DbContext(
 				.WithMany()
 				.HasForeignKey(m => m.ChannelId)
 				.OnDelete(DeleteBehavior.Cascade);
-
-			// entity.HasOne(m => m.User)
-			// 	.WithMany()
-			// 	.HasForeignKey(m => m.UserId)
-			// 	.OnDelete(DeleteBehavior.Cascade);
 		});
 
 		builder.Entity<ChannelRole>(entity =>

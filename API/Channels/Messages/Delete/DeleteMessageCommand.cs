@@ -43,7 +43,7 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var users = await db
 			.Users.Include(u => u.Role)
-			.Where(user => user.IsOnline && user.Id != sender.Id)
+			.Where(user => user.Id != sender.Id)
 			.ToListAsync();
 		var blockers = await db.ConversationBlockersOfAsync(channel, msg.SenderId);
 		var whitelisted = users

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using KeepGrouped.API.Users.Me.Relationships;
@@ -5,6 +6,13 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
+
+public record CreateMessageRequest
+{
+	[Required]
+	public string Content { get; init; } = null!;
+	public string? MessageReference { get; init; } = null;
+}
 
 public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
@@ -31,6 +39,11 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (await db.IsDirectMessageBlockedAsync(channel, sender.Id))
 			return MessageProblems.Blocked();
 
+		if (string.IsNullOrWhiteSpace(req.Content))
+		{
+			return MessageProblems.Empty();
+		}
+
 		if (req.Content.Length > 2048)
 		{
 			return MessageProblems.TooLong();
@@ -40,6 +53,9 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			? null
 			: await db
 				.Messages.Include(m => m.Sender)
+					.ThenInclude(u => u.Role)
+				.Include(m => m.Sender)
+					.ThenInclude(u => u.Avatar)
 				.SingleOrDefaultAsync(m =>
 					m.ChannelId == channelId && m.Id == req.MessageReference
 				);
@@ -53,7 +69,7 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var users = await db
 			.Users.Include(u => u.Role)
-			.Where(user => user.IsOnline && user.Id != sender.Id)
+			.Where(user => user.Id != sender.Id)
 			.ToListAsync();
 		var blockers = await db.ConversationBlockersOfAsync(channel, sender.Id);
 		var whitelisted = users

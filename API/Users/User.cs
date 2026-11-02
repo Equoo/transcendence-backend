@@ -27,7 +27,6 @@ public class User : IExpirable
 	public ICollection<Event> Events { get; } = [];
 	public ICollection<Registration> Registrations { get; } = [];
 	public ICollection<ChannelAck> ChannelsAckMsg { get; } = [];
-	public bool IsOnline { get; set; } = false;
 
 	public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

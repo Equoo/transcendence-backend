@@ -42,7 +42,10 @@ class Program
         builder.Services.AddProblemDetails();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddValidation();
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR().AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.Converters.Add(new NulFreeStringConverter());
+        });
 
 		if (builder.Environment.IsDevelopment())
 		{
