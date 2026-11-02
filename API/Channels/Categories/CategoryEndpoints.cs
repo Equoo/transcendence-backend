@@ -9,6 +9,7 @@ public static class CategoryEndpoints
 		categories.MapCreateCategory();
 		categories.MapListCategories();
 		categories.MapGetCategory();
+		categories.MapReorderCategories();
 		categories.MapUpdateCategory();
 		categories.MapDeleteCategory();
 	}

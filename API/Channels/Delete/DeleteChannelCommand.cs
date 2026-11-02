@@ -8,10 +8,15 @@ public sealed class DeleteChannelCommand(KeepGroupedDb db, IHubContext<KeepGroup
 {
 	public async Task<Result> ExecuteAsync(string id)
 	{
-		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == id);
+		var channel = await db.Channels.SingleOrDefaultAsync(c => c.Id == id && c.Type == ChannelType.Text);
 		if (channel is null)
 		{
 			return ChannelProblems.NotFound(id);
+		}
+
+		if (channel.EventId is not null)
+		{
+			return ChannelProblems.EventChannel(channel.EventId);
 		}
 
 		db.Channels.Remove(channel);

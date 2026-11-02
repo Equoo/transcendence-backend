@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
 
@@ -29,7 +30,7 @@ public class Channel : IRoleWhitelist
 
 	public string Name { get; set; } = null!;
 	public string Topic { get; set; } = null!;
-	public uint Order { get; init; } = 0;
+	public uint Order { get; set; } = 0;
 	public DateTime CreateAt { get; } = DateTime.UtcNow;
 	public string? CategoryId { get; set; } = null;
 	public ChannelCategory? Category { get; set; } = null;
@@ -43,8 +44,21 @@ public class Channel : IRoleWhitelist
 	public Message? LastMessage { get; set; } = null;
 	public string? LastMessageId { get; set; } = null;
 
+	public bool IsConversation => Type is ChannelType.DirectMessage or ChannelType.GroupDirectMessage;
+
+	public static async Task<uint> NextOrderAsync(KeepGroupedDb db, string? categoryId)
+	{
+		var max = await db.Channels
+			.Where(c => c.Type == ChannelType.Text && c.EventId == null && c.CategoryId == categoryId)
+			.MaxAsync(c => (uint?)c.Order);
+		return max is null ? 0 : max.Value + 1;
+	}
+
 	public bool IsWhitelisted(User sender)
 	{
+		if (IsConversation)
+			return Members.Any(m => m.UserId == sender.Id);
+
 		if (sender.Role.Permission.HasFlag(Perms.HandleChannels))
 			return true;
 
@@ -75,6 +89,7 @@ public record ChannelResponse(
 	string Topic,
 	DateTime CreateAt,
 	string? CategoryId,
+	uint Order,
 	string? EventId,
 	IReadOnlyList<ChannelRoleResponse> RolesWhitelist,
 	bool CategorySync
@@ -87,6 +102,7 @@ public record ChannelResponse(
 				c.Topic,
 				c.CreateAt,
 				c.CategoryId,
+				c.Order,
 				c.EventId,
 				[.. c.RolesWhitelist.Select((r) => new ChannelRoleResponse(r.Role.Id, r.Role.Name))],
 				c.CategorySync
@@ -104,13 +120,17 @@ public static partial class ChannelSlug
 	[GeneratedRegex(@"-{2,}")]
 	private static partial Regex DashRuns();
 
+	public static bool IsValidName(string? name, bool allowWhitespace = false) =>
+		!string.IsNullOrWhiteSpace(name) &&
+		!Forbidden().IsMatch(name) &&
+		(allowWhitespace || !Whitespace().IsMatch(name));
+
 	public static string Sanitize(string? input)
 	{
 		if (string.IsNullOrWhiteSpace(input))
 			return string.Empty;
 
-		var s = input.ToLowerInvariant();
-		s = Whitespace().Replace(s, "-");
+		var s = Whitespace().Replace(input, "-");
 		s = Forbidden().Replace(s, "");
 		s = DashRuns().Replace(s, "-");
 		return s.Trim('-');

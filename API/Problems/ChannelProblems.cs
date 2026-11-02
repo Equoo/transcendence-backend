@@ -17,7 +17,17 @@ static public class ChannelProblems
 	static public ProblemHttpResult NameInvalid() => ProblemFactory.Create(
 		StatusCodes.Status422UnprocessableEntity, "CHANNEL_NAME_INVALID",
 		"Invalid channel name",
-		"Channel name contains unauthorized characters.");
+		"Channel name must not be empty and cannot contain whitespace or special characters.");
+
+	static public ProblemHttpResult EventChannel(string eventId) => ProblemFactory.Create(
+		StatusCodes.Status409Conflict, "CHANNEL_EVENT_OWNED",
+		"Channel owned by an event",
+		$"This channel belongs to the event '{eventId}', delete the event instead.");
+
+	static public ProblemHttpResult OrderMismatch() => ProblemFactory.Create(
+		StatusCodes.Status422UnprocessableEntity, "CHANNEL_ORDER_MISMATCH",
+		"Invalid channel order",
+		"The list must contain each text channel of the category exactly once, and only text channels.");
 
 	static public ProblemHttpResult RoleNotFound() => ProblemFactory.Create(
 		StatusCodes.Status422UnprocessableEntity, "CHANNEL_ROLE_NOT_FOUND",

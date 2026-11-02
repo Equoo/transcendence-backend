@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.SignalR;
@@ -6,25 +5,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
 
-public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
+public sealed class UpdateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
 	public async Task<Result<ChannelResponse>> ExecuteAsync(string id, UpdateChannelRequest req)
 	{
 		var channel = await db.Channels
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
-			.SingleOrDefaultAsync(c => c.Id == id);
+			.SingleOrDefaultAsync(c => c.Id == id && c.Type == ChannelType.Text);
 		if (channel is null)
 		{
 			return ChannelProblems.NotFound(id);
 		}
 
-		if (ChannelNameValidation().IsMatch(req.Name))
+		if (!ChannelSlug.IsValidName(req.Name))
 		{
 			return ChannelProblems.NameInvalid();
 		}
 
-		if (await db.Channels.AnyAsync(c => c.Name == req.Name && c.Id != id))
+		if (await db.Channels.AnyAsync(c => c.Type == ChannelType.Text && c.EventId == null && c.Name.ToLower() == req.Name.ToLower() && c.Id != id))
 		{
 			return ChannelProblems.NameAlreadyUsed(req.Name);
 		}
@@ -45,6 +44,10 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 
 		channel.Name = req.Name;
 		channel.Topic = req.Topic;
+		if (channel.CategoryId != req.Category)
+		{
+			channel.Order = await Channel.NextOrderAsync(db, req.Category);
+		}
 		channel.CategoryId = req.Category;
 		channel.CategorySync = req.CategorySync;
 		await db.SaveChangesAsync();
@@ -55,7 +58,4 @@ public sealed partial class UpdateChannelCommand(KeepGroupedDb db, IHubContext<K
 
 		return response;
 	}
-
-	[GeneratedRegex(@"[\s\p{Lu}$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]
-	private static partial Regex ChannelNameValidation();
 }

@@ -1,26 +1,23 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using KeepGrouped.API.Activities;
-using Microsoft.AspNetCore.Http.HttpResults;
+using KeepGrouped.API.Channels;
+using KeepGrouped.API.Users;
 
 namespace KeepGrouped.API;
+
+static class MessagesDb
+{
+	public static async Task<User?> GetUser(KeepGroupedDb db, string? id) => await db.Users
+			.Include(user => user.Role)
+			.Include(user => user.Avatar)
+			.SingleOrDefaultAsync(user => user.Id == id);
+}
 
 [Authorize]
 public class KeepGroupedHub(KeepGroupedDb db) : Hub
 {
-
-	public override async Task OnConnectedAsync()
-	{
-		var userId = Context.UserIdentifier;
-
-		var user = await db.Users.Where(user => user.Id == userId).SingleOrDefaultAsync();
-		user?.IsOnline = true;
-		await db.SaveChangesAsync();
-		await base.OnConnectedAsync();
-	}
-
 	public async Task ActivityReported(ActivityEnum activity)
 	{
 		var userId = Context.UserIdentifier;
@@ -38,18 +35,42 @@ public class KeepGroupedHub(KeepGroupedDb db) : Hub
 		await Clients.Others.SendAsync("ReportActivityTo", Context.UserIdentifier);
 	}
 
-	public override async Task OnDisconnectedAsync(Exception? exception)
+	//  Messages request
+
+	public async Task<MessageResponse> CreateMessage(CreateMessageCommand command, string id, CreateMessageRequest req)
 	{
-		var userId = Context.UserIdentifier;
+		var user = await MessagesDb.GetUser(db, Context.UserIdentifier)
+			?? throw new HubException("USER_NOT_AUTHENTICATED");
 
-		if (exception != null)
+		var result = await command.ExecuteAsync(id, user, req);
+		if (result.IsProblem)
 		{
-			Console.WriteLine($"Disconnected due to error: {exception.Message}");
+			throw new HubException(result.Problem.ProblemDetails.Extensions["errorCode"]?.ToString());
 		}
+		return result.Value;
+	}
 
-		var user = await db.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
-		user?.IsOnline = false;
-		await db.SaveChangesAsync();
-		await base.OnDisconnectedAsync(exception);
+	public async Task UpdateMessage(UpdateMessageCommand command, string id, string msgId, UpdateMessageRequest req)
+	{
+		var user = await MessagesDb.GetUser(db, Context.UserIdentifier)
+			?? throw new HubException("USER_NOT_AUTHENTICATED");
+
+		var result = await command.ExecuteAsync(id, msgId, user, req);
+		if (result.IsProblem)
+		{
+			throw new HubException(result.Problem.ProblemDetails.Extensions["errorCode"]?.ToString());
+		}
+	}
+
+	public async Task DeleteMessage(DeleteMessageCommand command, string id, string msgId)
+	{
+		var user = await MessagesDb.GetUser(db, Context.UserIdentifier)
+			?? throw new HubException("USER_NOT_AUTHENTICATED");
+
+		var result = await command.ExecuteAsync(id, msgId, user);
+		if (result.IsProblem)
+		{
+			throw new HubException(result.Problem.ProblemDetails.Extensions["errorCode"]?.ToString());
+		}
 	}
 }

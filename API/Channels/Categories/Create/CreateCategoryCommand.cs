@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.SignalR;
@@ -6,21 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
 
-public sealed partial class CreateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
+public sealed class CreateCategoryCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
 	public async Task<Result<ChannelCategoryResponse>> ExecuteAsync(CreateCategoryRequest req)
 	{
-		if (CategoryNameValidation().IsMatch(req.Name))
+		if (!ChannelSlug.IsValidName(req.Name, allowWhitespace: true))
 		{
 			return CategoryProblems.NameInvalid();
 		}
 
-		if (await db.ChannelCategories.AnyAsync(c => c.Name == req.Name))
+		if (await db.ChannelCategories.AnyAsync(c => c.Name.ToLower() == req.Name.ToLower()))
 		{
 			return CategoryProblems.NameAlreadyUsed(req.Name);
 		}
 
-		var category = new ChannelCategory(req.Name, req.Order);
+		var category = new ChannelCategory(req.Name, req.Order ?? await ChannelCategory.NextOrderAsync(db));
 
 		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, category, (c, role) => new ChannelRole
 		{
@@ -40,7 +39,4 @@ public sealed partial class CreateCategoryCommand(KeepGroupedDb db, IHubContext<
 
 		return response;
 	}
-
-	[GeneratedRegex(@"[$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]
-	private static partial Regex CategoryNameValidation();
 }

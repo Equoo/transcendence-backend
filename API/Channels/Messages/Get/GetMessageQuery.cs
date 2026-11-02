@@ -10,9 +10,12 @@ public sealed class GetMessageQuery(KeepGroupedDb db) : IHandler
 	{
 		var channel = await db.Channels
 			.AsNoTracking()
+			.Include(c => c.Members)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
+				.ThenInclude(ct => ct!.RolesWhitelist)
+					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);
@@ -26,6 +29,7 @@ public sealed class GetMessageQuery(KeepGroupedDb db) : IHandler
 			.Include(m => m.Channel)
 			.Include(m => m.MessageRef)
 				.ThenInclude(r => r!.Sender)
+			.Where(m => m.ChannelId == channelId)
 			.SingleOrDefaultAsync(m => m.Id == msgId);
 
 		return msg is null ? MessageProblems.NotFound(msgId) : MessageResponse.FromEntity(msg);

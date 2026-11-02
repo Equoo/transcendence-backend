@@ -11,7 +11,7 @@ public record CreateCategoryRequest
 	[Required]
 	[Length(1, 25)]
 	public string Name { get; init; } = null!;
-	public uint Order { get; init; } = 0;
+	public uint? Order { get; init; } = null;
 	[Required]
 	public List<string> WhitelistRoles { get; init; } = [];
 }

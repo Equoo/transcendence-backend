@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
 using Microsoft.AspNetCore.SignalR;
@@ -6,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
 
-public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
+public sealed class CreateChannelCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
 	public async Task<Result<ChannelResponse>> ExecuteAsync(CreateChannelRequest req)
 	{
-		if (ChannelNameValidation().IsMatch(req.Name))
+		if (!ChannelSlug.IsValidName(req.Name))
 		{
 			return ChannelProblems.NameInvalid();
 		}
 
-		if (await db.Channels.AnyAsync(c => c.EventId == null && c.Name == req.Name))
+		if (await db.Channels.AnyAsync(c => c.Type == ChannelType.Text && c.EventId == null && c.Name.ToLower() == req.Name.ToLower()))
 		{
 			return ChannelProblems.NameAlreadyUsed(req.Name);
 		}
@@ -25,10 +24,11 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 			return CategoryProblems.NotFound(req.Category);
 		}
 
-		var channel = new Channel(req.Name, req.Topic, req.EventId)
+		var channel = new Channel(req.Name, req.Topic, null)
 		{
 			CategorySync = req.CategorySync,
-			CategoryId = req.Category
+			CategoryId = req.Category,
+			Order = await Channel.NextOrderAsync(db, req.Category)
 		};
 
 		var res = await ChannelRole.UpdateRoles(db, req.WhitelistRoles, channel, (c, role) => new ChannelRole
@@ -49,7 +49,4 @@ public sealed partial class CreateChannelCommand(KeepGroupedDb db, IHubContext<K
 
 		return response;
 	}
-
-	[GeneratedRegex(@"[\s\p{Lu}$%^&*()+|~={}[\]:;<>?,.\/\\`´'""!@#]")]
-	private static partial Regex ChannelNameValidation();
 }

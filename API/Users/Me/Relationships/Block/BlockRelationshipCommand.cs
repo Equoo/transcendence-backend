@@ -19,6 +19,8 @@ public sealed class BlockRelationshipCommand(KeepGroupedDb db, IHubContext<KeepG
 			return UserProblems.NotFound(userId);
 		}
 
+		await using var tx = await db.LockPairAsync(me.Id, userId);
+
 		Relationship? mine = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == me.Id && r.UserId == userId);
 		Relationship? theirs = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == userId && r.UserId == me.Id);
 
@@ -36,6 +38,8 @@ public sealed class BlockRelationshipCommand(KeepGroupedDb db, IHubContext<KeepG
 		}
 
 		await db.SaveChangesAsync();
+
+		await tx.CommitAsync();
 
 		var response = RelationshipResponse.FromEntity(mine);
 		await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", response);

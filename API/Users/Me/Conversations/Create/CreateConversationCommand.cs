@@ -27,18 +27,28 @@ public sealed class CreateConversationCommand(KeepGroupedDb db, IHubContext<Keep
 			return UserProblems.NotFound(missing);
 		}
 
-		Relationship? block = await db.Relationships
+		List<Relationship> blocks = await db.Relationships
 			.Include(r => r.Me)
 			.Include(r => r.User)
-			.FirstOrDefaultAsync(r => r.Type == RelationshipState.Blocked &&
+			.Where(r => r.Type == RelationshipState.Blocked &&
 				((r.MeId == me.Id && recipientIds.Contains(r.UserId)) ||
-				 (r.UserId == me.Id && recipientIds.Contains(r.MeId))));
-		if (block is not null)
+				 (r.UserId == me.Id && recipientIds.Contains(r.MeId))))
+			.ToListAsync();
+
+		Relationship? myBlock = blocks.FirstOrDefault(r => r.MeId == me.Id);
+		if (myBlock is not null)
 		{
-			return ConversationProblems.Blocked(block.MeId == me.Id ? block.User.UserName : block.Me.UserName);
+			return ConversationProblems.Blocked(myBlock.User.UserName);
 		}
 
 		var type = recipientIds.Count == 1 ? ChannelType.DirectMessage : ChannelType.GroupDirectMessage;
+
+		if (type == ChannelType.GroupDirectMessage && blocks.Count > 0)
+		{
+			return ConversationProblems.Blocked(blocks[0].Me.UserName);
+		}
+
+		HashSet<string> blockers = [.. blocks.Select(r => r.MeId)];
 
 		if (type == ChannelType.DirectMessage)
 		{
@@ -74,7 +84,7 @@ public sealed class CreateConversationCommand(KeepGroupedDb db, IHubContext<Keep
 		db.Channels.Add(conversation);
 		await db.SaveChangesAsync();
 
-		foreach (User user in recipients.Append(me))
+		foreach (User user in recipients.Append(me).Where(u => !blockers.Contains(u.Id)))
 		{
 			await hub.Clients.User(user.Id).SendAsync("NewConversation", ConversationResponse.FromEntity(conversation, user.Id));
 		}

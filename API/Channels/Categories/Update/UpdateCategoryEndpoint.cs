@@ -11,7 +11,7 @@ public record UpdateCategoryRequest
 	[Required]
 	[Length(1, 25)]
 	public string Name { get; init; } = null!;
-	public uint Order { get; init; } = 0;
+	public uint? Order { get; init; } = null;
 	[Required]
 	public List<string> WhitelistRoles { get; init; } = [];
 }
@@ -32,7 +32,7 @@ public static class UpdateCategoryEndpoint
 		})
 		.WithName("categories.update")
 		.WithSummary("Update a channel category")
-		.WithDescription("Replaces the name and the display order of a channel category. The name must stay unique. Online users are notified of the update.")
+		.WithDescription("Replaces the name of a channel category, and its display order when `order` is given. The name must stay unique. Online users are notified of the update.")
 		.Produces(StatusCodes.Status204NoContent)
 		.ProducesValidationProblem()
 		.ProducesProblem(StatusCodes.Status401Unauthorized)

@@ -8,6 +8,11 @@ public sealed class UpdateRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
 {
 	public async Task<Result<RelationshipResponse>> ExecuteAsync(User me, string userId, UpdateRelationshipRequest req)
 	{
+		if (req.Nickname is not null && string.IsNullOrWhiteSpace(req.Nickname))
+		{
+			return RelationshipProblems.NicknameEmpty();
+		}
+
 		Relationship? relationship = await db.Relationships
 			.Include(r => r.User)
 			.SingleOrDefaultAsync(r => r.MeId == me.Id && r.UserId == userId);
@@ -16,7 +21,7 @@ public sealed class UpdateRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
 			return RelationshipProblems.NotFound(userId);
 		}
 
-		relationship.Nickname = req.Nickname;
+		relationship.Nickname = req.Nickname?.Trim();
 
 		await db.SaveChangesAsync();
 

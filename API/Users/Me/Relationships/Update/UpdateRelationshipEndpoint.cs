@@ -6,7 +6,7 @@ namespace KeepGrouped.API.Users.Me.Relationships;
 
 public record UpdateRelationshipRequest
 {
-    [Length(1, 255)]
+    [MaxLength(255)]
     public string? Nickname { get; init; }
 }
 
@@ -26,10 +26,11 @@ public static class UpdateRelationshipEndpoint
         })
         .WithName("me.relationships.update")
         .WithSummary("Rename a relationship")
-        .WithDescription("Sets the nickname the current user gives to the user, or clears it when null. Only the current user sees it.")
+        .WithDescription("Sets the nickname the current user gives to the user, or clears it when null. Surrounding whitespace is trimmed, and an empty or whitespace-only nickname is rejected. Only the current user sees it.")
         .Produces<RelationshipResponse>(StatusCodes.Status200OK)
         .ProducesValidationProblem()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound);
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
     }
 }

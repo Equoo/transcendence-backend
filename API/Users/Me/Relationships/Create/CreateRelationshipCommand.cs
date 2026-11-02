@@ -19,12 +19,26 @@ public sealed class CreateRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
 			return UserProblems.NotFound(userId);
 		}
 
+		await using var tx = await db.LockPairAsync(me.Id, userId);
+
 		Relationship? mine = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == me.Id && r.UserId == userId);
 		Relationship? theirs = await db.Relationships.SingleOrDefaultAsync(r => r.MeId == userId && r.UserId == me.Id);
 
 		if (theirs?.Type == RelationshipState.Blocked)
 		{
-			return RelationshipProblems.Blocked(user.UserName);
+			if (mine is not null)
+			{
+				return RelationshipProblems.AlreadyExists(user.UserName);
+			}
+
+			mine = new() { MeId = me.Id, Me = me, UserId = user.Id, User = user, Type = RelationshipState.PendingRequest };
+			db.Relationships.Add(mine);
+			await db.SaveChangesAsync();
+			await tx.CommitAsync();
+
+			var pending = RelationshipResponse.FromEntity(mine);
+			await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", pending);
+			return pending;
 		}
 
 		if (mine?.Type == RelationshipState.PendingResponse && theirs is not null)
@@ -45,6 +59,8 @@ public sealed class CreateRelationshipCommand(KeepGroupedDb db, IHubContext<Keep
 		}
 
 		await db.SaveChangesAsync();
+
+		await tx.CommitAsync();
 
 		var response = RelationshipResponse.FromEntity(mine);
 		await hub.Clients.User(me.Id).SendAsync("UpsertRelationship", response);

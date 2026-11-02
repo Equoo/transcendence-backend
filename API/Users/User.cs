@@ -1,9 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Channels;
 using KeepGrouped.API.Events;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Storage;
-using KeepGrouped.API.Activities;
-using System.ComponentModel.DataAnnotations;
 
 namespace KeepGrouped.API.Users;
 
@@ -28,7 +27,6 @@ public class User : IExpirable
 	public ICollection<Event> Events { get; } = [];
 	public ICollection<Registration> Registrations { get; } = [];
 	public ICollection<ChannelAck> ChannelsAckMsg { get; } = [];
-	public bool IsOnline { get; set; } = false;
 
 	public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

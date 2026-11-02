@@ -1,9 +1,18 @@
+using System.ComponentModel.DataAnnotations;
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeepGrouped.API.Channels;
+
+public record CreateMessageRequest
+{
+	[Required]
+	public string Content { get; init; } = null!;
+	public string? MessageReference { get; init; } = null;
+}
 
 public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroupedHub> hub) : IHandler
 {
@@ -14,9 +23,12 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 	)
 	{
 		var channel = await db.Channels
+			.Include(c => c.Members)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
+				.ThenInclude(ct => ct!.RolesWhitelist)
+					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);
@@ -24,7 +36,15 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (!channel.IsWhitelisted(sender))
 			return MessageProblems.AccessNotAuthorized();
 
-		if (req.Content.Length > 8192)
+		if (await db.IsDirectMessageBlockedAsync(channel, sender.Id))
+			return MessageProblems.Blocked();
+
+		if (string.IsNullOrWhiteSpace(req.Content))
+		{
+			return MessageProblems.Empty();
+		}
+
+		if (req.Content.Length > 2048)
 		{
 			return MessageProblems.TooLong();
 		}
@@ -33,6 +53,9 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 			? null
 			: await db
 				.Messages.Include(m => m.Sender)
+					.ThenInclude(u => u.Role)
+				.Include(m => m.Sender)
+					.ThenInclude(u => u.Avatar)
 				.SingleOrDefaultAsync(m =>
 					m.ChannelId == channelId && m.Id == req.MessageReference
 				);
@@ -46,10 +69,12 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var users = await db
 			.Users.Include(u => u.Role)
-			.Where(user => user.IsOnline && user.Id != sender.Id)
+			.Where(user => user.Id != sender.Id)
 			.ToListAsync();
+		var blockers = await db.ConversationBlockersOfAsync(channel, sender.Id);
 		var whitelisted = users
 			.Where(channel.IsWhitelisted)
+			.Where(user => !blockers.Contains(user.Id))
 			.Select(user => user.Id);
 		await hub.Clients.Users(whitelisted).SendAsync("NewMessage", channelId, response);
 

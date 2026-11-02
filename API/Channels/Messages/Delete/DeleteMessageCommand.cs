@@ -1,6 +1,7 @@
 using KeepGrouped.API.Problems;
 using KeepGrouped.API.Roles;
 using KeepGrouped.API.Users;
+using KeepGrouped.API.Users.Me.Relationships;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +13,12 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 	{
 		var channel = await db.Channels
 			.AsNoTracking()
+			.Include(c => c.Members)
 			.Include(c => c.RolesWhitelist)
 				.ThenInclude(cr => cr.Role)
 			.Include(c => c.Category)
+				.ThenInclude(ct => ct!.RolesWhitelist)
+					.ThenInclude(cr => cr.Role)
 			.SingleOrDefaultAsync(c => c.Id == channelId);
 		if (channel is null)
 			return ChannelProblems.NotFound(channelId);
@@ -22,7 +26,7 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (!channel.IsWhitelisted(sender))
 			return MessageProblems.AccessNotAuthorized();
 
-		var msg = await db.Messages.SingleOrDefaultAsync(m => m.Id == msgId);
+		var msg = await db.Messages.SingleOrDefaultAsync(m => m.ChannelId == channelId && m.Id == msgId);
 		if (msg is null)
 		{
 			return MessageProblems.NotFound(msgId);
@@ -39,10 +43,12 @@ public sealed class DeleteMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 
 		var users = await db
 			.Users.Include(u => u.Role)
-			.Where(user => user.IsOnline && user.Id != sender.Id)
+			.Where(user => user.Id != sender.Id)
 			.ToListAsync();
+		var blockers = await db.ConversationBlockersOfAsync(channel, msg.SenderId);
 		var whitelisted = users
 			.Where(channel.IsWhitelisted)
+			.Where(user => !blockers.Contains(user.Id))
 			.Select(user => user.Id);
 		await hub.Clients.Users(whitelisted).SendAsync("RemoveMessage", channelId, msgId);
 
