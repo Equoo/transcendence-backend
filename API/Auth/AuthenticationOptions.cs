@@ -17,5 +17,6 @@ public class AuthenticationOptions
     public required string DefaultAdminPwd { get; init; }
 
     [Required]
+    [MinLength(32)]
     public required string JWTKey { get; init; }
 }
