@@ -30,12 +30,9 @@ public sealed class DeleteUserCommand(KeepGroupedDb db, IOptions<AuthenticationO
             return UserProblems.UserCannotBeDelete();
         }
 
-        RefreshToken? refresh = await db.RefreshTokens.SingleOrDefaultAsync(r => r.UserId == id);
+        var refresh = await db.RefreshTokens.Where(r => r.UserId == id).ToListAsync();
+        db.RefreshTokens.RemoveRange(refresh);
 
-        if (refresh is not null)
-        {
-            db.RefreshTokens.Remove(refresh);
-        }
         var userFiles = await db.Files.Where(fi => fi.Creator.Id == db_user.Id).ToListAsync();
         await deleteFiles.ExecuteAsync(userFiles.Select(fi => fi.Key));
 
