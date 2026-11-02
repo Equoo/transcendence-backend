@@ -46,7 +46,7 @@ public static class MessageProblems
 
 	public static ProblemHttpResult TooLong() =>
 		ProblemFactory.Create(
-			StatusCodes.Status404NotFound,
+			StatusCodes.Status422UnprocessableEntity,
 			"MESSAGE_TOO_LONG",
 			"Message too long",
 			$"Message content has more than 8192 characters."
