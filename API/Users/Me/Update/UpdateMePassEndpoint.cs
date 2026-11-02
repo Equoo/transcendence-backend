@@ -31,7 +31,7 @@ public static class UpdateMePassEndpoint
             var res = await logoutCmd.ExecAsync(tk.User.Id);
             if (res.IsProblem)
             {
-                return result.Problem;
+                return res.Problem;
             }
 
             TokenCookies.Remove(http);

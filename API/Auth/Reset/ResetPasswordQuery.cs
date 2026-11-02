@@ -21,7 +21,7 @@ public sealed class ResetPasswordQuery(KeepGroupedDb db, KeepGroupedPasswordHash
             return UserProblems.NotFound(id);
         }
 
-        if (tk.User.Role.Ranking > db_user.Role.Ranking)
+        if (tk.User.Role.Ranking >= db_user.Role.Ranking)
         {
             return UserProblems.NotAuthorized();
         }
