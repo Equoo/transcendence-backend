@@ -31,7 +31,7 @@ public sealed class CreateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (await db.IsDirectMessageBlockedAsync(channel, sender.Id))
 			return MessageProblems.Blocked();
 
-		if (req.Content.Length > 8192)
+		if (req.Content.Length > 2048)
 		{
 			return MessageProblems.TooLong();
 		}

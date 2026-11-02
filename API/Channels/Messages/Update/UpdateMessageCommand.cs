@@ -32,6 +32,11 @@ public sealed class UpdateMessageCommand(KeepGroupedDb db, IHubContext<KeepGroup
 		if (await db.IsDirectMessageBlockedAsync(channel, sender.Id))
 			return MessageProblems.Blocked();
 
+		if (req.Content.Length > 2048)
+		{
+			return MessageProblems.TooLong();
+		}
+
 		var msg = await db
 			.Messages.Include(m => m.Channel)
 			.Include(m => m.Sender)
